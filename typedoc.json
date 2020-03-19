@@ -1,0 +1,12 @@
+{
+    "mode": "file",
+    "inputFiles": [
+        "./src/index.ts"
+    ],
+    "out": "./docs",
+    "excludePrivate": true,
+    "excludeProtected": true,
+    "hideGenerator": true,
+    "theme": "default",
+    "readme": "README.md"
+}
