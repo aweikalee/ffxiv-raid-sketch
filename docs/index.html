@@ -68,23 +68,43 @@
 					<h1>FFXIV Raid Sketch</h1>
 				</a>
 				<p>封装了方便绘制《最终幻想 14》攻略示意图的 <code>Canvas</code> 库。</p>
+				<a href="#文档" id="文档" style="color: inherit; text-decoration: none;">
+					<h2>文档</h2>
+				</a>
+				<p>文档打包在了<code>docs</code>文档中，也可以直接访问
+				<a href="https://aweikalee.github.io/ffxiv-raid-sketch/">API Document</a> 。</p>
+				<p>由于文档也是通过源码中的 注释 和 类型 生成的，所以也可以直接看源码。</p>
 				<a href="#安装" id="安装" style="color: inherit; text-decoration: none;">
 					<h2>安装</h2>
 				</a>
-				<pre><code>$ <span class="hljs-built_in">npm</span> i ffxiv-raid-sketch</code></pre>
-				<a href="#使用方式" id="使用方式" style="color: inherit; text-decoration: none;">
-					<h2>使用方式</h2>
+				<a href="#使用-npm" id="使用-npm" style="color: inherit; text-decoration: none;">
+					<h3>使用 npm</h3>
 				</a>
+				<pre><code>$ <span class="hljs-built_in">npm</span> i ffxiv-raid-sketch</code></pre>
+				<a href="#浏览器引入" id="浏览器引入" style="color: inherit; text-decoration: none;">
+					<h3>浏览器引入</h3>
+				</a>
+				<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"./ffxiv-raid-sketch.umd.min.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre>
 				<a href="#基础用法" id="基础用法" style="color: inherit; text-decoration: none;">
-					<h3>基础用法</h3>
+					<h2>基础用法</h2>
+				</a>
+				<a href="#标准用法" id="标准用法" style="color: inherit; text-decoration: none;">
+					<h3>标准用法</h3>
 				</a>
 				<pre><code class="language-js"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> FRS <span class="hljs-keyword">from</span> <span class="hljs-string">'ffxiv-raid-sketch'</span>
 
 <span class="hljs-comment">// 创建实例 添加到页面上</span>
-<span class="hljs-keyword">const</span> sketch = <span class="hljs-keyword">new</span> FRS.Sketch().appendTo(<span class="hljs-built_in">document</span>.body)
+<span class="hljs-keyword">const</span> sketch = <span class="hljs-keyword">new</span> FRS.Sketch({
+    <span class="hljs-attr">canvas</span>: <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'canvas'</span>),
+    <span class="hljs-attr">w</span>: <span class="hljs-number">400</span>,
+    <span class="hljs-attr">h</span>: <span class="hljs-number">400</span>,
+    <span class="hljs-attr">unit</span>: <span class="hljs-number">4</span>
+})
 
 <span class="hljs-comment">// 创建一个半径为40的圆</span>
 <span class="hljs-keyword">new</span> FRS.Circle().addTo(sketch)</code></pre>
+				<p>若不传入 <code>canvas</code> 内部将会创建一个，之后需通过 <code>appendTo</code> 添加到页面中。</p>
+				<p><code>unit</code> 为基准单位(px)，除了 <code>strokeWidth</code> 以外的坐标、尺寸都将乘上这个基准单位再输出。</p>
 				<a href="#按需引入" id="按需引入" style="color: inherit; text-decoration: none;">
 					<h3>按需引入</h3>
 				</a>
@@ -93,24 +113,107 @@
 
 <span class="hljs-keyword">const</span> sketch = <span class="hljs-keyword">new</span> Sketch().appendTo(<span class="hljs-built_in">document</span>.body)
 <span class="hljs-keyword">new</span> Circle().addTo(sketch)</code></pre>
-				<a href="#直接在浏览器中使用" id="直接在浏览器中使用" style="color: inherit; text-decoration: none;">
-					<h3>直接在浏览器中使用</h3>
+				<a href="#在浏览器中使用" id="在浏览器中使用" style="color: inherit; text-decoration: none;">
+					<h3>在浏览器中使用</h3>
 				</a>
-				<pre><code class="language-html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-meta-keyword">html</span>&gt;</span>
-<span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"./ffxiv-raid-sketch.umd.min.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
-    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+				<pre><code class="language-js"><span class="hljs-keyword">var</span> sketch = <span class="hljs-keyword">new</span> FRS.Sketch().appendTo(<span class="hljs-built_in">document</span>.body) <span class="hljs-comment">// 圆形场地 new</span>
+FRS.Circle().addTo(sketch)</code></pre>
+				<a href="#layer" id="layer" style="color: inherit; text-decoration: none;">
+					<h2>Layer</h2>
+				</a>
+				<p>一切图形继承于 <code>Layer</code> 类。</p>
+				<a href="#方法" id="方法" style="color: inherit; text-decoration: none;">
+					<h3>方法</h3>
+				</a>
+				<a href="#add-添加子图层" id="add-添加子图层" style="color: inherit; text-decoration: none;">
+					<h4>add 添加子图层</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">new</span> FRS.Circle().add(<span class="hljs-keyword">new</span> FRS.Rect())</code></pre>
+				<p>将 <code>Rect</code> 添加到了 <code>Circle</code> 图层里。 <code>Rect</code> 将会随着 <code>Circle</code> 移动、旋转、缩放、设置不透明度。</p>
+				<p>相关方法：<code>addTo</code>, <code>remove</code></p>
+				<a href="#xy-坐标" id="xy-坐标" style="color: inherit; text-decoration: none;">
+					<h4>xy 坐标</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().xy(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>)</code></pre>
+				<p>将 <code>Rect</code> 设置在相对坐标(10, 10)的位置。</p>
+				<a href="#rotate-旋转" id="rotate-旋转" style="color: inherit; text-decoration: none;">
+					<h4>rotate 旋转</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().rotate(<span class="hljs-number">45</span>)</code></pre>
+				<p>将 <code>Rect</code> 顺时针旋转 45 度。</p>
+				<a href="#scale-缩放" id="scale-缩放" style="color: inherit; text-decoration: none;">
+					<h4>scale 缩放</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().scale(<span class="hljs-number">1.5</span>, <span class="hljs-number">2</span>)</code></pre>
+				<p>将 <code>Rect</code> 横向缩放设为 1.5 倍，纵向缩放设为2倍。</p>
+				<a href="#opacity-不透明度" id="opacity-不透明度" style="color: inherit; text-decoration: none;">
+					<h4>opacity 不透明度</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().scale(<span class="hljs-number">0.5</span>)</code></pre>
+				<p>将 <code>Rect</code> 不透明度设为 0.5。</p>
+				<a href="#fill-填充颜色" id="fill-填充颜色" style="color: inherit; text-decoration: none;">
+					<h4>fill 填充颜色</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().fill(<span class="hljs-string">'#f00'</span>)</code></pre>
+				<a href="#stroke-描边颜色" id="stroke-描边颜色" style="color: inherit; text-decoration: none;">
+					<h4>stroke 描边颜色</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().stroke(<span class="hljs-string">'#f00'</span>)</code></pre>
+				<a href="#stokewidth-描边宽度" id="stokewidth-描边宽度" style="color: inherit; text-decoration: none;">
+					<h4>stokeWidth 描边宽度</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().strokeWidth(<span class="hljs-number">4</span>)</code></pre>
+				<p><code>strokeWidth</code> 不受 <code>unit</code> 影响，设为 4 就是 4px。</p>
+				<a href="#show-hide-设置可见--不可见" id="show-hide-设置可见--不可见" style="color: inherit; text-decoration: none;">
+					<h4>show, hide 设置可见 / 不可见</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> boss = <span class="hljs-keyword">new</span> Monster()
 
-    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
-        <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
-            <span class="hljs-keyword">var</span> sketch = <span class="hljs-keyword">new</span> FRS.Sketch().appendTo(<span class="hljs-built_in">document</span>.body)
+boss.hide()
 
-            <span class="hljs-comment">// 圆形场地</span>
-            <span class="hljs-keyword">new</span> FRS.Circle().addTo(sketch)
-        </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
-    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre>
+boss.show()</code></pre>
+				<p>设为不可见后，渲染时将会被跳过，节省开销。</p>
+				<a href="#clone-克隆、复制" id="clone-克隆、复制" style="color: inherit; text-decoration: none;">
+					<h4>clone 克隆、复制</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> doll = <span class="hljs-keyword">new</span> Monster().add(<span class="hljs-keyword">new</span> Text(<span class="hljs-string">'狩猎人偶'</span>)).addTo(sketch)
+
+<span class="hljs-keyword">const</span> doll2 = doll.clone().addTo(sketch)</code></pre>
+				<p>复制一个 <code>doll</code>，对 <code>doll2</code> 操作不会影响到 <code>doll</code>.</p>
+				<p>可以将组合好的图层当作<strong>预设模版</strong>，不加入到画布。在需要用的时候进行<code>clone</code>。</p>
+				<a href="#事件" id="事件" style="color: inherit; text-decoration: none;">
+					<h4>事件</h4>
+				</a>
+				<p>可以通过 <code>on</code>, <code>off</code>, <code>emit</code> 添加事件监听、移除事件监听、发起事件。</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> boss = <span class="hljs-keyword">new</span> Monster()
+
+<span class="hljs-keyword">const</span> fn = <span class="hljs-function">(<span class="hljs-params">a, b</span>) =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(a, b)
+}
+
+<span class="hljs-comment">// 添加事件监听</span>
+boss.on(<span class="hljs-string">'test'</span>, fn)
+
+<span class="hljs-comment">// 发起事件</span>
+boss.emit(<span class="hljs-string">'test'</span>, [<span class="hljs-string">'参数1'</span>, <span class="hljs-string">'参数2'</span>]) <span class="hljs-comment">// 将会输出: 参数1, 参数2</span>
+
+<span class="hljs-comment">// 移除事件监听</span>
+boss.off(<span class="hljs-string">'test'</span>, fn)</code></pre>
+				<a href="#其他" id="其他" style="color: inherit; text-decoration: none;">
+					<h4>其他</h4>
+				</a>
+				<p>每种图形类有独有的属性和操作方法，请到 <a href="https://aweikalee.github.io/ffxiv-raid-sketch/">API Document</a> 进行查询。</p>
+				<a href="#动画" id="动画" style="color: inherit; text-decoration: none;">
+					<h2>动画</h2>
+				</a>
+				<p>虽然本身不支持动画，但是可以通过操作图形实例实现动画。</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> boss = <span class="hljs-keyword">new</span> Monster().addTo(sketch)
+<span class="hljs-keyword">let</span> angle = <span class="hljs-number">0</span>
+
+setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    angle += <span class="hljs-number">1</span>
+    boss.rotate(angle)
+}, <span class="hljs-number">100</span>)</code></pre>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">

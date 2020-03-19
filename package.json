@@ -30,5 +30,10 @@
     "tslib": "^1.11.1",
     "typedoc": "^0.16.11",
     "typescript": "^3.8.3"
-  }
+  },
+  "files": [
+    "dist",
+    "es",
+    "README.md"
+  ]
 }

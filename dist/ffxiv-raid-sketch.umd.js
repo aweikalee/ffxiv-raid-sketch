@@ -206,7 +206,8 @@
         x: 0,
         y: 0,
         rotate: 0,
-        scale: 1,
+        scaleX: 1,
+        scaleY: 1,
         opacity: 1,
         fill: '#000000',
         stroke: '#000000',
@@ -235,6 +236,7 @@
 
         layers.push(layer);
         layer.on('change', this.onChange.bind(this));
+        this.emit('add', [layer]);
         this.onChange();
         return this;
       }
@@ -247,6 +249,7 @@
       value: function addTo(layer) {
         try {
           layer.add(this);
+          this.emit('addTo', [layer]);
           return this;
         } catch (err) {
           return this;
@@ -266,6 +269,7 @@
           this.layers.splice(index, 1);
         }
 
+        this.emit('remove', [layer]);
         return this;
       }
       /**
@@ -280,7 +284,8 @@
             x = _this$props.x,
             y = _this$props.y,
             rotate = _this$props.rotate,
-            scale = _this$props.scale,
+            scaleX = _this$props.scaleX,
+            scaleY = _this$props.scaleY,
             opacity = _this$props.opacity,
             fill = _this$props.fill,
             stroke = _this$props.stroke,
@@ -289,7 +294,7 @@
         ctx.save();
         ctx.translate(mapping(x), mapping(y));
         ctx.rotate(rotate * Math.PI / 180);
-        ctx.scale(scale, scale);
+        ctx.scale(scaleX, scaleY);
         ctx.globalAlpha *= opacity;
         ctx.fillStyle = fill;
         ctx.strokeStyle = stroke;
@@ -301,6 +306,7 @@
           layer.render(ctx, utils);
         });
         ctx.restore();
+        this.emit('render');
       }
       /**
        * 设置坐标
@@ -309,8 +315,11 @@
     }, {
       key: "xy",
       value: function xy(x, y) {
-        this.props.x = x || this.props.x;
-        this.props.y = y || this.props.y;
+        if (typeof x !== 'number' || typeof y !== 'number') return this;
+        if (this.props.x === x && this.props.y === y) return this;
+        this.props.x = x;
+        this.props.y = y;
+        this.emit('xy', [x, y]);
         return this.onChange();
       }
       /**
@@ -321,7 +330,10 @@
       key: "opacity",
       value: function opacity(value) {
         if (typeof value !== 'number') return this;
-        this.props.opacity = Math.max(0, Math.min(value, 1));
+        var opacity = Math.max(0, Math.min(value, 1));
+        if (this.props.opacity === opacity) return this;
+        this.props.opacity = opacity;
+        this.emit('opacity', [opacity]);
         return this.onChange();
       }
       /**
@@ -331,8 +343,10 @@
     }, {
       key: "rotate",
       value: function rotate(value) {
-        if (!value) return this;
+        if (typeof value !== 'number') return this;
+        if (this.props.rotate === value) return this;
         this.props.rotate = value;
+        this.emit('rotate', [value]);
         return this.onChange();
       }
       /**
@@ -341,9 +355,15 @@
 
     }, {
       key: "scale",
-      value: function scale(value) {
-        if (!value) return this;
-        this.props.scale = value;
+      value: function scale(x, y) {
+        if (typeof x !== 'number') return this;
+
+        var _y = typeof y === 'number' ? y : x;
+
+        if (this.props.scaleX === x && this.props.scaleY === _y) return this;
+        this.props.scaleX = x;
+        this.props.scaleY = _y;
+        this.emit('scale', [x, _y]);
         return this.onChange();
       }
       /**
@@ -354,7 +374,9 @@
       key: "stroke",
       value: function stroke(value) {
         if (!value) return this;
+        if (this.props.stroke === value) return this;
         this.props.stroke = value;
+        this.emit('xy', [value]);
         return this.onChange();
       }
       /**
@@ -365,7 +387,9 @@
       key: "strokeWidth",
       value: function strokeWidth(value) {
         if (!value) return this;
+        if (this.props.strokeWidth === value) return this;
         this.props.strokeWidth = value;
+        this.emit('strokeWidth', [value]);
         return this.onChange();
       }
       /**
@@ -376,7 +400,9 @@
       key: "fill",
       value: function fill(value) {
         if (!value) return this;
+        if (this.props.fill === value) return this;
         this.props.fill = value;
+        this.emit('fill', [value]);
         return this.onChange();
       }
       /**
@@ -386,7 +412,9 @@
     }, {
       key: "show",
       value: function show() {
+        if (this.props.visible) return this;
         this.props.visible = true;
+        this.emit('visible', [true]);
         return this.onChange();
       }
       /**
@@ -396,7 +424,9 @@
     }, {
       key: "hide",
       value: function hide() {
+        if (!this.props.visible) return this;
         this.props.visible = false;
+        this.emit('visible', [false]);
         return this.onChange();
       }
       /**
@@ -420,6 +450,16 @@
         return this;
       }
       /**
+       * 发起事件
+       */
+
+    }, {
+      key: "emit",
+      value: function emit(type, args) {
+        this.subscribe.emit(type, args);
+        return this;
+      }
+      /**
        * 克隆
        */
 
@@ -432,6 +472,7 @@
         this.layers.forEach(function (v) {
           clone.add(v.clone());
         });
+        this.emit('clone', [clone]);
         return clone;
       }
       /**
@@ -441,7 +482,7 @@
     }, {
       key: "onChange",
       value: function onChange() {
-        this.subscribe.emit('change');
+        this.emit('change');
         return this;
       }
     }, {
@@ -534,13 +575,12 @@
       }
       /**
        * 设置缩放
-       * @param value 取值范围 (0, 1]
        */
 
     }, {
       key: "scale",
-      value: function scale(value) {
-        this._layer.scale(value);
+      value: function scale(x, y) {
+        this._layer.scale(x, y);
 
         return this;
       }
@@ -680,6 +720,7 @@
 
         coordinate.push(x, y);
         this.lineProps.coordinates.push(coordinate);
+        this.emit('to', [coordinate]);
         return this.onChange();
       }
       /**
@@ -690,7 +731,9 @@
       key: "clear",
       value: function clear() {
         var arr = this.lineProps.coordinates;
+        if (arr.length === 0) return this;
         arr.splice(0, arr.length);
+        this.emit('clear');
         return this.onChange();
       }
       /**
@@ -701,7 +744,9 @@
       key: "startCap",
       value: function startCap(value) {
         if (!LINECAP.includes(value)) return this;
+        if (this.lineProps.startCap === value) return this;
         this.lineProps.startCap = value;
+        this.emit('startCap', [value]);
         return this.onChange();
       }
       /**
@@ -712,7 +757,9 @@
       key: "endCap",
       value: function endCap(value) {
         if (!LINECAP.includes(value)) return this;
+        if (this.lineProps.endCap === value) return this;
         this.lineProps.endCap = value;
+        this.emit('endCap', [value]);
         return this.onChange();
       }
       /**
@@ -723,7 +770,9 @@
       key: "smooth",
       value: function smooth(value) {
         if (typeof value !== 'boolean') return this;
+        if (this.lineProps.smooth === value) return this;
         this.lineProps.smooth = value;
+        this.emit('smooth', [value]);
         return this.onChange();
       }
       /**
@@ -740,6 +789,7 @@
           return typeof v !== 'number';
         })) return this;
         this.lineProps.dash = value;
+        this.emit('dash', [value]);
         return this.onChange();
       }
     }, {
@@ -988,8 +1038,13 @@
       key: "size",
       value: function size(w, h) {
         if (typeof w !== 'number') return this;
+
+        var _h = typeof h === 'number' ? h : w;
+
+        if (this.rectProps.w === w && this.rectProps.h === _h) return this;
         this.rectProps.w = w;
         this.rectProps.h = typeof h === 'number' ? h : w;
+        this.emit('size', [w, _h]);
         return this.onChange();
       }
       /**
@@ -1000,7 +1055,11 @@
       key: "dash",
       value: function dash(value) {
         if (!Array.isArray(value)) return this;
+        if (value.some(function (v) {
+          return typeof v !== 'number';
+        })) return this;
         this.rectProps.dash = value;
+        this.emit('dash', [value]);
         return this.onChange();
       }
     }, {
@@ -1065,7 +1124,8 @@
       _this.circleProps = {
         radius: 30,
         angle: 360,
-        arc: false
+        arc: false,
+        dash: null
       };
       return _this;
     }
@@ -1079,7 +1139,9 @@
       key: "size",
       value: function size(value) {
         if (typeof value !== 'number') return this;
+        if (this.circleProps.radius === value) return this;
         this.circleProps.radius = value;
+        this.emit('size', [value]);
         return this.onChange();
       }
       /**
@@ -1091,7 +1153,12 @@
       key: "angle",
       value: function angle(value) {
         if (typeof value !== 'number') return this;
-        this.circleProps.angle = Math.max(0, Math.min(value, 360));
+
+        var _value = Math.max(0, Math.min(value, 360));
+
+        if (this.circleProps.angle === _value) return this;
+        this.circleProps.angle = _value;
+        this.emit('angle', [_value]);
         return this.onChange();
       }
       /**
@@ -1103,7 +1170,24 @@
       key: "arc",
       value: function arc(value) {
         if (typeof value !== 'boolean') return this;
+        if (this.circleProps.arc === value) return this;
         this.circleProps.arc = value;
+        this.emit('arc', [value]);
+        return this.onChange();
+      }
+      /**
+       * 设置线段样式
+       */
+
+    }, {
+      key: "dash",
+      value: function dash(value) {
+        if (!Array.isArray(value)) return this;
+        if (value.some(function (v) {
+          return typeof v !== 'number';
+        })) return this;
+        this.circleProps.dash = value;
+        this.emit('dash', [value]);
         return this.onChange();
       }
     }, {
@@ -1116,11 +1200,20 @@
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
+        var strokeWidth = this.props.strokeWidth;
         var _this$circleProps = this.circleProps,
             radius = _this$circleProps.radius,
             angle = _this$circleProps.angle,
-            arc = _this$circleProps.arc;
+            arc = _this$circleProps.arc,
+            dash = _this$circleProps.dash;
         var mapping = utils.mapping;
+
+        if (dash) {
+          ctx.setLineDash(dash.map(function (v) {
+            return v * strokeWidth;
+          }));
+        }
+
         ctx.beginPath();
         ctx.arc(0, 0, mapping(radius), 0, angle * Math.PI / 180);
 
@@ -1186,7 +1279,7 @@
       _this.image = new Image();
 
       _this.image.onload = function () {
-        _this.subscribe.emit('loaded');
+        _this.emit('loaded');
 
         _this.onChange();
       };
@@ -1207,9 +1300,10 @@
 
         var _value = IMG_ALIAS[value] || value;
 
-        if (_value === this.imgProps.src) return this;
+        if (this.imgProps.src === _value) return this;
         this.imgProps.src = _value;
         this.image.src = _value;
+        this.emit('src', [_value]);
         return this;
       }
       /**
@@ -1224,7 +1318,9 @@
       key: "size",
       value: function size(value) {
         if (typeof value !== 'number') return this;
+        if (this.imgProps.size === value) return this;
         this.imgProps.size = value;
+        this.emit('size', [value]);
         return this.onChange();
       }
     }, {
@@ -1302,9 +1398,14 @@
 
     _createClass(Text, [{
       key: "value",
-      value: function value(_value) {
-        if (typeof _value !== 'string' && typeof _value !== 'number') return this;
-        this.textProps.value = "".concat(_value);
+      value: function value(_value2) {
+        if (typeof _value2 !== 'string' && typeof _value2 !== 'number') return this;
+
+        var _value = "".concat(_value2);
+
+        if (this.textProps.value === _value) return this;
+        this.textProps.value = _value;
+        this.emit('value', [_value]);
         return this.onChange();
       }
       /**
@@ -1315,7 +1416,9 @@
       key: "size",
       value: function size(value) {
         if (typeof value !== 'number') return this;
+        if (this.textProps.size === value) return this;
         this.textProps.size = value;
+        this.emit('size', [value]);
         return this.onChange();
       }
       /**
@@ -1326,7 +1429,9 @@
       key: "align",
       value: function align(value) {
         if (!['start', 'end', 'left', 'center', 'right'].includes(value)) return this;
+        if (this.textProps.align === value) return this;
         this.textProps.align = value;
+        this.emit('align', [value]);
         return this.onChange();
       }
       /**
@@ -1339,7 +1444,9 @@
       key: "font",
       value: function font(value) {
         if (typeof value !== 'string') return this;
+        if (this.textProps.font === value) return this;
         this.textProps.font = value;
+        this.emit('font', [value]);
         return this.onChange();
       }
       /**
@@ -1349,7 +1456,10 @@
     }, {
       key: "bold",
       value: function bold(value) {
-        this.textProps.bold = !!value;
+        if (typeof value !== 'boolean') return this;
+        if (this.textProps.bold === value) return this;
+        this.textProps.bold = value;
+        this.emit('bold', [value]);
         return this.onChange();
       }
       /**
@@ -1359,7 +1469,10 @@
     }, {
       key: "italic",
       value: function italic(value) {
-        this.textProps.italic = !!value;
+        if (typeof value !== 'boolean') return this;
+        if (this.textProps.italic === value) return this;
+        this.textProps.italic = value;
+        this.emit('italic', [value]);
         return this.onChange();
       }
     }, {
@@ -1551,7 +1664,10 @@
       key: "type",
       value: function type(value) {
         if (!(value in MAKR_ALIAS)) return this;
-        this.markProps.type = value;
+        var _value = MAKR_ALIAS[value];
+        if (this.markProps.type === _value) return this;
+        this.markProps.type = _value;
+        this.emit('type', [_value]);
         return this.onChange();
       }
       /**
@@ -1562,7 +1678,9 @@
       key: "size",
       value: function size(value) {
         if (typeof value !== 'number') return this;
+        if (this.markProps.size === value) return this;
         this.markProps.size = value;
+        this.emit('size', [value]);
         return this.onChange();
       }
       /**
@@ -1591,7 +1709,7 @@
         var _this$markProps = this.markProps,
             type = _this$markProps.type,
             size = _this$markProps.size;
-        img.src(MARK[MAKR_ALIAS[type]]);
+        img.src(MARK[type]);
         img.size(size);
         img.render(ctx, utils);
       }
@@ -1688,7 +1806,9 @@
         var _value = typeof value === 'string' ? value.toUpperCase() : value;
 
         if (!(_value in WAYMARK)) return this;
+        if (this.waymarkProps.type === _value) return this;
         this.waymarkProps.type = _value;
+        this.emit('type', [_value]);
         return this.onChange();
       }
       /**
@@ -1699,7 +1819,9 @@
       key: "size",
       value: function size(value) {
         if (typeof value !== 'number') return this;
+        if (this.waymarkProps.size === value) return this;
         this.waymarkProps.size = value;
+        this.emit('size', [value]);
         return this.onChange();
       }
     }, {
@@ -1944,7 +2066,10 @@
       key: "job",
       value: function job(value) {
         if (!(value in JOB_ALIAS)) return this;
-        this.playerProps.job = value;
+        var _value = JOB_ALIAS[value];
+        if (this.playerProps.job === _value) return this;
+        this.playerProps.job = _value;
+        this.emit('job', [_value]);
         return this.onChange();
       }
       /**
@@ -1955,7 +2080,9 @@
       key: "size",
       value: function size(value) {
         if (typeof value !== 'number') return this;
+        if (this.playerProps.size === value) return this;
         this.playerProps.size = value;
+        this.emit('size', [value]);
         return this.onChange();
       }
       /**
@@ -1987,14 +2114,14 @@
             job = _this$playerProps.job,
             size = _this$playerProps.size;
         var unmapping = utils.unmapping;
-        var jobType = JOB_TYPE[JOB_ALIAS[job]];
+        var jobType = JOB_TYPE[job];
         var jobColor = JOB_COLOR[jobType];
         circle.stroke(jobColor);
         circle.fill("".concat(jobColor, "aa"));
         circle.strokeWidth(strokeWidth);
         circle.size(size / 2);
         circle.render(ctx, utils);
-        img.src(JOB[JOB_ALIAS[job]]);
+        img.src(JOB[job]);
         img.size(size - unmapping(strokeWidth * 2));
         img.render(ctx, utils);
       }
@@ -2044,7 +2171,9 @@
       key: "size",
       value: function size(value) {
         if (typeof value !== 'number') return this;
+        if (this.monsterProps.size === value) return this;
         this.monsterProps.size = value;
+        this.emit('size', [value]);
         return this.onChange();
       }
     }, {
