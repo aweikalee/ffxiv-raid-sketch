@@ -46,8 +46,12 @@ export default class Rect extends Layer {
      */
     size(w: number, h?: number) {
         if (typeof w !== 'number') return this
+        const _h = typeof h === 'number' ? h : w
+        if (this.rectProps.w === w && this.rectProps.h === _h) return this
+
         this.rectProps.w = w
         this.rectProps.h = typeof h === 'number' ? h : w
+        this.emit('size', [w, _h])
         return this.onChange()
     }
 
@@ -56,7 +60,10 @@ export default class Rect extends Layer {
      */
     dash(value: IRectProps['dash']) {
         if (!Array.isArray(value)) return this
+        if (value.some(v => typeof v !== 'number')) return this
+
         this.rectProps.dash = value
+        this.emit('dash', [value])
         return this.onChange()
     }
 

@@ -63,7 +63,11 @@ export default class Text extends Layer {
      */
     value(value: ITextProps['value']) {
         if (typeof value !== 'string' && typeof value !== 'number') return this
-        this.textProps.value = `${value}`
+        const _value = `${value}`
+        if (this.textProps.value === _value) return this
+
+        this.textProps.value = _value
+        this.emit('value', [_value])
         return this.onChange()
     }
 
@@ -72,7 +76,10 @@ export default class Text extends Layer {
      */
     size(value: number) {
         if (typeof value !== 'number') return this
+        if (this.textProps.size === value) return this
+
         this.textProps.size = value
+        this.emit('size', [value])
         return this.onChange()
     }
 
@@ -82,7 +89,10 @@ export default class Text extends Layer {
     align(value: ITextProps['align']) {
         if (!['start', 'end', 'left', 'center', 'right'].includes(value))
             return this
+        if (this.textProps.align === value) return this
+
         this.textProps.align = value
+        this.emit('align', [value])
         return this.onChange()
     }
 
@@ -93,7 +103,10 @@ export default class Text extends Layer {
      */
     font(value: ITextProps['font']) {
         if (typeof value !== 'string') return this
+        if (this.textProps.font === value) return this
+
         this.textProps.font = value
+        this.emit('font', [value])
         return this.onChange()
     }
 
@@ -101,7 +114,11 @@ export default class Text extends Layer {
      * 设置加粗
      */
     bold(value: ITextProps['bold']) {
-        this.textProps.bold = !!value
+        if (typeof value !== 'boolean') return this
+        if (this.textProps.bold === value) return this
+
+        this.textProps.bold = value
+        this.emit('bold', [value])
         return this.onChange()
     }
 
@@ -109,7 +126,11 @@ export default class Text extends Layer {
      * 设置斜体
      */
     italic(value: ITextProps['italic']) {
-        this.textProps.italic = !!value
+        if (typeof value !== 'boolean') return this
+        if (this.textProps.italic === value) return this
+
+        this.textProps.italic = value
+        this.emit('italic', [value])
         return this.onChange()
     }
 

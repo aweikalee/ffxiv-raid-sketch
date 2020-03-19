@@ -34,7 +34,10 @@ export default class Monster extends Layer {
      */
     size(value: number) {
         if (typeof value !== 'number') return this
+        if (this.monsterProps.size === value) return this
+
         this.monsterProps.size = value
+        this.emit('size', [value])
         return this.onChange()
     }
 

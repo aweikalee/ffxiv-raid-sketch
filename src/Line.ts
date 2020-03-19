@@ -106,6 +106,7 @@ export default class Line extends Layer {
         coordinate.push(x, y)
 
         this.lineProps.coordinates.push(coordinate)
+        this.emit('to', [coordinate])
         return this.onChange()
     }
 
@@ -114,7 +115,10 @@ export default class Line extends Layer {
      */
     clear() {
         const arr = this.lineProps.coordinates
+        if (arr.length === 0) return this
+
         arr.splice(0, arr.length)
+        this.emit('clear')
         return this.onChange()
     }
 
@@ -123,7 +127,10 @@ export default class Line extends Layer {
      */
     startCap(value: ILineCap) {
         if (!LINECAP.includes(value)) return this
+        if (this.lineProps.startCap === value) return this
+
         this.lineProps.startCap = value
+        this.emit('startCap', [value])
         return this.onChange()
     }
 
@@ -132,7 +139,10 @@ export default class Line extends Layer {
      */
     endCap(value: ILineCap) {
         if (!LINECAP.includes(value)) return this
+        if (this.lineProps.endCap === value) return this
+
         this.lineProps.endCap = value
+        this.emit('endCap', [value])
         return this.onChange()
     }
 
@@ -141,7 +151,10 @@ export default class Line extends Layer {
      */
     smooth(value: ILineProps['smooth']) {
         if (typeof value !== 'boolean') return this
+        if (this.lineProps.smooth === value) return this
+
         this.lineProps.smooth = value
+        this.emit('smooth', [value])
         return this.onChange()
     }
 
@@ -153,7 +166,9 @@ export default class Line extends Layer {
     dash(value: ILineProps['dash']) {
         if (!Array.isArray(value)) return this
         if (value.some(v => typeof v !== 'number')) return this
+
         this.lineProps.dash = value
+        this.emit('dash', [value])
         return this.onChange()
     }
 

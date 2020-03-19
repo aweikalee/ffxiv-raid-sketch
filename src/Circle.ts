@@ -21,6 +21,11 @@ export interface ICircleProps {
      * 值为 `true` 时，将不会渲染扇形两条直线的边。
      */
     arc: boolean
+
+    /**
+     * 线段样式
+     */
+    dash: number[] | null
 }
 
 /**
@@ -33,7 +38,8 @@ export default class Circle extends Layer {
     circleProps: ICircleProps = {
         radius: 30,
         angle: 360,
-        arc: false
+        arc: false,
+        dash: null
     }
 
     constructor() {
@@ -49,7 +55,10 @@ export default class Circle extends Layer {
      */
     size(value: ICircleProps['radius']) {
         if (typeof value !== 'number') return this
+        if (this.circleProps.radius === value) return this
+
         this.circleProps.radius = value
+        this.emit('size', [value])
         return this.onChange()
     }
 
@@ -59,7 +68,11 @@ export default class Circle extends Layer {
      */
     angle(value: ICircleProps['angle']) {
         if (typeof value !== 'number') return this
-        this.circleProps.angle = Math.max(0, Math.min(value, 360))
+        const _value = Math.max(0, Math.min(value, 360))
+        if (this.circleProps.angle === _value) return this
+
+        this.circleProps.angle = _value
+        this.emit('angle', [_value])
         return this.onChange()
     }
 
@@ -69,7 +82,22 @@ export default class Circle extends Layer {
      */
     arc(value: ICircleProps['arc']) {
         if (typeof value !== 'boolean') return this
+        if (this.circleProps.arc === value) return this
+
         this.circleProps.arc = value
+        this.emit('arc', [value])
+        return this.onChange()
+    }
+
+    /**
+     * 设置线段样式
+     */
+    dash(value: ICircleProps['dash']) {
+        if (!Array.isArray(value)) return this
+        if (value.some(v => typeof v !== 'number')) return this
+
+        this.circleProps.dash = value
+        this.emit('dash', [value])
         return this.onChange()
     }
 
@@ -80,8 +108,13 @@ export default class Circle extends Layer {
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
-        const { radius, angle, arc } = this.circleProps
+        const { strokeWidth } = this.props
+        const { radius, angle, arc, dash } = this.circleProps
         const { mapping } = utils
+
+        if (dash) {
+            ctx.setLineDash(dash.map(v => v * strokeWidth))
+        }
 
         ctx.beginPath()
         ctx.arc(0, 0, mapping(radius), 0, (angle * Math.PI) / 180)

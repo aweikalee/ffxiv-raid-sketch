@@ -52,7 +52,11 @@ export default class Player extends Layer {
      */
     job(value: IPlayerProps['job']) {
         if (!(value in JOB_ALIAS)) return this
-        this.playerProps.job = value
+        const _value = JOB_ALIAS[value]
+        if (this.playerProps.job === _value) return this
+
+        this.playerProps.job = _value
+        this.emit('job', [_value])
         return this.onChange()
     }
 
@@ -61,7 +65,10 @@ export default class Player extends Layer {
      */
     size(value: IPlayerProps['size']) {
         if (typeof value !== 'number') return this
+        if (this.playerProps.size === value) return this
+
         this.playerProps.size = value
+        this.emit('size', [value])
         return this.onChange()
     }
 
@@ -92,7 +99,7 @@ export default class Player extends Layer {
         const { job, size } = this.playerProps
         const { unmapping } = utils
 
-        const jobType = JOB_TYPE[JOB_ALIAS[job]]
+        const jobType = JOB_TYPE[job]
         const jobColor = JOB_COLOR[jobType]
 
         circle.stroke(jobColor)
@@ -101,7 +108,7 @@ export default class Player extends Layer {
         circle.size(size / 2)
         circle.render(ctx, utils)
 
-        img.src(JOB[JOB_ALIAS[job]])
+        img.src(JOB[job])
         img.size(size - unmapping(strokeWidth * 2))
         img.render(ctx, utils)
     }

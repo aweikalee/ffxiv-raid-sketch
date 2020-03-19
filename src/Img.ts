@@ -46,10 +46,11 @@ export default class Img extends Layer {
     src(value: string) {
         if (typeof value !== 'string') return this
         const _value = IMG_ALIAS[value] || value
-        if (_value === this.imgProps.src) return this
+        if (this.imgProps.src === _value) return this
+
         this.imgProps.src = _value
         this.image.src = _value
-
+        this.emit('src', [_value])
         return this
     }
 
@@ -62,7 +63,10 @@ export default class Img extends Layer {
      */
     size(value: number) {
         if (typeof value !== 'number') return this
+        if (this.imgProps.size === value) return this
+
         this.imgProps.size = value
+        this.emit('size', [value])
         return this.onChange()
     }
 

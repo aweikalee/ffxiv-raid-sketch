@@ -49,7 +49,11 @@ export default class Mark extends Layer {
      */
     type(value: IMarkProps['type']) {
         if (!(value in MAKR_ALIAS)) return this
-        this.markProps.type = value
+        const _value = MAKR_ALIAS[value]
+        if (this.markProps.type === _value) return this
+
+        this.markProps.type = _value
+        this.emit('type', [_value])
         return this.onChange()
     }
 
@@ -58,7 +62,10 @@ export default class Mark extends Layer {
      */
     size(value: IMarkProps['size']) {
         if (typeof value !== 'number') return this
+        if (this.markProps.size === value) return this
+
         this.markProps.size = value
+        this.emit('size', [value])
         return this.onChange()
     }
 
@@ -87,7 +94,7 @@ export default class Mark extends Layer {
         const { img } = this
         const { type, size } = this.markProps
 
-        img.src(MARK[MAKR_ALIAS[type]])
+        img.src(MARK[type])
         img.size(size)
         img.render(ctx, utils)
     }

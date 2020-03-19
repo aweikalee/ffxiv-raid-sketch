@@ -50,7 +50,10 @@ export default class Waymark extends Layer {
                 ? (value.toUpperCase() as IWaymarkProps['type'])
                 : value
         if (!(_value in WAYMARK)) return this
+        if (this.waymarkProps.type === _value) return this
+
         this.waymarkProps.type = _value
+        this.emit('type', [_value])
         return this.onChange()
     }
 
@@ -59,8 +62,10 @@ export default class Waymark extends Layer {
      */
     size(value: number) {
         if (typeof value !== 'number') return this
-        this.waymarkProps.size = value
+        if (this.waymarkProps.size === value) return this
 
+        this.waymarkProps.size = value
+        this.emit('size', [value])
         return this.onChange()
     }
 
