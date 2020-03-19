@@ -33,7 +33,7 @@ export default class Img extends Layer {
 
         this.image = new Image()
         this.image.onload = () => {
-            this.subscribe.emit('loaded')
+            this.emit('loaded')
             this.onChange()
         }
 

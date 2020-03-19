@@ -23,6 +23,8 @@ export interface ISketchOptions {
 
     /**
      * 画布 DOM
+     *
+     * 若不传入该值，则会在内部创建一个 Canvas DOM，则必须通过appendTo 添加到文档上
      */
     canvas?: HTMLCanvasElement
 }

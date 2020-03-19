@@ -262,6 +262,14 @@ export default class Layer {
     }
 
     /**
+     * 发起事件
+     */
+    emit(type: string, args?: unknown[]) {
+        this.subscribe.emit(type, args)
+        return this
+    }
+
+    /**
      * 克隆
      */
     clone() {
@@ -277,7 +285,7 @@ export default class Layer {
      * 通知变更
      */
     protected onChange() {
-        this.subscribe.emit('change')
+        this.emit('change')
         return this
     }
 
