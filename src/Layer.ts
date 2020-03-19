@@ -99,6 +99,8 @@ export default class Layer {
         layers.push(layer)
 
         layer.on('change', this.onChange.bind(this))
+
+        this.emit('add', [layer])
         this.onChange()
         return this
     }
@@ -109,6 +111,7 @@ export default class Layer {
     addTo(layer: Layer | Sketch) {
         try {
             layer.add(this)
+            this.emit('addTo', [layer])
             return this
         } catch (err) {
             return this
@@ -126,6 +129,7 @@ export default class Layer {
             this.layers.splice(index, 1)
         }
 
+        this.emit('remove', [layer])
         return this
     }
 
@@ -164,14 +168,21 @@ export default class Layer {
         })
 
         ctx.restore()
+
+        this.emit('render')
     }
 
     /**
      * 设置坐标
      */
     xy(x: ILayerProps['x'], y: ILayerProps['y']) {
-        this.props.x = x || this.props.x
-        this.props.y = y || this.props.y
+        if (typeof x !== 'number' || typeof y !== 'number') return this
+        if (this.props.x === x && this.props.y === y) return this
+
+        this.props.x = x
+        this.props.y = y
+
+        this.emit('xy', [x, y])
         return this.onChange()
     }
 
@@ -180,7 +191,12 @@ export default class Layer {
      */
     opacity(value: ILayerProps['opacity']) {
         if (typeof value !== 'number') return this
-        this.props.opacity = Math.max(0, Math.min(value, 1))
+        const opacity = Math.max(0, Math.min(value, 1))
+        if (this.props.opacity === opacity) return this
+
+        this.props.opacity = opacity
+
+        this.emit('opacity', [opacity])
         return this.onChange()
     }
 
@@ -188,8 +204,11 @@ export default class Layer {
      * 设置旋转角度
      */
     rotate(value: ILayerProps['rotate']) {
-        if (!value) return this
+        if (typeof value !== 'number') return this
+        if (this.props.rotate === value) return this
         this.props.rotate = value
+
+        this.emit('rotate', [value])
         return this.onChange()
     }
 
@@ -197,8 +216,11 @@ export default class Layer {
      * 设置缩放
      */
     scale(value: ILayerProps['scale']) {
-        if (!value) return this
+        if (typeof value !== 'number') return this
+        if (this.props.scale === value) return this
         this.props.scale = value
+
+        this.emit('scale', [value])
         return this.onChange()
     }
 
@@ -207,7 +229,10 @@ export default class Layer {
      */
     stroke(value: ILayerProps['stroke']) {
         if (!value) return this
+        if (this.props.stroke === value) return this
         this.props.stroke = value
+
+        this.emit('xy', [value])
         return this.onChange()
     }
 
@@ -216,7 +241,10 @@ export default class Layer {
      */
     strokeWidth(value: ILayerProps['strokeWidth']) {
         if (!value) return this
+        if (this.props.strokeWidth === value) return this
         this.props.strokeWidth = value
+
+        this.emit('strokeWidth', [value])
         return this.onChange()
     }
 
@@ -225,7 +253,10 @@ export default class Layer {
      */
     fill(value: ILayerProps['fill']) {
         if (!value) return this
+        if (this.props.fill === value) return this
         this.props.fill = value
+
+        this.emit('fill', [value])
         return this.onChange()
     }
 
@@ -233,7 +264,9 @@ export default class Layer {
      * 设置为可见
      */
     show() {
+        if (this.props.visible) return this
         this.props.visible = true
+        this.emit('visible', [true])
         return this.onChange()
     }
 
@@ -241,7 +274,9 @@ export default class Layer {
      * 设置为不可见
      */
     hide() {
+        if (!this.props.visible) return this
         this.props.visible = false
+        this.emit('visible', [false])
         return this.onChange()
     }
 
@@ -278,6 +313,7 @@ export default class Layer {
         this.layers.forEach(v => {
             clone.add(v.clone())
         })
+        this.emit('clone', [clone])
         return clone
     }
 
