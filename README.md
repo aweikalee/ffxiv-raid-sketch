@@ -97,10 +97,10 @@ new Rect().rotate(45)
 #### scale 缩放
 
 ```js
-new Rect().scale(1.5)
+new Rect().scale(1.5, 2)
 ```
 
-将 `Rect` 缩放设为 1.5 倍。
+将 `Rect` 横向缩放设为 1.5 倍，纵向缩放设为2倍。
 
 #### opacity 不透明度
 

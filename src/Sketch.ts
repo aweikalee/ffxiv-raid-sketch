@@ -112,10 +112,9 @@ export default class Sketch {
 
     /**
      * 设置缩放
-     * @param value 取值范围 (0, 1]
      */
-    scale(value: number) {
-        this._layer.scale(value)
+    scale(x: number, y?: number) {
+        this._layer.scale(x, y)
         return this
     }
 

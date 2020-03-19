@@ -25,9 +25,14 @@ export interface ILayerProps {
     rotate: number
 
     /**
-     * 相对放大倍率
+     * 横向放大倍率
      */
-    scale: number
+    scaleX: number
+
+    /**
+     * 纵向放大倍率
+     */
+    scaleY: number
 
     /**
      * 不透明度
@@ -68,7 +73,8 @@ export default class Layer {
         x: 0,
         y: 0,
         rotate: 0,
-        scale: 1,
+        scaleX: 1,
+        scaleY: 1,
         opacity: 1,
         fill: '#000000',
         stroke: '#000000',
@@ -143,7 +149,8 @@ export default class Layer {
             x,
             y,
             rotate,
-            scale,
+            scaleX,
+            scaleY,
             opacity,
             fill,
             stroke,
@@ -154,7 +161,7 @@ export default class Layer {
         ctx.save()
         ctx.translate(mapping(x), mapping(y))
         ctx.rotate((rotate * Math.PI) / 180)
-        ctx.scale(scale, scale)
+        ctx.scale(scaleX, scaleY)
         ctx.globalAlpha *= opacity
 
         ctx.fillStyle = fill
@@ -215,12 +222,14 @@ export default class Layer {
     /**
      * 设置缩放
      */
-    scale(value: ILayerProps['scale']) {
-        if (typeof value !== 'number') return this
-        if (this.props.scale === value) return this
-        this.props.scale = value
+    scale(x: ILayerProps['scaleX'], y?: ILayerProps['scaleY']) {
+        if (typeof x !== 'number') return this
+        const _y = typeof y === 'number' ? y : x
+        if (this.props.scaleX === x && this.props.scaleY === _y) return this
 
-        this.emit('scale', [value])
+        this.props.scaleX = x
+        this.props.scaleY = _y
+        this.emit('scale', [x, _y])
         return this.onChange()
     }
 
