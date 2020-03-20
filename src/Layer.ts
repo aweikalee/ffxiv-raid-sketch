@@ -159,6 +159,7 @@ export default class Layer {
         const { mapping } = utils
 
         ctx.save()
+
         ctx.translate(mapping(x), mapping(y))
         ctx.rotate((rotate * Math.PI) / 180)
         ctx.scale(scaleX, scaleY)
@@ -168,7 +169,11 @@ export default class Layer {
         ctx.strokeStyle = stroke
         ctx.lineWidth = strokeWidth
 
-        this._render(ctx, utils)
+        try {
+            this._render(ctx, utils)
+        } catch (err) {
+            console.error(err)
+        }
 
         this.layers.forEach(layer => {
             layer.render(ctx, utils)

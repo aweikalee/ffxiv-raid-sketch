@@ -300,7 +300,11 @@
         ctx.strokeStyle = stroke;
         ctx.lineWidth = strokeWidth;
 
-        this._render(ctx, utils);
+        try {
+          this._render(ctx, utils);
+        } catch (err) {
+          console.error(err);
+        }
 
         this.layers.forEach(function (layer) {
           layer.render(ctx, utils);
