@@ -1,7 +1,7 @@
 import Layer from './Layer'
 import { ISketchUtils } from './Sketch'
 import { IMG_ALIAS } from './alias/img'
-import { setImgAlias } from './alias/utils'
+import { setAliasMapping } from './alias/utils'
 import { cloneDeep } from './utils'
 
 export interface IImgProps {
@@ -70,8 +70,17 @@ export default class Img extends Layer {
         return this.onChange()
     }
 
+    /**
+     * 定义图片地址的别名，方便后期使用
+     *
+     * 比如 `Img.setAlias('buff', 'https://example/buff.png')`
+     *
+     * 之后就可以使用 `Img('buff')` 来使用这张图片了
+     * @param alias 别名
+     * @param value 值
+     */
     static setAlias(alias: string, value: string) {
-        setImgAlias(alias, value)
+        setAliasMapping(IMG_ALIAS, alias, value)
     }
 
     protected _clone() {

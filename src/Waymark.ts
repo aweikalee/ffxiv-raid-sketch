@@ -1,6 +1,8 @@
 import Layer from './Layer'
 import { ISketchUtils } from './Sketch'
 import { WAYMARK, WAYMARK_COLOR } from './img/waymark/map'
+import { WAYMARK_ALIAS, IWaymarkAlias } from './alias/waymark'
+import { setAlias } from './alias/utils'
 import Img from './Img'
 import Circle from './Circle'
 import Rect from './Rect'
@@ -10,7 +12,7 @@ export interface IWaymarkProps {
     /**
      * 场景标记类型（名称）
      */
-    type: keyof typeof WAYMARK
+    type: IWaymarkAlias | null
 
     /**
      * 显示尺寸
@@ -26,7 +28,7 @@ export default class Waymark extends Layer {
      * 字段详情：[[IWaymarkProps]]
      */
     waymarkProps: IWaymarkProps = {
-        type: 'A',
+        type: null,
         size: 5
     }
     private img = new Img()
@@ -45,11 +47,8 @@ export default class Waymark extends Layer {
      * 设置目标标记类型（名称）
      */
     type(value: IWaymarkProps['type']) {
-        const _value =
-            typeof value === 'string'
-                ? (value.toUpperCase() as IWaymarkProps['type'])
-                : value
-        if (!(_value in WAYMARK)) return this
+        if (!(value in WAYMARK_ALIAS)) return this
+        const _value = WAYMARK_ALIAS[value]
         if (this.waymarkProps.type === _value) return this
 
         this.waymarkProps.type = _value
@@ -67,6 +66,20 @@ export default class Waymark extends Layer {
         this.waymarkProps.size = value
         this.emit('size', [value])
         return this.onChange()
+    }
+
+    /**
+     * 为场地标记设别名
+     *
+     * 通过 `Waymark.setAlias('A', 'A点')` 设置别名
+     *
+     * 之后则可以使用 `new Waymark('A点')` 获得与`A`同样的图标
+     *
+     * @param name 官方名称 / 已设置成功的别名
+     * @param alias 别名
+     */
+    static setAlias(name: IWaymarkAlias, alias: string) {
+        setAlias(WAYMARK_ALIAS, name, alias)
     }
 
     protected _clone() {

@@ -1,7 +1,7 @@
 import Layer from './Layer'
 import { ISketchUtils } from './Sketch'
 import { JOB, JOB_TYPE, JOB_COLOR } from './img/job/map'
-import { JOB_ALIAS } from './alias/job'
+import { JOB_ALIAS, IJobAlias } from './alias/job'
 import { setAlias } from './alias/utils'
 import Img from './Img'
 import Circle from './Circle'
@@ -17,7 +17,7 @@ export interface IPlayerProps {
      *
      * 可通过 [[Player.setAlias]] 设置别名
      */
-    job: keyof typeof JOB_ALIAS | null
+    job: IJobAlias | null
 
     /**
      * 显示尺寸
@@ -82,7 +82,7 @@ export default class Player extends Layer {
      * @param name 中英文官方名称 / 已设置成功的别名
      * @param alias 别名
      */
-    static setAlias(name: keyof typeof JOB_ALIAS, alias: string) {
+    static setAlias(name: IJobAlias, alias: string) {
         setAlias(JOB_ALIAS, name, alias)
     }
 

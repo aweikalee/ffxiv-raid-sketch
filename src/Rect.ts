@@ -50,7 +50,7 @@ export default class Rect extends Layer {
         if (this.rectProps.w === w && this.rectProps.h === _h) return this
 
         this.rectProps.w = w
-        this.rectProps.h = typeof h === 'number' ? h : w
+        this.rectProps.h = _h
         this.emit('size', [w, _h])
         return this.onChange()
     }

@@ -7,11 +7,23 @@ import B from './b.png'
 import C from './c.png'
 import D from './d.png'
 
-export const WAYMARK = {
-    '1': one,
-    '2': two,
-    '3': three,
-    // '4': four,
+export type IWaymark =
+    | 1
+    | 2
+    | 3
+    // | 4
+    | 'A'
+    | 'B'
+    | 'C'
+    | 'D'
+
+export const WAYMARK: {
+    [key in IWaymark]: string
+} = {
+    1: one,
+    2: two,
+    3: three,
+    // 4: four,
     A,
     B,
     C,
@@ -26,11 +38,11 @@ export const WAYMARK_COLOR_MAP = {
 }
 
 export const WAYMARK_COLOR: {
-    [key in keyof typeof WAYMARK]: string
+    [key in IWaymark]: string
 } = {
-    '1': WAYMARK_COLOR_MAP.red,
-    '2': WAYMARK_COLOR_MAP.yellow,
-    '3': WAYMARK_COLOR_MAP.blue,
+    1: WAYMARK_COLOR_MAP.red,
+    2: WAYMARK_COLOR_MAP.yellow,
+    3: WAYMARK_COLOR_MAP.blue,
     // '4': WAYMARK_COLOR_MAP.purple,
     A: WAYMARK_COLOR_MAP.red,
     B: WAYMARK_COLOR_MAP.yellow,

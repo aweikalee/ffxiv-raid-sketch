@@ -30,7 +30,39 @@ import circle from './circle.png'
 import cross from './cross.png'
 import triangle from './triangle.png'
 
-export const MARK = {
+export type IMark =
+    | 'attack1'
+    | 'attack2'
+    | 'attack3'
+    | 'attack4'
+    | 'attack5'
+    | 'attack6'
+    | 'attack7'
+    | 'attack8'
+    | 'bind1'
+    | 'bind2'
+    | 'bind3'
+    | 'bind4'
+    | 'bind5'
+    | 'bind6'
+    | 'bind7'
+    | 'bind8'
+    | 'stop1'
+    | 'stop2'
+    | 'stop3'
+    | 'stop4'
+    | 'stop5'
+    | 'stop6'
+    | 'stop7'
+    | 'stop8'
+    | 'square'
+    | 'circle'
+    | 'cross'
+    | 'triangle'
+
+export const MARK: {
+    [key in IMark]: string
+} = {
     attack1,
     attack2,
     attack3,

@@ -1,6 +1,3 @@
-import { IMG_ALIAS } from './img'
-
-
 /**
  * @ignore
  */
@@ -15,15 +12,14 @@ export function setAlias<T>(map: T, name: keyof T, alias: string) {
     map[alias] = map[name]
 }
 
-
 /**
  * @ignore
  */
-export function setImgAlias(alias: string, value: string) {
+export function setAliasMapping<T>(map: T, alias: string, value: string) {
     if (!alias) throw new Error('alias is not a string')
-    if (!value) throw new Error('alias is not a string')
-    if (alias in IMG_ALIAS)
+    if (!value) throw new Error('value is not a string')
+    if (alias in map)
         console.warn('alias already exists, value will be replaced')
 
-    IMG_ALIAS[alias] = value
+    map[alias] = value
 }

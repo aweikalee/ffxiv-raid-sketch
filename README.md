@@ -71,7 +71,7 @@ FRS.Circle().addTo(sketch)
 #### add 添加子图层
 
 ```js
-new FRS.Circle().add(new FRS.Rect())
+new Circle().add(new FRS.Rect())
 ```
 
 将 `Rect` 添加到了 `Circle` 图层里。 `Rect` 将会随着 `Circle` 移动、旋转、缩放、设置不透明度。
@@ -187,3 +187,19 @@ setInterval(() => {
     boss.rotate(angle)
 }, 100)
 ```
+
+## Alias 别名
+以`Player`举例，
+
+```js
+new Player('吟游诗人')
+
+Player.setAlias('吟游诗人', '诗人')
+
+new Player('诗人')
+```
+
+为 `吟游诗人` 设置别名 `诗人` 之后，设置职业时就可以用 `诗人` 代替 `吟游诗人`了。
+
+`Mark`, `Waymark`, `Player` 都有别名系统，最终都会定向到预设好的官方英文全名。
+而 `Img` 的别名系统则就是一个字符串映射。

@@ -1043,7 +1043,7 @@
 
         if (this.rectProps.w === w && this.rectProps.h === _h) return this;
         this.rectProps.w = w;
-        this.rectProps.h = typeof h === 'number' ? h : w;
+        this.rectProps.h = _h;
         this.emit('size', [w, _h]);
         return this.onChange();
       }
@@ -1241,7 +1241,6 @@
   /**
    * @ignore
    */
-
   function setAlias(map, name, alias) {
     if (!(name in map)) throw new Error('alias target is not found');
     if (!alias || typeof alias !== 'string') throw new Error('alias is not a string');
@@ -1252,11 +1251,11 @@
    * @ignore
    */
 
-  function setImgAlias(alias, value) {
+  function setAliasMapping(map, alias, value) {
     if (!alias) throw new Error('alias is not a string');
-    if (!value) throw new Error('alias is not a string');
-    if (alias in IMG_ALIAS) console.warn('alias already exists, value will be replaced');
-    IMG_ALIAS[alias] = value;
+    if (!value) throw new Error('value is not a string');
+    if (alias in map) console.warn('alias already exists, value will be replaced');
+    map[alias] = value;
   }
 
   var Img = /*#__PURE__*/function (_Layer) {
@@ -1323,6 +1322,16 @@
         this.emit('size', [value]);
         return this.onChange();
       }
+      /**
+       * 定义图片地址的别名，方便后期使用
+       *
+       * 比如 `Img.setAlias('buff', 'https://example/buff.png')`
+       *
+       * 之后就可以使用 `Img('buff')` 来使用这张图片了
+       * @param alias 别名
+       * @param value 值
+       */
+
     }, {
       key: "_clone",
       value: function _clone() {
@@ -1352,7 +1361,7 @@
     }], [{
       key: "setAlias",
       value: function setAlias(alias, value) {
-        setImgAlias(alias, value);
+        setAliasMapping(IMG_ALIAS, alias, value);
       }
     }]);
 
@@ -1596,35 +1605,64 @@
     triangle: img$r
   };
 
-  var MAKR_ALIAS = Object.assign(Object.assign(Object.assign({}, function () {
-    var keys = Object.keys(MARK);
-    var result = {};
-    keys.forEach(function (key) {
-      result[key] = key;
-    });
-    return result;
-  }()), function () {
-    var result = {};
-
-    for (var i = 1; i < 6; i += 1) {
-      result["\u653B\u51FB".concat(i)] = "attack".concat(i);
-    }
-
-    for (var _i = 1; _i < 4; _i += 1) {
-      result["\u6B62\u6B65".concat(_i)] = "bind".concat(_i);
-    }
-
-    for (var _i2 = 1; _i2 < 3; _i2 += 1) {
-      result["\u7981\u6B62".concat(_i2)] = "stop".concat(_i2);
-    }
-
-    return result;
-  }()), {
+  var MAKR_ALIAS = {
+    attack1: 'attack1',
+    attack2: 'attack2',
+    attack3: 'attack3',
+    attack4: 'attack4',
+    attack5: 'attack5',
+    attack6: 'attack6',
+    attack7: 'attack7',
+    attack8: 'attack8',
+    bind1: 'bind1',
+    bind2: 'bind2',
+    bind3: 'bind3',
+    bind4: 'bind4',
+    bind5: 'bind5',
+    bind6: 'bind6',
+    bind7: 'bind7',
+    bind8: 'bind8',
+    stop1: 'stop1',
+    stop2: 'stop2',
+    stop3: 'stop3',
+    stop4: 'stop4',
+    stop5: 'stop5',
+    stop6: 'stop6',
+    stop7: 'stop7',
+    stop8: 'stop8',
+    square: 'square',
+    circle: 'circle',
+    cross: 'cross',
+    triangle: 'triangle',
+    攻击1: 'attack1',
+    攻击2: 'attack2',
+    攻击3: 'attack3',
+    攻击4: 'attack4',
+    攻击5: 'attack5',
+    攻击6: 'attack6',
+    攻击7: 'attack7',
+    攻击8: 'attack8',
+    止步1: 'bind1',
+    止步2: 'bind2',
+    止步3: 'bind3',
+    止步4: 'bind4',
+    止步5: 'bind5',
+    止步6: 'bind6',
+    止步7: 'bind7',
+    止步8: 'bind8',
+    禁止1: 'stop1',
+    禁止2: 'stop2',
+    禁止3: 'stop3',
+    禁止4: 'stop4',
+    禁止5: 'stop5',
+    禁止6: 'stop6',
+    禁止7: 'stop7',
+    禁止8: 'stop8',
     方块: 'square',
     圆圈: 'circle',
     十字: 'cross',
     三角: 'triangle'
-  });
+  };
 
   /**
    * 绘制 `目标标记`
@@ -1738,10 +1776,10 @@
   const img$y = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAAG1BMVEVzQpZ1RJd/T52JWaKSY6iba67+xv/Zj+D//P+KtydjAAAACHRSTlMCGjxsk7f+3p2mXvkAAAQ4SURBVFjDpVjdedsgFBUbgDYAdQKjugMIOwtYyQBN3Lw3TjuBorF7/0CqA0L9yksewvW559xf1DT/f9S/XNZKqUap/b+tGt2QidptgXe13ueY1uiRgj/aqH1U6L4BAwLZg4C/rY1RBv3SVTXBIwPX4aBjO/2JR+1QCq7ATWutIaeqvJGAMa1zrhWMyv0GCBtHBy1I3rpHbdf5g3MEUblPHrXOf/sOFgihTY03GLjOn6fBJ6cqoiJAeJ2fh4MjqSoswKXW9dd5vgaEIKkwe8ulgJSPMxyEcMaabRLkUveKBh8I4Vioookmzl/IYLqAUNZVgscIZzIYB5Q2altKVlK1J4grQrBSaqv+UdYTWbwEtGhFWl1wCf4NcXhkFkOUthwKsLAOLN4XCEsk8hAUaUyNnpya3gjCCkQeBYUH2qffAuEdFpMu5RRWA5aD759emcUhpZQqZivo1PnT40ooTttcMKhALUIEZnFZS1vIVtMCQifSvpC0XODZLOSe4dxBINgpaiJZ2loQUNkleotTKovALvnwNN8niCq0MYcuAcT7nHhznmecEgQPZwgjsfhBvJGFzhQr6ercEQB8EBYUb5fPQUxvEKk7Podh6AMnyEwpZfPtgBtZd5yeQwCLJymlQepblQqih0wNwIIThJXKh04QArgeeh8hON42g0AcsEapMQFvhphu2HNyDURxPXjsG9BeAWJcscjKpFEl/4B+DAMYLCwgFJleIC6xgV8gwEGPPmXjJgY3MugFYkIIk0ewKwSgLRBXn5NpjfAcPPskEP6QS1jsfNFgkBRkiGnIIpiEgJXDCL8igi0jnLgOiDTXERgUOdiOIn1hWbm0Ibd8NnBSP2jwFtZxwBS3n3ND6ocNKDVOY4q0yyQfV6i4BAXR32VfJr2pKzFpSqVx1Z2AQ7ZpMAKoFIDBdekDuSHPqrqeDVKu3gig/cyBykE4TGMIsdHEXlaKW9eLgTC+BC7QTAOXbs8GpzVjXm0+tRlp9uzSOK4Bsgixj/UPbHAPoJp8GMhgHsf3ZVrznGtUnoMgPN3vA/k2hoFmBGqsH5fhEEdWZlLLOOmRrSTREEdWbiomBA7w/YLSFAdWMpDxY8WjkkoycglgSAA5BnFgRQMeoXEbLaxLoGo0mG6bEzR11rjLwHCL+zEFOeNSQy8B33NOfKRJVXxHyKp+uiaF4l5ZWH5oRez687wkEU3P4i6teR17XAFgYWpTeKHJEvqwSjprN7d15OB8YtxtrlaJw3FpFABArUJtPYCcf5T1MD6cNpZ1+B+odJYZyM8HU9ntQaWvr39v0ZsvFGqU5/ljiAptPoG0ksi9/+Skq3gkbYYWvvTuUzuerrDxkT9WFklde7pal96uuoYQi65N7+nadZ7UxnLVaF39jIBOp/e6rj+/I434zK1+E+APJvHU7/NTTmv5eqB3WJDXKn1rKZw/3GDp2IYUxjUAAAAASUVORK5CYII=";
 
   var WAYMARK = {
-    '1': img$s,
-    '2': img$t,
-    '3': img$u,
-    // '4': four,
+    1: img$s,
+    2: img$t,
+    3: img$u,
+    // 4: four,
     A: img$v,
     B: img$w,
     C: img$x,
@@ -1754,14 +1792,29 @@
     purple: '#9b44ff'
   };
   var WAYMARK_COLOR = {
-    '1': WAYMARK_COLOR_MAP.red,
-    '2': WAYMARK_COLOR_MAP.yellow,
-    '3': WAYMARK_COLOR_MAP.blue,
+    1: WAYMARK_COLOR_MAP.red,
+    2: WAYMARK_COLOR_MAP.yellow,
+    3: WAYMARK_COLOR_MAP.blue,
     // '4': WAYMARK_COLOR_MAP.purple,
     A: WAYMARK_COLOR_MAP.red,
     B: WAYMARK_COLOR_MAP.yellow,
     C: WAYMARK_COLOR_MAP.blue,
     D: WAYMARK_COLOR_MAP.purple
+  };
+
+  var WAYMARK_ALIAS = {
+    1: 1,
+    2: 2,
+    3: 3,
+    // 4: 4,
+    A: 'A',
+    B: 'B',
+    C: 'C',
+    D: 'D',
+    a: 'A',
+    b: 'B',
+    c: 'C',
+    d: 'D'
   };
 
   /**
@@ -1782,7 +1835,7 @@
        */
 
       _this.waymarkProps = {
-        type: 'A',
+        type: null,
         size: 5
       };
       _this.img = new Img();
@@ -1803,9 +1856,8 @@
     _createClass(Waymark, [{
       key: "type",
       value: function type(value) {
-        var _value = typeof value === 'string' ? value.toUpperCase() : value;
-
-        if (!(_value in WAYMARK)) return this;
+        if (!(value in WAYMARK_ALIAS)) return this;
+        var _value = WAYMARK_ALIAS[value];
         if (this.waymarkProps.type === _value) return this;
         this.waymarkProps.type = _value;
         this.emit('type', [_value]);
@@ -1824,6 +1876,17 @@
         this.emit('size', [value]);
         return this.onChange();
       }
+      /**
+       * 为场地标记设别名
+       *
+       * 通过 `Waymark.setAlias('A', 'A点')` 设置别名
+       *
+       * 之后则可以使用 `new Waymark('A点')` 获得与`A`同样的图标
+       *
+       * @param name 官方名称 / 已设置成功的别名
+       * @param alias 别名
+       */
+
     }, {
       key: "_clone",
       value: function _clone() {
@@ -1861,6 +1924,11 @@
         img.src(WAYMARK[type]);
         img.size(size - unmapping(strokeWidth * 2));
         img.render(ctx, utils);
+      }
+    }], [{
+      key: "setAlias",
+      value: function setAlias$1(name, alias) {
+        setAlias(WAYMARK_ALIAS, name, alias);
       }
     }]);
 
@@ -1950,54 +2018,69 @@
     redmage: img$Y,
     bluemage: img$Z
   };
-  var JOB_TYPE_MAP = {
-    tank: 'tank',
-    healer: 'healer',
-    dps: 'dps'
-  };
   var JOB_COLOR = {
     tank: '#4494f0',
     healer: '#64aa4f',
     dps: '#c25859'
   };
   var JOB_TYPE = {
-    gladiator: JOB_TYPE_MAP.tank,
-    marauder: JOB_TYPE_MAP.tank,
-    paladin: JOB_TYPE_MAP.tank,
-    warrior: JOB_TYPE_MAP.tank,
-    darkknight: JOB_TYPE_MAP.tank,
-    gunbreaker: JOB_TYPE_MAP.tank,
-    conjurer: JOB_TYPE_MAP.healer,
-    whitemage: JOB_TYPE_MAP.healer,
-    scholar: JOB_TYPE_MAP.healer,
-    astrologian: JOB_TYPE_MAP.healer,
-    pugilist: JOB_TYPE_MAP.dps,
-    lancer: JOB_TYPE_MAP.dps,
-    rogue: JOB_TYPE_MAP.dps,
-    archer: JOB_TYPE_MAP.dps,
-    thaumaturge: JOB_TYPE_MAP.dps,
-    arcanist: JOB_TYPE_MAP.dps,
-    monk: JOB_TYPE_MAP.dps,
-    dragoon: JOB_TYPE_MAP.dps,
-    ninja: JOB_TYPE_MAP.dps,
-    samurai: JOB_TYPE_MAP.dps,
-    bard: JOB_TYPE_MAP.dps,
-    machinist: JOB_TYPE_MAP.dps,
-    dancer: JOB_TYPE_MAP.dps,
-    blackmage: JOB_TYPE_MAP.dps,
-    summoner: JOB_TYPE_MAP.dps,
-    redmage: JOB_TYPE_MAP.dps,
-    bluemage: JOB_TYPE_MAP.dps
+    gladiator: 'tank',
+    marauder: 'tank',
+    paladin: 'tank',
+    warrior: 'tank',
+    darkknight: 'tank',
+    gunbreaker: 'tank',
+    conjurer: 'healer',
+    whitemage: 'healer',
+    scholar: 'healer',
+    astrologian: 'healer',
+    pugilist: 'dps',
+    lancer: 'dps',
+    rogue: 'dps',
+    archer: 'dps',
+    thaumaturge: 'dps',
+    arcanist: 'dps',
+    monk: 'dps',
+    dragoon: 'dps',
+    ninja: 'dps',
+    samurai: 'dps',
+    bard: 'dps',
+    machinist: 'dps',
+    dancer: 'dps',
+    blackmage: 'dps',
+    summoner: 'dps',
+    redmage: 'dps',
+    bluemage: 'dps'
   };
 
-  var JOB_ALIAS = Object.assign(Object.assign({}, function () {
-    var keys = Object.keys(JOB);
-    var result = {};
-    keys.forEach(function (key) {
-      result[key] = key;
-    });
-    return result;
-  }()), {
+  var JOB_ALIAS = {
+    gladiator: 'gladiator',
+    marauder: 'marauder',
+    paladin: 'paladin',
+    warrior: 'warrior',
+    darkknight: 'darkknight',
+    gunbreaker: 'gunbreaker',
+    conjurer: 'conjurer',
+    whitemage: 'whitemage',
+    scholar: 'scholar',
+    astrologian: 'astrologian',
+    pugilist: 'pugilist',
+    lancer: 'lancer',
+    rogue: 'rogue',
+    archer: 'archer',
+    thaumaturge: 'thaumaturge',
+    arcanist: 'arcanist',
+    monk: 'monk',
+    dragoon: 'dragoon',
+    ninja: 'ninja',
+    samurai: 'samurai',
+    bard: 'bard',
+    machinist: 'machinist',
+    dancer: 'dancer',
+    blackmage: 'blackmage',
+    summoner: 'summoner',
+    redmage: 'redmage',
+    bluemage: 'bluemage',
     剑术师: 'gladiator',
     斧术师: 'marauder',
     骑士: 'paladin',
@@ -2025,7 +2108,7 @@
     召唤师: 'summoner',
     赤魔法师: 'redmage',
     青魔法师: 'bluemage'
-  });
+  };
 
   /**
    * 绘制 职业图标

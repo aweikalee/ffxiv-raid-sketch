@@ -1,16 +1,67 @@
-import { JOB } from '../img/job/map'
+import { JOB, IJob } from '../img/job/map'
+
+export type IJobAlias =
+    | IJob
+    | '剑术师'
+    | '斧术师'
+    | '骑士'
+    | '战士'
+    | '暗黑骑士'
+    | '绝枪战士'
+    | '幻术师'
+    | '白魔法师'
+    | '学者'
+    | '占星术士'
+    | '格斗家'
+    | '枪术师'
+    | '双剑师'
+    | '弓箭手'
+    | '咒术师'
+    | '秘术师'
+    | '武僧'
+    | '龙骑士'
+    | '忍者'
+    | '武士'
+    | '吟游诗人'
+    | '机工士'
+    | '舞者'
+    | '黑魔法师'
+    | '召唤师'
+    | '赤魔法师'
+    | '青魔法师'
 
 export const JOB_ALIAS: {
-    [key: string]: keyof typeof JOB
+    [key in IJobAlias]: keyof typeof JOB
 } = {
-    ...(() => {
-        const keys = Object.keys(JOB)
-        const result = {}
-        keys.forEach(key => {
-            result[key] = key
-        })
-        return result
-    })(),
+    gladiator: 'gladiator',
+    marauder: 'marauder',
+    paladin: 'paladin',
+    warrior: 'warrior',
+    darkknight: 'darkknight',
+    gunbreaker: 'gunbreaker',
+
+    conjurer: 'conjurer',
+    whitemage: 'whitemage',
+    scholar: 'scholar',
+    astrologian: 'astrologian',
+
+    pugilist: 'pugilist',
+    lancer: 'lancer',
+    rogue: 'rogue',
+    archer: 'archer',
+    thaumaturge: 'thaumaturge',
+    arcanist: 'arcanist',
+    monk: 'monk',
+    dragoon: 'dragoon',
+    ninja: 'ninja',
+    samurai: 'samurai',
+    bard: 'bard',
+    machinist: 'machinist',
+    dancer: 'dancer',
+    blackmage: 'blackmage',
+    summoner: 'summoner',
+    redmage: 'redmage',
+    bluemage: 'bluemage',
 
     剑术师: 'gladiator',
     斧术师: 'marauder',

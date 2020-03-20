@@ -1,7 +1,7 @@
 import Layer from './Layer'
 import { ISketchUtils } from './Sketch'
 import { MARK } from './img/mark/map'
-import { MAKR_ALIAS } from './alias/mark'
+import { MAKR_ALIAS, IMarkAlias } from './alias/mark'
 import { setAlias } from './alias/utils'
 import Img from './Img'
 import { cloneDeep } from './utils'
@@ -14,7 +14,7 @@ export interface IMarkProps {
      *
      * 可通过 [[Mark.setAlias]] 设置别名
      */
-    type: keyof typeof MAKR_ALIAS | null
+    type: IMarkAlias | null
 
     /**
      * 显示尺寸
@@ -80,7 +80,7 @@ export default class Mark extends Layer {
      * @param name 中英文官方名称 / 已设置成功的别名
      * @param alias 别名
      */
-    static setAlias(name: keyof typeof MAKR_ALIAS, alias: string) {
+    static setAlias(name: IMarkAlias, alias: string) {
         setAlias(MAKR_ALIAS, name, alias)
     }
 
