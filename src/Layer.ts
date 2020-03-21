@@ -107,8 +107,7 @@ export default class Layer {
         layer.on('change', this.onChange.bind(this))
 
         this.emit('add', [layer])
-        this.onChange()
-        return this
+        return this.onChange()
     }
 
     /**
@@ -118,7 +117,7 @@ export default class Layer {
         try {
             layer.add(this)
             this.emit('addTo', [layer])
-            return this
+            return this.onChange()
         } catch (err) {
             return this
         }
@@ -136,7 +135,17 @@ export default class Layer {
         }
 
         this.emit('remove', [layer])
-        return this
+        return this.onChange()
+    }
+
+    /**
+     * 移除全部子图层
+     */
+    removeAll() {
+        this.layers.splice(0, this.layers.length)
+
+        this.emit('removeAll')
+        return this.onChange()
     }
 
     /**
