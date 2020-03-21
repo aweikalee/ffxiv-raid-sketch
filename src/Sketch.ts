@@ -71,10 +71,11 @@ export default class Sketch {
      * 不需要主动调用，任何操作都后都会发起渲染请求
      */
     render() {
-        if (this.raf) {
-            cancelAnimationFrame(this.raf)
-        }
-        this.raf = requestAnimationFrame(this._render.bind(this))
+        if (this.raf) return this
+        this.raf = requestAnimationFrame(() => {
+            this.raf = null
+            this._render()
+        })
         return this
     }
 
