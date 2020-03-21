@@ -15,11 +15,13 @@
             canvas: document.getElementById('canvas')
         })
 
+        var layer = sketch.layer
+
         // 背景
         new FRS.Rect()
             .size(100, 100)
             .fill('#21252b')
-            .addTo(sketch)
+            .addTo(layer)
 
         // 圆形场地
         new FRS.Circle()
@@ -27,28 +29,28 @@
             .fill('#282c34')
             .stroke('#61afef')
             .strokeWidth(4)
-            .addTo(sketch)
+            .addTo(layer)
 
         // 场地标记
-        new FRS.Waymark('A').xy(0, -37.5).addTo(sketch)
-        new FRS.Waymark('B').xy(37.5, 0).addTo(sketch)
-        new FRS.Waymark('C').xy(0, 37.5).addTo(sketch)
-        new FRS.Waymark('D').xy(-37.5, 0).addTo(sketch)
+        new FRS.Waymark('A').xy(0, -37.5).addTo(layer)
+        new FRS.Waymark('B').xy(37.5, 0).addTo(layer)
+        new FRS.Waymark('C').xy(0, 37.5).addTo(layer)
+        new FRS.Waymark('D').xy(-37.5, 0).addTo(layer)
 
         // 怪物
         new FRS.Monster()
             .xy(0, -20)
             .rotate(180)
-            .addTo(sketch)
+            .addTo(layer)
 
         // 玩家
         new FRS.Player('吟游诗人')
-            .addTo(sketch)
+            .addTo(layer)
 
         // 标记
         new FRS.Mark('攻击1')
             .xy(5, -25)
-            .addTo(sketch)
+            .addTo(layer)
     </script>
 </body>
 

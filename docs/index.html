@@ -102,7 +102,7 @@
 })
 
 <span class="hljs-comment">// 创建一个半径为40的圆</span>
-<span class="hljs-keyword">new</span> FRS.Circle().addTo(sketch)</code></pre>
+<span class="hljs-keyword">new</span> FRS.Circle().addTo(sketch.layer)</code></pre>
 				<p>若不传入 <code>canvas</code> 内部将会创建一个，之后需通过 <code>appendTo</code> 添加到页面中。</p>
 				<p><code>unit</code> 为基准单位(px)，除了 <code>strokeWidth</code> 以外的坐标、尺寸都将乘上这个基准单位再输出。</p>
 				<a href="#按需引入" id="按需引入" style="color: inherit; text-decoration: none;">
@@ -112,12 +112,12 @@
 <span class="hljs-keyword">import</span> Circle <span class="hljs-keyword">from</span> <span class="hljs-string">'ffxiv-raid-sketch/es/Circle'</span>
 
 <span class="hljs-keyword">const</span> sketch = <span class="hljs-keyword">new</span> Sketch().appendTo(<span class="hljs-built_in">document</span>.body)
-<span class="hljs-keyword">new</span> Circle().addTo(sketch)</code></pre>
+<span class="hljs-keyword">new</span> Circle().addTo(sketch.layer)</code></pre>
 				<a href="#在浏览器中使用" id="在浏览器中使用" style="color: inherit; text-decoration: none;">
 					<h3>在浏览器中使用</h3>
 				</a>
 				<pre><code class="language-js"><span class="hljs-keyword">var</span> sketch = <span class="hljs-keyword">new</span> FRS.Sketch().appendTo(<span class="hljs-built_in">document</span>.body) <span class="hljs-comment">// 圆形场地 new</span>
-FRS.Circle().addTo(sketch)</code></pre>
+FRS.Circle().addTo(sketch.layer)</code></pre>
 				<a href="#layer" id="layer" style="color: inherit; text-decoration: none;">
 					<h2>Layer</h2>
 				</a>
@@ -130,7 +130,7 @@ FRS.Circle().addTo(sketch)</code></pre>
 				</a>
 				<pre><code class="language-js"><span class="hljs-keyword">new</span> Circle().add(<span class="hljs-keyword">new</span> FRS.Rect())</code></pre>
 				<p>将 <code>Rect</code> 添加到了 <code>Circle</code> 图层里。 <code>Rect</code> 将会随着 <code>Circle</code> 移动、旋转、缩放、设置不透明度。</p>
-				<p>相关方法：<code>addTo</code>, <code>remove</code></p>
+				<p>相关方法：<code>addTo</code>, <code>remove</code>, <code>removeAll</code></p>
 				<a href="#xy-坐标" id="xy-坐标" style="color: inherit; text-decoration: none;">
 					<h4>xy 坐标</h4>
 				</a>
@@ -176,9 +176,9 @@ boss.show()</code></pre>
 				<a href="#clone-克隆、复制" id="clone-克隆、复制" style="color: inherit; text-decoration: none;">
 					<h4>clone 克隆、复制</h4>
 				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">const</span> doll = <span class="hljs-keyword">new</span> Monster().add(<span class="hljs-keyword">new</span> Text(<span class="hljs-string">'狩猎人偶'</span>)).addTo(sketch)
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> doll = <span class="hljs-keyword">new</span> Monster().add(<span class="hljs-keyword">new</span> Text(<span class="hljs-string">'狩猎人偶'</span>)).addTo(sketch.layer)
 
-<span class="hljs-keyword">const</span> doll2 = doll.clone().addTo(sketch)</code></pre>
+<span class="hljs-keyword">const</span> doll2 = doll.clone().addTo(sketch.layer)</code></pre>
 				<p>复制一个 <code>doll</code>，对 <code>doll2</code> 操作不会影响到 <code>doll</code>.</p>
 				<p>可以将组合好的图层当作<strong>预设模版</strong>，不加入到画布。在需要用的时候进行<code>clone</code>。</p>
 				<a href="#事件" id="事件" style="color: inherit; text-decoration: none;">
@@ -207,7 +207,7 @@ boss.off(<span class="hljs-string">'test'</span>, fn)</code></pre>
 					<h2>动画</h2>
 				</a>
 				<p>虽然本身不支持动画，但是可以通过操作图形实例实现动画。</p>
-				<pre><code class="language-js"><span class="hljs-keyword">const</span> boss = <span class="hljs-keyword">new</span> Monster().addTo(sketch)
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> boss = <span class="hljs-keyword">new</span> Monster().addTo(sketch.layer)
 <span class="hljs-keyword">let</span> angle = <span class="hljs-number">0</span>
 
 setInterval(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {

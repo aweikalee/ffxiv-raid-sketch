@@ -237,8 +237,7 @@
         layers.push(layer);
         layer.on('change', this.onChange.bind(this));
         this.emit('add', [layer]);
-        this.onChange();
-        return this;
+        return this.onChange();
       }
       /**
        * 添加到父图层
@@ -247,13 +246,9 @@
     }, {
       key: "addTo",
       value: function addTo(layer) {
-        try {
-          layer.add(this);
-          this.emit('addTo', [layer]);
-          return this;
-        } catch (err) {
-          return this;
-        }
+        layer.add(this);
+        this.emit('addTo', [layer]);
+        return this.onChange();
       }
       /**
        * 移除子图层
@@ -270,7 +265,18 @@
         }
 
         this.emit('remove', [layer]);
-        return this;
+        return this.onChange();
+      }
+      /**
+       * 移除全部子图层
+       */
+
+    }, {
+      key: "removeAll",
+      value: function removeAll() {
+        this.layers.splice(0, this.layers.length);
+        this.emit('removeAll');
+        return this.onChange();
       }
       /**
        * 渲染
@@ -515,10 +521,8 @@
       this.options = mergeOptions(Object.assign({}, Sketch.defaultOptions), options);
       this.canvas = options.canvas || document.createElement('canvas');
       this.ctx = this.canvas.getContext('2d');
-      this._layer = new Layer();
-
-      this._layer.on('change', this.render.bind(this));
-
+      this.layer = new Layer();
+      this.layer.on('change', this.render.bind(this));
       this.size(this.options.w, this.options.h);
       this.unit(options.unit || this.options.w / 100);
     }
@@ -577,41 +581,6 @@
         this.options.unit = value;
         return this.render();
       }
-      /**
-       * 设置缩放
-       */
-
-    }, {
-      key: "scale",
-      value: function scale(x, y) {
-        this._layer.scale(x, y);
-
-        return this;
-      }
-      /**
-       * 添加图层到实例
-       * @param layer
-       */
-
-    }, {
-      key: "add",
-      value: function add(layer) {
-        this._layer.add(layer);
-
-        return this;
-      }
-      /**
-       * 克隆图层并添加到实例
-       * @param layer
-       */
-
-    }, {
-      key: "cloneIn",
-      value: function cloneIn(layer) {
-        var clone = layer.clone();
-        this.add(clone);
-        return clone;
-      }
     }, {
       key: "_render",
       value: function _render() {
@@ -631,9 +600,7 @@
         ctx.clearRect(0, 0, w, h);
         ctx.save();
         ctx.translate(w / 2, h / 2);
-
-        this._layer.render(ctx, utils);
-
+        this.layer.render(ctx, utils);
         ctx.restore();
       }
     }]);

@@ -1,4 +1,4 @@
-import Sketch, { ISketchUtils } from './Sketch'
+import { ISketchUtils } from './Sketch'
 import Subscribe from './Subscribe'
 import { mergeOptions, cloneDeep } from './utils'
 
@@ -113,14 +113,10 @@ export default class Layer {
     /**
      * 添加到父图层
      */
-    addTo(layer: Layer | Sketch) {
-        try {
-            layer.add(this)
-            this.emit('addTo', [layer])
-            return this.onChange()
-        } catch (err) {
-            return this
-        }
+    addTo(layer: Layer) {
+        layer.add(this)
+        this.emit('addTo', [layer])
+        return this.onChange()
     }
 
     /**

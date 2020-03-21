@@ -39,7 +39,7 @@ const sketch = new FRS.Sketch({
 })
 
 // 创建一个半径为40的圆
-new FRS.Circle().addTo(sketch)
+new FRS.Circle().addTo(sketch.layer)
 ```
 若不传入 `canvas` 内部将会创建一个，之后需通过 `appendTo` 添加到页面中。
 
@@ -52,14 +52,14 @@ import Sketch from 'ffxiv-raid-sketch/es/Sketch'
 import Circle from 'ffxiv-raid-sketch/es/Circle'
 
 const sketch = new Sketch().appendTo(document.body)
-new Circle().addTo(sketch)
+new Circle().addTo(sketch.layer)
 ```
 
 ### 在浏览器中使用
 
 ```js
 var sketch = new FRS.Sketch().appendTo(document.body) // 圆形场地 new
-FRS.Circle().addTo(sketch)
+FRS.Circle().addTo(sketch.layer)
 ```
 
 ## Layer
@@ -76,7 +76,7 @@ new Circle().add(new FRS.Rect())
 
 将 `Rect` 添加到了 `Circle` 图层里。 `Rect` 将会随着 `Circle` 移动、旋转、缩放、设置不透明度。
 
-相关方法：`addTo`, `remove`
+相关方法：`addTo`, `remove`, `removeAll`
 
 #### xy 坐标
 
@@ -140,9 +140,9 @@ boss.show()
 #### clone 克隆、复制
 
 ```js
-const doll = new Monster().add(new Text('狩猎人偶')).addTo(sketch)
+const doll = new Monster().add(new Text('狩猎人偶')).addTo(sketch.layer)
 
-const doll2 = doll.clone().addTo(sketch)
+const doll2 = doll.clone().addTo(sketch.layer)
 ```
 
 复制一个 `doll`，对 `doll2` 操作不会影响到 `doll`.
@@ -179,7 +179,7 @@ boss.off('test', fn)
 虽然本身不支持动画，但是可以通过操作图形实例实现动画。
 
 ```js
-const boss = new Monster().addTo(sketch)
+const boss = new Monster().addTo(sketch.layer)
 let angle = 0
 
 setInterval(() => {

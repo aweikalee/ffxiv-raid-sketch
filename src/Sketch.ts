@@ -47,7 +47,7 @@ export default class Sketch {
     canvas: HTMLCanvasElement
     ctx: CanvasRenderingContext2D
     options: ISketchOptions
-    private _layer: Layer
+    layer: Layer
     private raf?: number
 
     constructor(options: Partial<ISketchOptions> = {}) {
@@ -57,9 +57,9 @@ export default class Sketch {
 
         this.ctx = this.canvas.getContext('2d')
 
-        this._layer = new Layer()
+        this.layer = new Layer()
 
-        this._layer.on('change', this.render.bind(this))
+        this.layer.on('change', this.render.bind(this))
 
         this.size(this.options.w, this.options.h)
         this.unit(options.unit || this.options.w / 100)
@@ -110,33 +110,6 @@ export default class Sketch {
         return this.render()
     }
 
-    /**
-     * 设置缩放
-     */
-    scale(x: number, y?: number) {
-        this._layer.scale(x, y)
-        return this
-    }
-
-    /**
-     * 添加图层到实例
-     * @param layer
-     */
-    add(layer: Layer) {
-        this._layer.add(layer)
-        return this
-    }
-
-    /**
-     * 克隆图层并添加到实例
-     * @param layer
-     */
-    cloneIn(layer: Layer) {
-        const clone = layer.clone()
-        this.add(clone)
-        return clone
-    }
-
     private _render() {
         const { ctx } = this
         const { w, h, unit } = this.options
@@ -152,7 +125,7 @@ export default class Sketch {
         ctx.clearRect(0, 0, w, h)
         ctx.save()
         ctx.translate(w / 2, h / 2)
-        this._layer.render(ctx, utils)
+        this.layer.render(ctx, utils)
         ctx.restore()
     }
 }
