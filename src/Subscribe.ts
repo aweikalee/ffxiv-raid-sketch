@@ -16,6 +16,14 @@ export default class Subscribe {
         arr.push(event)
     }
 
+    once(type: string, event: Function) {
+        const fn = (...args: any[]) => {
+            event(...args)
+            this.off(type, fn)
+        }
+        this.on(type, fn)
+    }
+
     off(type: string, event: Function) {
         if (!this.map.has(type)) {
             return

@@ -117,6 +117,19 @@
         arr.push(event);
       }
     }, {
+      key: "once",
+      value: function once(type, event) {
+        var _this = this;
+
+        var fn = function fn() {
+          event.apply(void 0, arguments);
+
+          _this.off(type, fn);
+        };
+
+        this.on(type, fn);
+      }
+    }, {
       key: "off",
       value: function off(type, event) {
         if (!this.map.has(type)) {
@@ -215,27 +228,20 @@
         visible: true
       };
       this.subscribe = new Subscribe();
-      this.layers = [];
+      this.children = [];
       mergeOptions(this.props, props);
     }
-    /**
-     * 添加子图层
-     */
-
 
     _createClass(Layer, [{
       key: "add",
+
+      /**
+       * 添加子图层
+       */
       value: function add(layer) {
         if (!(layer instanceof Layer)) return this;
-        var layers = this.layers;
-        var index = layers.indexOf(layer);
-
-        if (index !== -1) {
-          layers.splice(index, 1);
-        }
-
-        layers.push(layer);
-        layer.on('change', this.onChange.bind(this));
+        if (layer.parent === this) return this;
+        layer.parent = this;
         this.emit('add', [layer]);
         return this.onChange();
       }
@@ -246,7 +252,9 @@
     }, {
       key: "addTo",
       value: function addTo(layer) {
-        layer.add(this);
+        if (!(layer instanceof Layer)) return this;
+        if (layer.parent === this) return this;
+        this.parent = layer;
         this.emit('addTo', [layer]);
         return this.onChange();
       }
@@ -258,12 +266,7 @@
       key: "remove",
       value: function remove(layer) {
         if (!(layer instanceof Layer)) return this;
-        var index = this.layers.indexOf(layer);
-
-        if (index !== -1) {
-          this.layers.splice(index, 1);
-        }
-
+        layer.parent = null;
         this.emit('remove', [layer]);
         return this.onChange();
       }
@@ -274,7 +277,11 @@
     }, {
       key: "removeAll",
       value: function removeAll() {
-        this.layers.splice(0, this.layers.length);
+        var _this = this;
+
+        this.children.forEach(function (child) {
+          return _this.remove(child);
+        });
         this.emit('removeAll');
         return this.onChange();
       }
@@ -312,11 +319,9 @@
           console.error(err);
         }
 
-        this.layers.forEach(function (layer) {
-          layer.render(ctx, utils);
-        });
+        this.emit('render', [ctx, utils]);
         ctx.restore();
-        this.emit('render');
+        this.emit('rendered');
       }
       /**
        * 设置坐标
@@ -450,6 +455,16 @@
         return this;
       }
       /**
+       * 绑定一次性事件监听
+       */
+
+    }, {
+      key: "once",
+      value: function once(type, event) {
+        this.subscribe.once(type, event);
+        return this;
+      }
+      /**
        * 取消事件监听
        */
 
@@ -479,7 +494,7 @@
         var clone = this._clone();
 
         clone.props = cloneDeep(this.props);
-        this.layers.forEach(function (v) {
+        this.children.forEach(function (v) {
           clone.add(v.clone());
         });
         this.emit('clone', [clone]);
@@ -503,6 +518,41 @@
     }, {
       key: "_render",
       value: function _render(ctx, utils) {}
+    }, {
+      key: "parent",
+      get: function get() {
+        return this._parent;
+      },
+      set: function set(newParent) {
+        var _this2 = this;
+
+        // 发起解绑
+        this.emit('unbindParent');
+        this._parent = newParent;
+        if (newParent === null) return; // 绑定
+
+        var render = this.render.bind(this);
+
+        var change = function change() {
+          return newParent.emit('change');
+        };
+
+        newParent.children.push(this);
+        newParent.on('render', render);
+        this.on('change', change); // 绑定新的解绑事件
+
+        this.once('unbindParent', function () {
+          var index = newParent.children.indexOf(_this2);
+
+          if (index !== -1) {
+            newParent.children.splice(index, 1);
+          }
+
+          newParent.off('render', render);
+
+          _this2.off('change', change);
+        });
+      }
     }]);
 
     return Layer;
@@ -536,11 +586,14 @@
     _createClass(Sketch, [{
       key: "render",
       value: function render() {
-        if (this.raf) {
-          cancelAnimationFrame(this.raf);
-        }
+        var _this = this;
 
-        this.raf = requestAnimationFrame(this._render.bind(this));
+        if (this.raf) return this;
+        this.raf = requestAnimationFrame(function () {
+          _this.raf = null;
+
+          _this._render();
+        });
         return this;
       }
       /**

@@ -84,7 +84,40 @@ export default class Layer {
 
     protected subscribe = new Subscribe()
 
-    private layers: Layer[] = []
+    children: Layer[] = []
+
+    get parent() {
+        return this._parent
+    }
+
+    set parent(newParent) {
+        // 发起解绑
+        this.emit('unbindParent')
+
+        this._parent = newParent
+
+        if (newParent === null) return
+
+        // 绑定
+        const render = this.render.bind(this)
+        const change = () => newParent.emit('change')
+        newParent.children.push(this)
+        newParent.on('render', render)
+        this.on('change', change)
+
+        // 绑定新的解绑事件
+        this.once('unbindParent', () => {
+            const index = newParent.children.indexOf(this)
+            if (index !== -1) {
+                newParent.children.splice(index, 1)
+            }
+
+            newParent.off('render', render)
+            this.off('change', change)
+        })
+    }
+
+    private _parent: Layer | null
 
     constructor(props: Partial<ILayerProps> = {}) {
         mergeOptions(this.props, props)
@@ -95,17 +128,8 @@ export default class Layer {
      */
     add(layer: Layer) {
         if (!(layer instanceof Layer)) return this
-
-        const { layers } = this
-        const index = layers.indexOf(layer)
-        if (index !== -1) {
-            layers.splice(index, 1)
-        }
-
-        layers.push(layer)
-
-        layer.on('change', this.onChange.bind(this))
-
+        if (layer.parent === this) return this
+        layer.parent = this
         this.emit('add', [layer])
         return this.onChange()
     }
@@ -114,7 +138,9 @@ export default class Layer {
      * 添加到父图层
      */
     addTo(layer: Layer) {
-        layer.add(this)
+        if (!(layer instanceof Layer)) return this
+        if (layer.parent === this) return this
+        this.parent = layer
         this.emit('addTo', [layer])
         return this.onChange()
     }
@@ -124,12 +150,7 @@ export default class Layer {
      */
     remove(layer: Layer) {
         if (!(layer instanceof Layer)) return this
-
-        const index = this.layers.indexOf(layer)
-        if (index !== -1) {
-            this.layers.splice(index, 1)
-        }
-
+        layer.parent = null
         this.emit('remove', [layer])
         return this.onChange()
     }
@@ -138,8 +159,7 @@ export default class Layer {
      * 移除全部子图层
      */
     removeAll() {
-        this.layers.splice(0, this.layers.length)
-
+        this.children.forEach(child => this.remove(child))
         this.emit('removeAll')
         return this.onChange()
     }
@@ -180,13 +200,11 @@ export default class Layer {
             console.error(err)
         }
 
-        this.layers.forEach(layer => {
-            layer.render(ctx, utils)
-        })
+        this.emit('render', [ctx, utils])
 
         ctx.restore()
 
-        this.emit('render')
+        this.emit('rendered')
     }
 
     /**
@@ -308,6 +326,14 @@ export default class Layer {
     }
 
     /**
+     * 绑定一次性事件监听
+     */
+    once(type: string, event: Function) {
+        this.subscribe.once(type, event)
+        return this
+    }
+
+    /**
      * 取消事件监听
      */
     off(type: string, event: Function) {
@@ -329,7 +355,7 @@ export default class Layer {
     clone() {
         const clone = this._clone()
         clone.props = cloneDeep(this.props)
-        this.layers.forEach(v => {
+        this.children.forEach(v => {
             clone.add(v.clone())
         })
         this.emit('clone', [clone])
