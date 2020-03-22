@@ -1,9 +1,9 @@
-import Layer from './Layer'
+import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { WAYMARK, WAYMARK_COLOR } from './img/waymark/map'
 import { WAYMARK_ALIAS, IWaymarkAlias } from './alias/waymark'
 import { setAlias } from './alias/utils'
-import Img from './Img'
+import Img, { IImgEvent } from './Img'
 import Circle from './Circle'
 import Rect from './Rect'
 import { cloneDeep } from './utils'
@@ -20,10 +20,15 @@ export interface IWaymarkProps {
     size: number
 }
 
+export interface IWaymarkEvent extends ILayerEvent {
+    type: (type: IWaymarkProps['type']) => void
+    size: (size: IWaymarkProps['size']) => void
+}
+
 /**
  * 绘制 `场景标记`
  */
-export default class Waymark extends Layer {
+export default class Waymark extends Layer<IWaymarkEvent> {
     /**
      * 字段详情：[[IWaymarkProps]]
      */
@@ -38,7 +43,7 @@ export default class Waymark extends Layer {
     constructor(type?: IWaymarkProps['type']) {
         super()
 
-        this.img.on('loaded', this.onChange.bind(this))
+        this.img.on<IImgEvent['loaded']>('loaded', this.onChange.bind(this))
 
         this.type(type)
     }
@@ -52,7 +57,7 @@ export default class Waymark extends Layer {
         if (this.waymarkProps.type === _value) return this
 
         this.waymarkProps.type = _value
-        this.emit('type', [_value])
+        this.emit<IWaymarkEvent['type']>('type', [_value])
         return this.onChange()
     }
 
@@ -64,7 +69,7 @@ export default class Waymark extends Layer {
         if (this.waymarkProps.size === value) return this
 
         this.waymarkProps.size = value
-        this.emit('size', [value])
+        this.emit<IWaymarkEvent['size']>('size', [value])
         return this.onChange()
     }
 

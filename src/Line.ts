@@ -1,4 +1,4 @@
-import Layer, { ILayerProps } from './Layer'
+import Layer, { ILayerProps, ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { rotationAngle } from './utils'
 import { cloneDeep } from './utils'
@@ -37,6 +37,15 @@ export interface ILineProps {
     endCap: ILineCap
 }
 
+export interface ILineEvent extends ILayerEvent {
+    to: (coordinate: number[]) => void
+    clear: () => void
+    startCap: (cap: ILineCap) => void
+    endCap: (cap: ILineCap) => void
+    smooth: (smooth: ILineProps['smooth']) => void
+    dash: (dash: ILineProps['dash']) => void
+}
+
 /**
  * @ignore
  */
@@ -45,7 +54,7 @@ const LINECAP: ILineCap[] = ['none', 'point', 'arrow', 'triangle']
 /**
  * 可绘制 折线、二次曲线、贝塞尔曲线（任意组合）
  */
-export default class Line extends Layer {
+export default class Line extends Layer<ILineEvent> {
     /**
      * 字段详情：[[ILineProps]]
      */
@@ -106,7 +115,7 @@ export default class Line extends Layer {
         coordinate.push(x, y)
 
         this.lineProps.coordinates.push(coordinate)
-        this.emit('to', [coordinate])
+        this.emit<ILineEvent['to']>('to', [coordinate])
         return this.onChange()
     }
 
@@ -118,7 +127,7 @@ export default class Line extends Layer {
         if (arr.length === 0) return this
 
         arr.splice(0, arr.length)
-        this.emit('clear')
+        this.emit<ILineEvent['clear']>('clear')
         return this.onChange()
     }
 
@@ -130,7 +139,7 @@ export default class Line extends Layer {
         if (this.lineProps.startCap === value) return this
 
         this.lineProps.startCap = value
-        this.emit('startCap', [value])
+        this.emit<ILineEvent['startCap']>('startCap', [value])
         return this.onChange()
     }
 
@@ -142,7 +151,7 @@ export default class Line extends Layer {
         if (this.lineProps.endCap === value) return this
 
         this.lineProps.endCap = value
-        this.emit('endCap', [value])
+        this.emit<ILineEvent['endCap']>('endCap', [value])
         return this.onChange()
     }
 
@@ -154,7 +163,7 @@ export default class Line extends Layer {
         if (this.lineProps.smooth === value) return this
 
         this.lineProps.smooth = value
-        this.emit('smooth', [value])
+        this.emit<ILineEvent['smooth']>('smooth', [value])
         return this.onChange()
     }
 
@@ -168,7 +177,7 @@ export default class Line extends Layer {
         if (value.some(v => typeof v !== 'number')) return this
 
         this.lineProps.dash = value
-        this.emit('dash', [value])
+        this.emit<ILineEvent['dash']>('dash', [value])
         return this.onChange()
     }
 

@@ -1,4 +1,4 @@
-import Layer from './Layer'
+import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { cloneDeep } from './utils'
 
@@ -19,10 +19,15 @@ export interface IRectProps {
     dash: number[] | null
 }
 
+export interface IRectEvent extends ILayerEvent {
+    size: (w: IRectProps['w'], h: IRectProps['h']) => void
+    dash: (dash: IRectProps['dash']) => void
+}
+
 /**
  * 绘制矩形
  */
-export default class Rect extends Layer {
+export default class Rect extends Layer<IRectEvent> {
     /**
      * 字段详情：[[IPlayerProps]]
      */
@@ -51,7 +56,7 @@ export default class Rect extends Layer {
 
         this.rectProps.w = w
         this.rectProps.h = _h
-        this.emit('size', [w, _h])
+        this.emit<IRectEvent['size']>('size', [w, _h])
         return this.onChange()
     }
 
@@ -63,7 +68,7 @@ export default class Rect extends Layer {
         if (value.some(v => typeof v !== 'number')) return this
 
         this.rectProps.dash = value
-        this.emit('dash', [value])
+        this.emit<IRectEvent['dash']>('dash', [value])
         return this.onChange()
     }
 

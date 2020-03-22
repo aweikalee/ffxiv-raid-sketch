@@ -1,4 +1,4 @@
-import Layer from './Layer'
+import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { cloneDeep } from './utils'
 
@@ -34,10 +34,19 @@ export interface ITextProps {
     italic: boolean
 }
 
+export interface ITextEvent extends ILayerEvent {
+    value: (value: ITextProps['value']) => void
+    size: (size: ITextProps['size']) => void
+    align: (align: ITextProps['align']) => void
+    font: (font: ITextProps['font']) => void
+    bold: (bold: ITextProps['bold']) => void
+    italic: (italic: ITextProps['italic']) => void
+}
+
 /**
  * 绘制文本
  */
-export default class Text extends Layer {
+export default class Text extends Layer<ITextEvent> {
     /**
      * 字段详情：[[ITextProps]]
      */
@@ -67,19 +76,19 @@ export default class Text extends Layer {
         if (this.textProps.value === _value) return this
 
         this.textProps.value = _value
-        this.emit('value', [_value])
+        this.emit<ITextEvent['value']>('value', [_value])
         return this.onChange()
     }
 
     /**
      * 设置字体大小
      */
-    size(value: number) {
+    size(value: ITextProps['size']) {
         if (typeof value !== 'number') return this
         if (this.textProps.size === value) return this
 
         this.textProps.size = value
-        this.emit('size', [value])
+        this.emit<ITextEvent['size']>('size', [value])
         return this.onChange()
     }
 
@@ -92,7 +101,7 @@ export default class Text extends Layer {
         if (this.textProps.align === value) return this
 
         this.textProps.align = value
-        this.emit('align', [value])
+        this.emit<ITextEvent['align']>('align', [value])
         return this.onChange()
     }
 
@@ -106,7 +115,7 @@ export default class Text extends Layer {
         if (this.textProps.font === value) return this
 
         this.textProps.font = value
-        this.emit('font', [value])
+        this.emit<ITextEvent['font']>('font', [value])
         return this.onChange()
     }
 
@@ -118,7 +127,7 @@ export default class Text extends Layer {
         if (this.textProps.bold === value) return this
 
         this.textProps.bold = value
-        this.emit('bold', [value])
+        this.emit<ITextEvent['bold']>('bold', [value])
         return this.onChange()
     }
 
@@ -130,7 +139,7 @@ export default class Text extends Layer {
         if (this.textProps.italic === value) return this
 
         this.textProps.italic = value
-        this.emit('italic', [value])
+        this.emit<ITextEvent['italic']>('italic', [value])
         return this.onChange()
     }
 

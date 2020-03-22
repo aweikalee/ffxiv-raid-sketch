@@ -1,8 +1,8 @@
-export default class Subscribe {
-    map = new Map<string, Function[]>()
+export default class Subscribe<T = string> {
+    map = new Map<T, ((...args: any[]) => void)[]>()
     constructor() {}
 
-    on(type: string, event: Function) {
+    on<F extends (...args: any[]) => void>(type: T, event: F) {
         if (!this.map.has(type)) {
             this.map.set(type, [])
         }
@@ -16,15 +16,15 @@ export default class Subscribe {
         arr.push(event)
     }
 
-    once(type: string, event: Function) {
-        const fn = (...args: any[]) => {
+    once<F extends (...args: any[]) => void>(type: T, event: F) {
+        const fn = (...args: Parameters<F>) => {
             event(...args)
             this.off(type, fn)
         }
         this.on(type, fn)
     }
 
-    off(type: string, event: Function) {
+    off<F extends (...args: any[]) => void>(type: T, event: F) {
         if (!this.map.has(type)) {
             return
         }
@@ -36,13 +36,13 @@ export default class Subscribe {
         }
     }
 
-    emit(type: string, args: unknown[] = []) {
+    emit<F extends (...args: any[]) => void>(type: T, args?: Parameters<F>) {
         if (!this.map.has(type)) {
             return
         }
 
         this.map.get(type).forEach(event => {
-            event(...args)
+            event(...(args || []))
         })
     }
 }

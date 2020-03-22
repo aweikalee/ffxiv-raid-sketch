@@ -1,9 +1,9 @@
-import Layer from './Layer'
+import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { MARK } from './img/mark/map'
 import { MAKR_ALIAS, IMarkAlias } from './alias/mark'
 import { setAlias } from './alias/utils'
-import Img from './Img'
+import Img, { IImgEvent } from './Img'
 import { cloneDeep } from './utils'
 
 export interface IMarkProps {
@@ -22,10 +22,15 @@ export interface IMarkProps {
     size: number
 }
 
+export interface IMarkEvent extends ILayerEvent {
+    type: (type: IMarkProps['type']) => void
+    size: (size: IMarkProps['size']) => void
+}
+
 /**
  * 绘制 `目标标记`
  */
-export default class Mark extends Layer {
+export default class Mark extends Layer<IMarkEvent> {
     /**
      * 字段详情：[[IMarkProps]]
      */
@@ -39,7 +44,7 @@ export default class Mark extends Layer {
     constructor(type?: IMarkProps['type']) {
         super()
 
-        this.img.on('loaded', this.onChange.bind(this))
+        this.img.on<IImgEvent['loaded']>('loaded', this.onChange.bind(this))
 
         this.type(type || this.markProps.type)
     }
@@ -53,7 +58,7 @@ export default class Mark extends Layer {
         if (this.markProps.type === _value) return this
 
         this.markProps.type = _value
-        this.emit('type', [_value])
+        this.emit<IMarkEvent['type']>('type', [_value])
         return this.onChange()
     }
 
@@ -65,7 +70,7 @@ export default class Mark extends Layer {
         if (this.markProps.size === value) return this
 
         this.markProps.size = value
-        this.emit('size', [value])
+        this.emit<IMarkEvent['size']>('size', [value])
         return this.onChange()
     }
 

@@ -1,4 +1,4 @@
-import Layer from './Layer'
+import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { cloneDeep } from './utils'
 
@@ -9,12 +9,16 @@ export interface IMonsterProps {
     size: number
 }
 
+export interface IMonsterEvent extends ILayerEvent {
+    size: (size: IMonsterProps['size']) => void
+}
+
 /**
  * 绘制目标圈
  *
  * 即选中怪时可以分辨面向和侧背的圈
  */
-export default class Monster extends Layer {
+export default class Monster extends Layer<IMonsterEvent> {
     /**
      * 字段详情：[[IMonsterProps]]
      */
@@ -37,7 +41,7 @@ export default class Monster extends Layer {
         if (this.monsterProps.size === value) return this
 
         this.monsterProps.size = value
-        this.emit('size', [value])
+        this.emit<IMonsterEvent['size']>('size', [value])
         return this.onChange()
     }
 

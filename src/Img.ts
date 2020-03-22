@@ -1,4 +1,4 @@
-import Layer from './Layer'
+import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { IMG_ALIAS } from './alias/img'
 import { setAliasMapping } from './alias/utils'
@@ -18,7 +18,13 @@ export interface IImgProps {
     size: 'auto' | number
 }
 
-export default class Img extends Layer {
+export interface IImgEvent extends ILayerEvent {
+    loaded: () => void
+    src: (src: IImgProps['src']) => void
+    size: (size: IImgProps['size']) => void
+}
+
+export default class Img extends Layer<IImgEvent> {
     /**
      * 字段详情：[[IImgProps]]
      */
@@ -33,7 +39,7 @@ export default class Img extends Layer {
 
         this.image = new Image()
         this.image.onload = () => {
-            this.emit('loaded')
+            this.emit<IImgEvent['loaded']>('loaded')
             this.onChange()
         }
 
@@ -50,7 +56,7 @@ export default class Img extends Layer {
 
         this.imgProps.src = _value
         this.image.src = _value
-        this.emit('src', [_value])
+        this.emit<IImgEvent['src']>('src', [_value])
         return this
     }
 
@@ -66,7 +72,7 @@ export default class Img extends Layer {
         if (this.imgProps.size === value) return this
 
         this.imgProps.size = value
-        this.emit('size', [value])
+        this.emit<IImgEvent['size']>('size', [value])
         return this.onChange()
     }
 

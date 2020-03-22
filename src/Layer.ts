@@ -60,12 +60,34 @@ export interface ILayerProps {
     visible: boolean
 }
 
+export interface ILayerEvent {
+    render: (ctx: CanvasRenderingContext2D, utils: ISketchUtils) => void
+    rendered: () => void
+    change: () => void
+    unbindParent: () => void
+
+    add: (layer: Layer) => void
+    addTo: (layer: Layer) => void
+    remove: (layer: Layer) => void
+    removeAll: () => void
+    clone: (clone: Layer) => void
+
+    xy: (x: ILayerProps['x'], y: ILayerProps['y']) => void
+    opacity: (opacity: ILayerProps['opacity']) => void
+    rotate: (rotate: ILayerProps['rotate']) => void
+    scale: (x: ILayerProps['scaleX'], y: ILayerProps['scaleY']) => void
+    stroke: (stroke: ILayerProps['stroke']) => void
+    strokeWidth: (strokeWidth: ILayerProps['strokeWidth']) => void
+    fill: (fill: ILayerProps['fill']) => void
+    visible: (visible: ILayerProps['visible']) => void
+}
+
 /**
  * 图层
  *
  * 基础类，其他形状、图形类都是继承自 [[Layer]]
  */
-export default class Layer {
+export default class Layer<E extends ILayerEvent = ILayerEvent> {
     /**
      * 字段详情：[[ILayerProps]]
      */
@@ -82,9 +104,9 @@ export default class Layer {
         visible: true
     }
 
-    protected subscribe = new Subscribe()
+    protected subscribe = new Subscribe<keyof E>()
 
-    children: Layer[] = []
+    children: Layer<any>[] = []
 
     get parent() {
         return this._parent
@@ -92,32 +114,33 @@ export default class Layer {
 
     set parent(newParent) {
         // 发起解绑
-        this.emit('unbindParent')
+        this.emit<ILayerEvent['unbindParent']>('unbindParent')
 
         this._parent = newParent
 
         if (newParent === null) return
 
-        // 绑定
         const render = this.render.bind(this)
-        const change = () => newParent.emit('change')
+        const change = () => newParent.emit<ILayerEvent['change']>('change')
+
+        // 绑定
         newParent.children.push(this)
-        newParent.on('render', render)
-        this.on('change', change)
+        newParent.on<ILayerEvent['render']>('render', render)
+        this.on<ILayerEvent['change']>('change', change)
 
         // 绑定新的解绑事件
-        this.once('unbindParent', () => {
+        this.once<ILayerEvent['unbindParent']>('unbindParent', () => {
             const index = newParent.children.indexOf(this)
             if (index !== -1) {
                 newParent.children.splice(index, 1)
             }
 
-            newParent.off('render', render)
-            this.off('change', change)
+            newParent.off<ILayerEvent['render']>('render', render)
+            this.off<ILayerEvent['change']>('change', change)
         })
     }
 
-    private _parent: Layer | null
+    private _parent: Layer<any> | null
 
     constructor(props: Partial<ILayerProps> = {}) {
         mergeOptions(this.props, props)
@@ -126,11 +149,11 @@ export default class Layer {
     /**
      * 添加子图层
      */
-    add(layer: Layer) {
+    add(layer: Layer<any>) {
         if (!(layer instanceof Layer)) return this
         if (layer.parent === this) return this
         layer.parent = this
-        this.emit('add', [layer])
+        this.emit<ILayerEvent['add']>('add', [layer])
         return this.onChange()
     }
 
@@ -141,7 +164,7 @@ export default class Layer {
         if (!(layer instanceof Layer)) return this
         if (layer.parent === this) return this
         this.parent = layer
-        this.emit('addTo', [layer])
+        this.emit<ILayerEvent['addTo']>('addTo', [layer])
         return this.onChange()
     }
 
@@ -151,7 +174,7 @@ export default class Layer {
     remove(layer: Layer) {
         if (!(layer instanceof Layer)) return this
         layer.parent = null
-        this.emit('remove', [layer])
+        this.emit<ILayerEvent['remove']>('remove', [layer])
         return this.onChange()
     }
 
@@ -160,7 +183,7 @@ export default class Layer {
      */
     removeAll() {
         this.children.forEach(child => this.remove(child))
-        this.emit('removeAll')
+        this.emit<ILayerEvent['remove']>('removeAll')
         return this.onChange()
     }
 
@@ -200,11 +223,11 @@ export default class Layer {
             console.error(err)
         }
 
-        this.emit('render', [ctx, utils])
+        this.emit<ILayerEvent['render']>('render', [ctx, utils])
 
         ctx.restore()
 
-        this.emit('rendered')
+        this.emit<ILayerEvent['rendered']>('rendered')
     }
 
     /**
@@ -217,7 +240,7 @@ export default class Layer {
         this.props.x = x
         this.props.y = y
 
-        this.emit('xy', [x, y])
+        this.emit<ILayerEvent['xy']>('xy', [x, y])
         return this.onChange()
     }
 
@@ -231,7 +254,7 @@ export default class Layer {
 
         this.props.opacity = opacity
 
-        this.emit('opacity', [opacity])
+        this.emit<ILayerEvent['opacity']>('opacity', [opacity])
         return this.onChange()
     }
 
@@ -243,7 +266,7 @@ export default class Layer {
         if (this.props.rotate === value) return this
         this.props.rotate = value
 
-        this.emit('rotate', [value])
+        this.emit<ILayerEvent['rotate']>('rotate', [value])
         return this.onChange()
     }
 
@@ -257,7 +280,7 @@ export default class Layer {
 
         this.props.scaleX = x
         this.props.scaleY = _y
-        this.emit('scale', [x, _y])
+        this.emit<ILayerEvent['scale']>('scale', [x, _y])
         return this.onChange()
     }
 
@@ -269,7 +292,7 @@ export default class Layer {
         if (this.props.stroke === value) return this
         this.props.stroke = value
 
-        this.emit('xy', [value])
+        this.emit<ILayerEvent['stroke']>('stroke', [value])
         return this.onChange()
     }
 
@@ -281,7 +304,7 @@ export default class Layer {
         if (this.props.strokeWidth === value) return this
         this.props.strokeWidth = value
 
-        this.emit('strokeWidth', [value])
+        this.emit<ILayerEvent['strokeWidth']>('strokeWidth', [value])
         return this.onChange()
     }
 
@@ -293,7 +316,7 @@ export default class Layer {
         if (this.props.fill === value) return this
         this.props.fill = value
 
-        this.emit('fill', [value])
+        this.emit<ILayerEvent['fill']>('fill', [value])
         return this.onChange()
     }
 
@@ -303,7 +326,7 @@ export default class Layer {
     show() {
         if (this.props.visible) return this
         this.props.visible = true
-        this.emit('visible', [true])
+        this.emit<ILayerEvent['visible']>('visible', [true])
         return this.onChange()
     }
 
@@ -313,39 +336,42 @@ export default class Layer {
     hide() {
         if (!this.props.visible) return this
         this.props.visible = false
-        this.emit('visible', [false])
+        this.emit<ILayerEvent['visible']>('visible', [false])
         return this.onChange()
     }
 
     /**
      * 绑定事件监听
      */
-    on(type: string, event: Function) {
-        this.subscribe.on(type, event)
+    on<F extends (...args: any[]) => void>(type: keyof E, event: F) {
+        this.subscribe.on<F>(type, event)
         return this
     }
 
     /**
      * 绑定一次性事件监听
      */
-    once(type: string, event: Function) {
-        this.subscribe.once(type, event)
+    once<F extends (...args: any[]) => void>(type: keyof E, event: F) {
+        this.subscribe.once<F>(type, event)
         return this
     }
 
     /**
      * 取消事件监听
      */
-    off(type: string, event: Function) {
-        this.subscribe.off(type, event)
+    off<F extends (...args: any[]) => void>(type: keyof E, event: F) {
+        this.subscribe.off<F>(type, event)
         return this
     }
 
     /**
      * 发起事件
      */
-    emit(type: string, args?: unknown[]) {
-        this.subscribe.emit(type, args)
+    emit<F extends (...args: any[]) => void>(
+        type: keyof E,
+        args?: Parameters<F>
+    ) {
+        this.subscribe.emit<F>(type, args)
         return this
     }
 
@@ -358,7 +384,7 @@ export default class Layer {
         this.children.forEach(v => {
             clone.add(v.clone())
         })
-        this.emit('clone', [clone])
+        this.emit<ILayerEvent['clone']>('clone', [clone])
         return clone
     }
 
@@ -366,12 +392,12 @@ export default class Layer {
      * 通知变更
      */
     protected onChange() {
-        this.emit('change')
+        this.emit<ILayerEvent['change']>('change')
         return this
     }
 
     protected _clone() {
-        return new Layer()
+        return new Layer() as Layer<any>
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {}

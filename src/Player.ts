@@ -1,9 +1,9 @@
-import Layer from './Layer'
+import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { JOB, JOB_TYPE, JOB_COLOR } from './img/job/map'
 import { JOB_ALIAS, IJobAlias } from './alias/job'
 import { setAlias } from './alias/utils'
-import Img from './Img'
+import Img, { IImgEvent } from './Img'
 import Circle from './Circle'
 import { cloneDeep } from './utils'
 
@@ -25,10 +25,15 @@ export interface IPlayerProps {
     size: number
 }
 
+export interface IPlayerEvent extends ILayerEvent {
+    job: (job: IPlayerProps['job']) => void
+    size: (size: IPlayerProps['size']) => void
+}
+
 /**
  * 绘制 职业图标
  */
-export default class Player extends Layer {
+export default class Player extends Layer<IPlayerEvent> {
     /**
      * 字段详情：[[IPlayerProps]]
      */
@@ -42,7 +47,7 @@ export default class Player extends Layer {
     constructor(job?: IPlayerProps['job']) {
         super()
 
-        this.img.on('loaded', this.onChange.bind(this))
+        this.img.on<IImgEvent['loaded']>('loaded', this.onChange.bind(this))
 
         this.job(job || this.playerProps.job)
     }
@@ -56,7 +61,7 @@ export default class Player extends Layer {
         if (this.playerProps.job === _value) return this
 
         this.playerProps.job = _value
-        this.emit('job', [_value])
+        this.emit<IPlayerEvent['job']>('job', [_value])
         return this.onChange()
     }
 
@@ -68,7 +73,7 @@ export default class Player extends Layer {
         if (this.playerProps.size === value) return this
 
         this.playerProps.size = value
-        this.emit('size', [value])
+        this.emit<IPlayerEvent['size']>('size', [value])
         return this.onChange()
     }
 

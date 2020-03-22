@@ -1,4 +1,4 @@
-import Layer from './Layer'
+import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { cloneDeep } from './utils'
 
@@ -28,10 +28,17 @@ export interface ICircleProps {
     dash: number[] | null
 }
 
+export interface ICircleEvent extends ILayerEvent {
+    size: (radius: ICircleProps['radius']) => void
+    angle: (angle: ICircleProps['angle']) => void
+    arc: (arc: ICircleProps['arc']) => void
+    dash: (dash: ICircleProps['dash']) => void
+}
+
 /**
  * 可绘制 圆形、扇形、弧形
  */
-export default class Circle extends Layer {
+export default class Circle extends Layer<ICircleEvent> {
     /**
      * 字段详情：[[ICircleProps]]
      */
@@ -58,7 +65,7 @@ export default class Circle extends Layer {
         if (this.circleProps.radius === value) return this
 
         this.circleProps.radius = value
-        this.emit('size', [value])
+        this.emit<ICircleEvent['size']>('size', [value])
         return this.onChange()
     }
 
@@ -72,7 +79,7 @@ export default class Circle extends Layer {
         if (this.circleProps.angle === _value) return this
 
         this.circleProps.angle = _value
-        this.emit('angle', [_value])
+        this.emit<ICircleEvent['angle']>('angle', [_value])
         return this.onChange()
     }
 
@@ -85,7 +92,7 @@ export default class Circle extends Layer {
         if (this.circleProps.arc === value) return this
 
         this.circleProps.arc = value
-        this.emit('arc', [value])
+        this.emit<ICircleEvent['arc']>('arc', [value])
         return this.onChange()
     }
 
@@ -97,7 +104,7 @@ export default class Circle extends Layer {
         if (value.some(v => typeof v !== 'number')) return this
 
         this.circleProps.dash = value
-        this.emit('dash', [value])
+        this.emit<ICircleEvent['dash']>('dash', [value])
         return this.onChange()
     }
 
