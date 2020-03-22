@@ -181,6 +181,7 @@ boss.show()</code></pre>
 <span class="hljs-keyword">const</span> doll2 = doll.clone().addTo(sketch.layer)</code></pre>
 				<p>复制一个 <code>doll</code>，对 <code>doll2</code> 操作不会影响到 <code>doll</code>.</p>
 				<p>可以将组合好的图层当作<strong>预设模版</strong>，不加入到画布。在需要用的时候进行<code>clone</code>。</p>
+				<p>但是只能<code>clone</code>只能简单地复制外表，事件之类的是无法复制的。如有需求可以使用用工厂函数的形式进行创建。</p>
 				<a href="#事件" id="事件" style="color: inherit; text-decoration: none;">
 					<h4>事件</h4>
 				</a>
@@ -244,7 +245,7 @@ Player.setAlias(<span class="hljs-string">'吟游诗人'</span>, <span class="hl
 					<li class=" tsd-kind-class">
 						<a href="classes/img.html" class="tsd-kind-icon">Img</a>
 					</li>
-					<li class=" tsd-kind-class">
+					<li class=" tsd-kind-class tsd-has-type-parameter">
 						<a href="classes/layer.html" class="tsd-kind-icon">Layer</a>
 					</li>
 					<li class=" tsd-kind-class">
@@ -265,7 +266,7 @@ Player.setAlias(<span class="hljs-string">'吟游诗人'</span>, <span class="hl
 					<li class=" tsd-kind-class">
 						<a href="classes/sketch.html" class="tsd-kind-icon">Sketch</a>
 					</li>
-					<li class=" tsd-kind-class">
+					<li class=" tsd-kind-class tsd-has-type-parameter">
 						<a href="classes/subscribe.html" class="tsd-kind-icon">Subscribe</a>
 					</li>
 					<li class=" tsd-kind-class">
@@ -275,10 +276,19 @@ Player.setAlias(<span class="hljs-string">'吟游诗人'</span>, <span class="hl
 						<a href="classes/waymark.html" class="tsd-kind-icon">Waymark</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/icircleevent.html" class="tsd-kind-icon">ICircle<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/icircleprops.html" class="tsd-kind-icon">ICircle<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/iimgevent.html" class="tsd-kind-icon">IImg<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/iimgprops.html" class="tsd-kind-icon">IImg<wbr>Props</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/ilayerevent.html" class="tsd-kind-icon">ILayer<wbr>Event</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/ilayerprops.html" class="tsd-kind-icon">ILayer<wbr>Props</a>
@@ -287,16 +297,31 @@ Player.setAlias(<span class="hljs-string">'吟游诗人'</span>, <span class="hl
 						<a href="interfaces/ilinecoordinate.html" class="tsd-kind-icon">ILine<wbr>Coordinate</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/ilineevent.html" class="tsd-kind-icon">ILine<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/ilineprops.html" class="tsd-kind-icon">ILine<wbr>Props</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/imarkevent.html" class="tsd-kind-icon">IMark<wbr>Event</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/imarkprops.html" class="tsd-kind-icon">IMark<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/imonsterevent.html" class="tsd-kind-icon">IMonster<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/imonsterprops.html" class="tsd-kind-icon">IMonster<wbr>Props</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/iplayerevent.html" class="tsd-kind-icon">IPlayer<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/iplayerprops.html" class="tsd-kind-icon">IPlayer<wbr>Props</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/irectevent.html" class="tsd-kind-icon">IRect<wbr>Event</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/irectprops.html" class="tsd-kind-icon">IRect<wbr>Props</a>
@@ -308,7 +333,13 @@ Player.setAlias(<span class="hljs-string">'吟游诗人'</span>, <span class="hl
 						<a href="interfaces/isketchutils.html" class="tsd-kind-icon">ISketch<wbr>Utils</a>
 					</li>
 					<li class=" tsd-kind-interface">
+						<a href="interfaces/itextevent.html" class="tsd-kind-icon">IText<wbr>Event</a>
+					</li>
+					<li class=" tsd-kind-interface">
 						<a href="interfaces/itextprops.html" class="tsd-kind-icon">IText<wbr>Props</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/iwaymarkevent.html" class="tsd-kind-icon">IWaymark<wbr>Event</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/iwaymarkprops.html" class="tsd-kind-icon">IWaymark<wbr>Props</a>

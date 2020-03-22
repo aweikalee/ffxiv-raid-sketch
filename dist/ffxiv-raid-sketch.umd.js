@@ -145,15 +145,13 @@
       }
     }, {
       key: "emit",
-      value: function emit(type) {
-        var args = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-
+      value: function emit(type, args) {
         if (!this.map.has(type)) {
           return;
         }
 
         this.map.get(type).forEach(function (event) {
-          event.apply(void 0, _toConsumableArray(args));
+          event.apply(void 0, _toConsumableArray(args || []));
         });
       }
     }]);
@@ -391,7 +389,7 @@
         if (!value) return this;
         if (this.props.stroke === value) return this;
         this.props.stroke = value;
-        this.emit('xy', [value]);
+        this.emit('stroke', [value]);
         return this.onChange();
       }
       /**
@@ -529,13 +527,13 @@
         // 发起解绑
         this.emit('unbindParent');
         this._parent = newParent;
-        if (newParent === null) return; // 绑定
-
+        if (newParent === null) return;
         var render = this.render.bind(this);
 
         var change = function change() {
           return newParent.emit('change');
-        };
+        }; // 绑定
+
 
         newParent.children.push(this);
         newParent.on('render', render);
