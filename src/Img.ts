@@ -90,7 +90,7 @@ export default class Img extends Layer<IImgEvent> {
     }
 
     protected _clone() {
-        const layer = new Img()
+        const layer = new Img(this.imgProps.src)
         layer.imgProps = cloneDeep(this.imgProps)
         return layer
     }
