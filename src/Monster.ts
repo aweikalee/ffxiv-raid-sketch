@@ -52,31 +52,33 @@ export default class Monster extends Layer<IMonsterEvent> {
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
+        const { strokeWidth } = this.props
         const { size } = this.monsterProps
         const { mapping } = utils
 
         ctx.rotate(Math.PI * 0.75)
 
         const radius = mapping(size / 2)
+        const smallRadius = (radius - strokeWidth * 1.5) * 0.85
 
         /* 填充 */
         ctx.beginPath()
-        ctx.arc(0, 0, radius * 0.8, 0, Math.PI * 2)
+        ctx.arc(0, 0, smallRadius, 0, Math.PI * 2)
         ctx.fill()
 
         ctx.beginPath()
         ctx.lineCap = 'round'
 
         /* 大圈 */
-        ctx.lineWidth = radius * 0.1
+        ctx.lineWidth = strokeWidth * 2
         ctx.arc(0, 0, radius, 0, Math.PI * 1.5)
         ctx.stroke()
 
         ctx.beginPath()
 
         /* 小圈 */
-        ctx.lineWidth = radius * 0.05
-        ctx.arc(0, 0, radius * 0.8, 0, Math.PI * 1.5)
+        ctx.lineWidth = strokeWidth
+        ctx.arc(0, 0, smallRadius, 0, Math.PI * 1.5)
         ctx.stroke()
 
         ctx.beginPath()
@@ -89,7 +91,7 @@ export default class Monster extends Layer<IMonsterEvent> {
         ctx.fillStyle = ctx.strokeStyle
         ctx.lineTo(-_sin, -_cos)
         ctx.quadraticCurveTo(0, -radius * 1.5, _sin, -_cos)
-        ctx.quadraticCurveTo(0, -radius * 1.1, -_sin, -_cos)
+        ctx.quadraticCurveTo(0, -radius, -_sin, -_cos)
         ctx.stroke()
         ctx.fill()
     }
