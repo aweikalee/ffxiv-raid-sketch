@@ -137,6 +137,31 @@ boss.show()
 设为不可见后，渲染时将会被跳过，节省开销。
 
 
+#### getLayerStatus 获得图层状态
+```js
+new Rect().addTo(sketch.layer).getLayerStatus()
+```
+获得图层当前在画布中的状态（位置、被旋转角度、透明度、缩放）。
+
+主要针对嵌套图层，嵌套图层将会进行多次位移、旋转、改透明度、缩放。该方法则是多次嵌套后，计算得到最终状态。
+
+属性从自身累加到最顶层的父图层。如果图层没有父图层，获得的值就等于自身的`props`。
+
+
+#### turnTo 转向
+```js
+const mt = new Player('战士').addTo(sketch.layer).xy(0, 20)
+const boss = new Monster().addTo(sketch.layer).turnTo(mt)
+```
+将 `boss` 转向MT。(`boss`图层的北面)
+
+如需背对则可以使用 `turnTo(mt, 180)`，即面朝MT后再转180度。
+
+一次性的，移动后请重新调用。
+
+注：这个方法是建立在`getLayerStatus`基础上的，不建议在添加到画布上之前调用 `turnTo`。
+
+
 #### clone 克隆、复制
 
 ```js
