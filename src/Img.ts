@@ -33,6 +33,7 @@ export default class Img extends Layer<IImgEvent> {
         size: 'auto'
     }
     private image: HTMLImageElement
+    private raf: number | null = null
 
     constructor(src?: string) {
         super()
@@ -100,7 +101,32 @@ export default class Img extends Layer<IImgEvent> {
         const { size } = imgProps
         const { mapping } = utils
 
-        if (!image.src || !image.complete) return
+        if (this.raf) {
+            cancelAnimationFrame(this.raf)
+            this.raf = null
+        }
+        if (!image.src) return
+
+        // 加载动画
+        if (!image.complete) {
+            const r = typeof size === 'number' ? size * 0.4 : 5
+            const time = Date.now()
+
+            ctx.strokeStyle = '#99999990'
+            ctx.lineWidth = mapping(r * 0.3)
+            ctx.lineCap = 'round'
+
+            ctx.rotate((time / 150) % (2 * Math.PI))
+            ctx.beginPath()
+            ctx.arc(0, 0, mapping(r), 0, 1.5 * Math.PI)
+            ctx.stroke()
+
+            this.raf = requestAnimationFrame(() => {
+                this.emit('change')
+                this.raf = null
+            })
+            return
+        }
 
         let w = image.width
         let h = image.height
