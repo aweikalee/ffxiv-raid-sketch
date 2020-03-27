@@ -1,25 +1,34 @@
 /**
- * 向量相对x轴的旋转角
+ * 向量相对y轴的旋转角
+ *
+ * 注意：此处坐标是图层坐标 不是数学坐标（y轴方向相反）
  * @ignore
  * */
-export function rotationAngle(x: number, y: number) {
-    const x1 = 1
-    const y1 = 0
-    const z1 = 0
-    const x2 = x
-    const y2 = y
-    const z2 = 0
-    let angle = Math.acos(
-        (x1 * x2 + y1 * y2 + z1 * z2) /
-            Math.pow(
-                (Math.pow(x1, 2) + Math.pow(y1, 2) + Math.pow(z1, 2)) *
-                    (Math.pow(x2, 2) + Math.pow(y2, 2) + Math.pow(z2, 2)),
-                1 / 2
-            )
-    )
-    angle *= y2 > 0 ? -1 : 1
+export function rotationAngleY(x: number, y: number) {
+    let angle = Math.acos(-y / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)))
 
-    return angle
+    return x > 0 ? angle : -angle
+}
+
+/**
+ * 向量相对x轴的旋转角
+ *
+ * 注意：此处坐标是图层坐标 不是数学坐标（y轴方向相反）
+ * @ignore
+ * */
+export function rotationAngleX(x: number, y: number) {
+    return rotationAngleY(y, x)
+}
+
+/**
+ * 向量旋转后的坐标
+ * @ignore
+ * */
+export function rotateVector(x: number, y: number, angle: number) {
+    return [
+        Math.cos(angle) * x - Math.sin(angle) * y,
+        Math.sin(angle) * x + Math.cos(angle) * y
+    ]
 }
 
 /**

@@ -1,6 +1,6 @@
 import Layer, { ILayerProps, ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { rotationAngle } from './utils'
+import { rotationAngleY } from './utils'
 import { cloneDeep } from './utils'
 
 export interface ILineCoordinate {
@@ -364,7 +364,7 @@ function drawCap({
     ctx.save()
     ctx.beginPath()
     ctx.translate(mapping(to.x), mapping(to.y))
-    let r
+    let r: number
     switch (type) {
         case 'none':
             break
@@ -379,7 +379,7 @@ function drawCap({
             r = strokeWidth + 4
             ctx.lineCap = 'round'
             ctx.lineJoin = 'round'
-            ctx.rotate(rotationAngle(from.y - to.y, from.x - to.x))
+            ctx.rotate(rotationAngleY(to.x - from.x, to.y - from.y))
             ctx.beginPath()
             ctx.lineTo(-r, r)
             ctx.lineTo(0, 0)
@@ -388,7 +388,7 @@ function drawCap({
             break
         case 'triangle':
             r = strokeWidth * 1.5 + 4
-            ctx.rotate(rotationAngle(from.y - to.y, from.x - to.x))
+            ctx.rotate(rotationAngleY(to.x - from.x, to.y - from.y))
             ctx.fillStyle = stroke
             ctx.beginPath()
             ctx.lineTo(0, -r)

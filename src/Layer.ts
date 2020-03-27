@@ -1,6 +1,6 @@
 import { ISketchUtils } from './Sketch'
 import Subscribe from './Subscribe'
-import { mergeOptions, cloneDeep } from './utils'
+import { mergeOptions, cloneDeep, rotateVector, rotationAngleY } from './utils'
 
 export interface ILayerProps {
     /**
@@ -188,6 +188,19 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
     }
 
     /**
+     * 克隆
+     */
+    clone() {
+        const clone = this._clone()
+        clone.props = cloneDeep(this.props)
+        this.children.forEach(v => {
+            clone.add(v.clone())
+        })
+        this.emit<ILayerEvent['clone']>('clone', [clone])
+        return clone
+    }
+
+    /**
      * 渲染
      */
     render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
@@ -209,8 +222,8 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         ctx.save()
 
         ctx.translate(mapping(x), mapping(y))
-        ctx.rotate((rotate * Math.PI) / 180)
         ctx.scale(scaleX, scaleY)
+        ctx.rotate((rotate * Math.PI) / 180)
         ctx.globalAlpha *= opacity
 
         ctx.fillStyle = fill
@@ -228,6 +241,70 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         ctx.restore()
 
         this.emit<ILayerEvent['rendered']>('rendered')
+    }
+
+    /**
+     * 获得当前图层 在画布中的状态
+     *
+     * x, y返回的是相对坐标
+     */
+    getLayerStatus() {
+        let { x, y, rotate, scaleX, scaleY, opacity } = this.props
+        let parent = this.parent
+        while (parent) {
+            const {
+                    x: _x,
+                    y: _y,
+                    rotate: _rotate,
+                    scaleX: _scaleX,
+                    scaleY: _scaleY,
+                    opacity: _opacity
+                } = parent.props
+
+                // 旋转
+            ;[x, y] = rotateVector(x, y, (_rotate * Math.PI) / 180)
+            rotate += _rotate
+
+            // 缩放
+            x *= _scaleX
+            y *= _scaleY
+            scaleX *= scaleX
+            scaleY *= scaleY
+
+            // 位移
+            x += _x
+            y += _y
+
+            // 透明度
+            opacity *= _opacity
+
+            parent = parent.parent
+        }
+
+        return {
+            x,
+            y,
+            rotate,
+            scaleX,
+            scaleY,
+            opacity
+        }
+    }
+
+    /**
+     * 将原始北面转向目标图层
+     * @param layer 目标图层
+     * @param offset 偏移角度
+     */
+    turnTo(layer: Layer, offset: number = 0) {
+        if (!(layer instanceof Layer)) return this
+        const p1 = this.getLayerStatus()
+        const p2 = layer.getLayerStatus()
+        const rotate =
+            (rotationAngleY(p2.x - p1.x, p2.y - p1.y) / Math.PI) * 180
+
+        this.rotate(rotate - p1.rotate + this.props.rotate + offset)
+        return this
     }
 
     /**
@@ -373,19 +450,6 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
     ) {
         this.subscribe.emit<F>(type, args)
         return this
-    }
-
-    /**
-     * 克隆
-     */
-    clone() {
-        const clone = this._clone()
-        clone.props = cloneDeep(this.props)
-        this.children.forEach(v => {
-            clone.add(v.clone())
-        })
-        this.emit<ILayerEvent['clone']>('clone', [clone])
-        return clone
     }
 
     /**
