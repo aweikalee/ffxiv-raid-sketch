@@ -73,6 +73,10 @@
     return _assertThisInitialized(self);
   }
 
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+  }
+
   function _toConsumableArray(arr) {
     return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
   }
@@ -85,12 +89,50 @@
     }
   }
 
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+
   function _iterableToArray(iter) {
     if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
   }
 
+  function _iterableToArrayLimit(arr, i) {
+    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+      return;
+    }
+
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
   function _nonIterableSpread() {
     throw new TypeError("Invalid attempt to spread non-iterable instance");
+  }
+
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance");
   }
 
   var Subscribe = /*#__PURE__*/function () {
@@ -160,19 +202,22 @@
   }();
 
   /**
-   * 向量相对x轴的旋转角
+   * 向量相对y轴的旋转角
+   *
+   * 注意：此处坐标是图层坐标 不是数学坐标（y轴方向相反）
    * @ignore
    * */
-  function rotationAngle(x, y) {
-    var x1 = 1;
-    var y1 = 0;
-    var z1 = 0;
-    var x2 = x;
-    var y2 = y;
-    var z2 = 0;
-    var angle = Math.acos((x1 * x2 + y1 * y2 + z1 * z2) / Math.pow((Math.pow(x1, 2) + Math.pow(y1, 2) + Math.pow(z1, 2)) * (Math.pow(x2, 2) + Math.pow(y2, 2) + Math.pow(z2, 2)), 1 / 2));
-    angle *= y2 > 0 ? -1 : 1;
-    return angle;
+  function rotationAngleY(x, y) {
+    var angle = Math.acos(-y / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    return x > 0 ? angle : -angle;
+  }
+  /**
+   * 向量旋转后的坐标
+   * @ignore
+   * */
+
+  function rotateVector(x, y, angle) {
+    return [Math.cos(angle) * x - Math.sin(angle) * y, Math.sin(angle) * x + Math.cos(angle) * y];
   }
   /**
    * 合并设置, b将会合并到a
@@ -284,6 +329,22 @@
         return this.onChange();
       }
       /**
+       * 克隆
+       */
+
+    }, {
+      key: "clone",
+      value: function clone() {
+        var clone = this._clone();
+
+        clone.props = cloneDeep(this.props);
+        this.children.forEach(function (v) {
+          clone.add(v.clone());
+        });
+        this.emit('clone', [clone]);
+        return clone;
+      }
+      /**
        * 渲染
        */
 
@@ -304,8 +365,8 @@
         var mapping = utils.mapping;
         ctx.save();
         ctx.translate(mapping(x), mapping(y));
-        ctx.rotate(rotate * Math.PI / 180);
         ctx.scale(scaleX, scaleY);
+        ctx.rotate(rotate * Math.PI / 180);
         ctx.globalAlpha *= opacity;
         ctx.fillStyle = fill;
         ctx.strokeStyle = stroke;
@@ -320,6 +381,79 @@
         this.emit('render', [ctx, utils]);
         ctx.restore();
         this.emit('rendered');
+      }
+      /**
+       * 获得当前图层 在画布中的状态
+       *
+       * x, y返回的是相对坐标
+       */
+
+    }, {
+      key: "getLayerStatus",
+      value: function getLayerStatus() {
+        var _this$props2 = this.props,
+            x = _this$props2.x,
+            y = _this$props2.y,
+            rotate = _this$props2.rotate,
+            scaleX = _this$props2.scaleX,
+            scaleY = _this$props2.scaleY,
+            opacity = _this$props2.opacity;
+        var parent = this.parent;
+
+        while (parent) {
+          var _parent$props = parent.props,
+              _x = _parent$props.x,
+              _y = _parent$props.y,
+              _rotate = _parent$props.rotate,
+              _scaleX = _parent$props.scaleX,
+              _scaleY = _parent$props.scaleY,
+              _opacity = _parent$props.opacity;
+
+          var _rotateVector = rotateVector(x, y, _rotate * Math.PI / 180);
+
+          var _rotateVector2 = _slicedToArray(_rotateVector, 2);
+
+          x = _rotateVector2[0];
+          y = _rotateVector2[1];
+          rotate += _rotate; // 缩放
+
+          x *= _scaleX;
+          y *= _scaleY;
+          scaleX *= scaleX;
+          scaleY *= scaleY; // 位移
+
+          x += _x;
+          y += _y; // 透明度
+
+          opacity *= _opacity;
+          parent = parent.parent;
+        }
+
+        return {
+          x: x,
+          y: y,
+          rotate: rotate,
+          scaleX: scaleX,
+          scaleY: scaleY,
+          opacity: opacity
+        };
+      }
+      /**
+       * 将原始北面转向目标图层
+       * @param layer 目标图层
+       * @param offset 偏移角度
+       */
+
+    }, {
+      key: "turnTo",
+      value: function turnTo(layer) {
+        var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+        if (!(layer instanceof Layer)) return this;
+        var p1 = this.getLayerStatus();
+        var p2 = layer.getLayerStatus();
+        var rotate = rotationAngleY(p2.x - p1.x, p2.y - p1.y) / Math.PI * 180;
+        this.rotate(rotate - p1.rotate + this.props.rotate + offset);
+        return this;
       }
       /**
        * 设置坐标
@@ -481,22 +615,6 @@
       value: function emit(type, args) {
         this.subscribe.emit(type, args);
         return this;
-      }
-      /**
-       * 克隆
-       */
-
-    }, {
-      key: "clone",
-      value: function clone() {
-        var clone = this._clone();
-
-        clone.props = cloneDeep(this.props);
-        this.children.forEach(function (v) {
-          clone.add(v.clone());
-        });
-        this.emit('clone', [clone]);
-        return clone;
       }
       /**
        * 通知变更
@@ -999,7 +1117,7 @@
         r = strokeWidth + 4;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
-        ctx.rotate(rotationAngle(from.y - to.y, from.x - to.x));
+        ctx.rotate(rotationAngleY(to.x - from.x, to.y - from.y));
         ctx.beginPath();
         ctx.lineTo(-r, r);
         ctx.lineTo(0, 0);
@@ -1009,7 +1127,7 @@
 
       case 'triangle':
         r = strokeWidth * 1.5 + 4;
-        ctx.rotate(rotationAngle(from.y - to.y, from.x - to.x));
+        ctx.rotate(rotationAngleY(to.x - from.x, to.y - from.y));
         ctx.fillStyle = stroke;
         ctx.beginPath();
         ctx.lineTo(0, -r);
@@ -1236,8 +1354,11 @@
           }));
         }
 
+        var _angle = angle * Math.PI / 180;
+
+        ctx.rotate(-(Math.PI + _angle) / 2);
         ctx.beginPath();
-        ctx.arc(0, 0, mapping(radius), 0, angle * Math.PI / 180);
+        ctx.arc(0, 0, mapping(radius), 0, _angle);
 
         if (!arc) {
           if (angle !== 360) {
@@ -1297,6 +1418,7 @@
         src: null,
         size: 'auto'
       };
+      _this.raf = null;
       _this.image = new Image();
 
       _this.image.onload = function () {
@@ -1357,18 +1479,45 @@
     }, {
       key: "_clone",
       value: function _clone() {
-        var layer = new Img();
+        var layer = new Img(this.imgProps.src);
         layer.imgProps = cloneDeep(this.imgProps);
         return layer;
       }
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
+        var _this2 = this;
+
         var imgProps = this.imgProps,
             image = this.image;
         var size = imgProps.size;
         var mapping = utils.mapping;
-        if (!image.src || !image.complete) return;
+
+        if (this.raf) {
+          cancelAnimationFrame(this.raf);
+          this.raf = null;
+        }
+
+        if (!image.src) return; // 加载动画
+
+        if (!image.complete) {
+          var r = typeof size === 'number' ? size * 0.4 : 5;
+          var time = Date.now();
+          ctx.strokeStyle = '#99999990';
+          ctx.lineWidth = mapping(r * 0.3);
+          ctx.lineCap = 'round';
+          ctx.rotate(time / 150 % (2 * Math.PI));
+          ctx.beginPath();
+          ctx.arc(0, 0, mapping(r), 0, 1.5 * Math.PI);
+          ctx.stroke();
+          this.raf = requestAnimationFrame(function () {
+            _this2.emit('change');
+
+            _this2.raf = null;
+          });
+          return;
+        }
+
         var w = image.width;
         var h = image.height;
 
@@ -2291,27 +2440,29 @@
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
+        var strokeWidth = this.props.strokeWidth;
         var size = this.monsterProps.size;
         var mapping = utils.mapping;
         ctx.rotate(Math.PI * 0.75);
         var radius = mapping(size / 2);
+        var smallRadius = (radius - strokeWidth * 1.5) * 0.85;
         /* 填充 */
 
         ctx.beginPath();
-        ctx.arc(0, 0, radius * 0.8, 0, Math.PI * 2);
+        ctx.arc(0, 0, smallRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
         ctx.lineCap = 'round';
         /* 大圈 */
 
-        ctx.lineWidth = radius * 0.1;
+        ctx.lineWidth = strokeWidth * 2;
         ctx.arc(0, 0, radius, 0, Math.PI * 1.5);
         ctx.stroke();
         ctx.beginPath();
         /* 小圈 */
 
-        ctx.lineWidth = radius * 0.05;
-        ctx.arc(0, 0, radius * 0.8, 0, Math.PI * 1.5);
+        ctx.lineWidth = strokeWidth;
+        ctx.arc(0, 0, smallRadius, 0, Math.PI * 1.5);
         ctx.stroke();
         ctx.beginPath();
         ctx.rotate(-Math.PI * 0.75);
@@ -2326,7 +2477,7 @@
         ctx.fillStyle = ctx.strokeStyle;
         ctx.lineTo(-_sin, -_cos);
         ctx.quadraticCurveTo(0, -radius * 1.5, _sin, -_cos);
-        ctx.quadraticCurveTo(0, -radius * 1.1, -_sin, -_cos);
+        ctx.quadraticCurveTo(0, -radius, -_sin, -_cos);
         ctx.stroke();
         ctx.fill();
       }
