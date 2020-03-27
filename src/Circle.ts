@@ -123,8 +123,11 @@ export default class Circle extends Layer<ICircleEvent> {
             ctx.setLineDash(dash.map(v => v * strokeWidth))
         }
 
+        const _angle = (angle * Math.PI) / 180
+        ctx.rotate(-(Math.PI + _angle) / 2)
+
         ctx.beginPath()
-        ctx.arc(0, 0, mapping(radius), 0, (angle * Math.PI) / 180)
+        ctx.arc(0, 0, mapping(radius), 0, _angle)
 
         if (!arc) {
             if (angle !== 360) {
