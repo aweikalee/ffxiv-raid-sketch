@@ -2,6 +2,7 @@
   "compilerOptions": {
     "declaration": true,
     "target": "es6",
+    "noUnusedLocals": true,
     "allowSyntheticDefaultImports": true
   },
   "include": [
