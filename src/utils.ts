@@ -27,7 +27,7 @@ export function rotationAngleX(x: number, y: number) {
 export function rotateVector(x: number, y: number, angle: number) {
     return [
         Math.cos(angle) * x - Math.sin(angle) * y,
-        Math.sin(angle) * x + Math.cos(angle) * y
+        Math.sin(angle) * x + Math.cos(angle) * y,
     ]
 }
 
@@ -51,4 +51,19 @@ export function mergeOptions<T = {}>(a: T, b: Partial<T>) {
 export function cloneDeep<T>(target: T) {
     // TODO: 更换为遍历形式的深拷贝
     return JSON.parse(JSON.stringify(target))
+}
+
+export function hasOwn(target: object, key: unknown) {
+    return Object.hasOwnProperty.call(target, key)
+}
+
+export function isObject(value: unknown): value is object {
+    return value !== null && typeof value === 'object'
+}
+const objectToString = Object.prototype.toString
+export const toTypeString = (value: unknown): string => {
+    return objectToString.call(value)
+}
+export const toRawType = (value: unknown): string => {
+    return toTypeString(value).slice(8, -1)
 }
