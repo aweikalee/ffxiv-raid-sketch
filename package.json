@@ -3,6 +3,7 @@
   "version": "0.0.5",
   "main": "dist/ffxiv-raid-sketch.umd.js",
   "typings": "es",
+  "sideEffects": false,
   "scripts": {
     "dev": "rollup -c -w",
     "build": "npm run build:umd && npm run build:es",
