@@ -1,6 +1,5 @@
 import { ISketchUtils } from './Sketch'
-import Subscribe from './Subscribe'
-import { mergeOptions, cloneDeep, rotateVector, rotationAngleY } from './utils'
+import { Subscribe, IKey, rotateVector, rotationAngleY } from './utils/index'
 
 export interface ILayerProps {
     /**
@@ -101,10 +100,10 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         fill: '#000000',
         stroke: '#000000',
         strokeWidth: 2,
-        visible: true
+        visible: true,
     }
 
-    protected subscribe = new Subscribe<keyof E>()
+    protected subscribe = new Subscribe<E>()
 
     children: Layer<any>[] = []
 
@@ -114,36 +113,36 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
 
     set parent(newParent) {
         // 发起解绑
-        this.emit<ILayerEvent['unbindParent']>('unbindParent')
+        this.emit<ILayerEvent>('unbindParent', [])
 
         this._parent = newParent
 
         if (newParent === null) return
 
         const render = this.render.bind(this)
-        const change = () => newParent.emit<ILayerEvent['change']>('change')
+        const change = () => newParent.emit<ILayerEvent>('change', [])
 
         // 绑定
         newParent.children.push(this)
-        newParent.on<ILayerEvent['render']>('render', render)
-        this.on<ILayerEvent['change']>('change', change)
+        newParent.on<ILayerEvent>('render', render)
+        this.on<ILayerEvent>('change', change)
 
         // 绑定新的解绑事件
-        this.once<ILayerEvent['unbindParent']>('unbindParent', () => {
+        this.once<ILayerEvent>('unbindParent', () => {
             const index = newParent.children.indexOf(this)
             if (index !== -1) {
                 newParent.children.splice(index, 1)
             }
 
-            newParent.off<ILayerEvent['render']>('render', render)
-            this.off<ILayerEvent['change']>('change', change)
+            newParent.off('render', render)
+            this.off<ILayerEvent>('change', change)
         })
     }
 
     private _parent: Layer<any> | null
 
     constructor(props: Partial<ILayerProps> = {}) {
-        mergeOptions(this.props, props)
+        // mergeOptions(this.props, props)
     }
 
     /**
@@ -153,7 +152,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         if (!(layer instanceof Layer)) return this
         if (layer.parent === this) return this
         layer.parent = this
-        this.emit<ILayerEvent['add']>('add', [layer])
+        this.emit<ILayerEvent>('add', [layer])
         return this.onChange()
     }
 
@@ -164,7 +163,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         if (!(layer instanceof Layer)) return this
         if (layer.parent === this) return this
         this.parent = layer
-        this.emit<ILayerEvent['addTo']>('addTo', [layer])
+        this.emit<ILayerEvent>('addTo', [layer])
         return this.onChange()
     }
 
@@ -174,7 +173,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
     remove(layer: Layer) {
         if (!(layer instanceof Layer)) return this
         layer.parent = null
-        this.emit<ILayerEvent['remove']>('remove', [layer])
+        this.emit<ILayerEvent>('remove', [layer])
         return this.onChange()
     }
 
@@ -182,8 +181,8 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * 移除全部子图层
      */
     removeAll() {
-        this.children.forEach(child => this.remove(child))
-        this.emit<ILayerEvent['remove']>('removeAll')
+        this.children.forEach((child) => this.remove(child))
+        this.emit<ILayerEvent>('removeAll', [])
         return this.onChange()
     }
 
@@ -192,11 +191,11 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      */
     clone() {
         const clone = this._clone()
-        clone.props = cloneDeep(this.props)
-        this.children.forEach(v => {
+        // clone.props = cloneDeep(this.props)
+        this.children.forEach((v) => {
             clone.add(v.clone())
         })
-        this.emit<ILayerEvent['clone']>('clone', [clone])
+        this.emit<ILayerEvent>('clone', [clone])
         return clone
     }
 
@@ -215,7 +214,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
             opacity,
             fill,
             stroke,
-            strokeWidth
+            strokeWidth,
         } = this.props
         const { mapping } = utils
 
@@ -236,11 +235,11 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
             console.error(err)
         }
 
-        this.emit<ILayerEvent['render']>('render', [ctx, utils])
+        this.emit<ILayerEvent>('render', [ctx, utils])
 
         ctx.restore()
 
-        this.emit<ILayerEvent['rendered']>('rendered')
+        this.emit<ILayerEvent>('rendered', [])
     }
 
     /**
@@ -253,15 +252,15 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         let parent = this.parent
         while (parent) {
             const {
-                    x: _x,
-                    y: _y,
-                    rotate: _rotate,
-                    scaleX: _scaleX,
-                    scaleY: _scaleY,
-                    opacity: _opacity
-                } = parent.props
+                x: _x,
+                y: _y,
+                rotate: _rotate,
+                scaleX: _scaleX,
+                scaleY: _scaleY,
+                opacity: _opacity,
+            } = parent.props
 
-                // 旋转
+            // 旋转
             ;[x, y] = rotateVector(x, y, (_rotate * Math.PI) / 180)
             rotate += _rotate
 
@@ -287,7 +286,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
             rotate,
             scaleX,
             scaleY,
-            opacity
+            opacity,
         }
     }
 
@@ -317,7 +316,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         this.props.x = x
         this.props.y = y
 
-        this.emit<ILayerEvent['xy']>('xy', [x, y])
+        this.emit<ILayerEvent>('xy', [x, y])
         return this.onChange()
     }
 
@@ -331,7 +330,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
 
         this.props.opacity = opacity
 
-        this.emit<ILayerEvent['opacity']>('opacity', [opacity])
+        this.emit<ILayerEvent>('opacity', [opacity])
         return this.onChange()
     }
 
@@ -343,7 +342,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         if (this.props.rotate === value) return this
         this.props.rotate = value
 
-        this.emit<ILayerEvent['rotate']>('rotate', [value])
+        this.emit<ILayerEvent>('rotate', [value])
         return this.onChange()
     }
 
@@ -357,7 +356,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
 
         this.props.scaleX = x
         this.props.scaleY = _y
-        this.emit<ILayerEvent['scale']>('scale', [x, _y])
+        this.emit<ILayerEvent>('scale', [x, _y])
         return this.onChange()
     }
 
@@ -369,7 +368,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         if (this.props.stroke === value) return this
         this.props.stroke = value
 
-        this.emit<ILayerEvent['stroke']>('stroke', [value])
+        this.emit<ILayerEvent>('stroke', [value])
         return this.onChange()
     }
 
@@ -381,7 +380,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         if (this.props.strokeWidth === value) return this
         this.props.strokeWidth = value
 
-        this.emit<ILayerEvent['strokeWidth']>('strokeWidth', [value])
+        this.emit<ILayerEvent>('strokeWidth', [value])
         return this.onChange()
     }
 
@@ -393,7 +392,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         if (this.props.fill === value) return this
         this.props.fill = value
 
-        this.emit<ILayerEvent['fill']>('fill', [value])
+        this.emit<ILayerEvent>('fill', [value])
         return this.onChange()
     }
 
@@ -403,7 +402,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
     show() {
         if (this.props.visible) return this
         this.props.visible = true
-        this.emit<ILayerEvent['visible']>('visible', [true])
+        this.emit<ILayerEvent>('visible', [true])
         return this.onChange()
     }
 
@@ -413,42 +412,42 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
     hide() {
         if (!this.props.visible) return this
         this.props.visible = false
-        this.emit<ILayerEvent['visible']>('visible', [false])
+        this.emit<ILayerEvent>('visible', [])
         return this.onChange()
     }
 
     /**
      * 绑定事件监听
      */
-    on<F extends (...args: any[]) => void>(type: keyof E, event: F) {
-        this.subscribe.on<F>(type, event)
+    on<T extends {} = E, K extends IKey<T> = IKey<T>>(type: K, event: T[K]) {
+        this.subscribe.on(type as any, event)
         return this
     }
 
     /**
      * 绑定一次性事件监听
      */
-    once<F extends (...args: any[]) => void>(type: keyof E, event: F) {
-        this.subscribe.once<F>(type, event)
+    once<T extends {} = E, K extends IKey<T> = IKey<T>>(type: K, event: T[K]) {
+        this.subscribe.once(type as any, event)
         return this
     }
 
     /**
      * 取消事件监听
      */
-    off<F extends (...args: any[]) => void>(type: keyof E, event: F) {
-        this.subscribe.off<F>(type, event)
+    off<T extends {} = E, K extends IKey<T> = IKey<T>>(type: K, event: T[K]) {
+        this.subscribe.off(type as any, event)
         return this
     }
 
     /**
      * 发起事件
      */
-    emit<F extends (...args: any[]) => void>(
-        type: keyof E,
-        args?: Parameters<F>
+    emit<T extends {} = E, K extends IKey<T> = IKey<T>>(
+        type: K,
+        args: Parameters<T[K]>
     ) {
-        this.subscribe.emit<F>(type, args)
+        this.subscribe.emit(type as any, args)
         return this
     }
 
@@ -456,7 +455,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * 通知变更
      */
     protected onChange() {
-        this.emit<ILayerEvent['change']>('change')
+        this.emit<ILayerEvent>('change', [])
         return this
     }
 

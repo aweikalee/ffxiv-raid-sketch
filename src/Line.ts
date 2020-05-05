@@ -115,7 +115,7 @@ export default class Line extends Layer<ILineEvent> {
         coordinate.push(x, y)
 
         this.lineProps.coordinates.push(coordinate)
-        this.emit<ILineEvent['to']>('to', [coordinate])
+        this.emit('to', [coordinate])
         return this.onChange()
     }
 
@@ -127,7 +127,7 @@ export default class Line extends Layer<ILineEvent> {
         if (arr.length === 0) return this
 
         arr.splice(0, arr.length)
-        this.emit<ILineEvent['clear']>('clear')
+        this.emit('clear', [])
         return this.onChange()
     }
 
@@ -139,7 +139,7 @@ export default class Line extends Layer<ILineEvent> {
         if (this.lineProps.startCap === value) return this
 
         this.lineProps.startCap = value
-        this.emit<ILineEvent['startCap']>('startCap', [value])
+        this.emit('startCap', [value])
         return this.onChange()
     }
 
@@ -151,7 +151,7 @@ export default class Line extends Layer<ILineEvent> {
         if (this.lineProps.endCap === value) return this
 
         this.lineProps.endCap = value
-        this.emit<ILineEvent['endCap']>('endCap', [value])
+        this.emit('endCap', [value])
         return this.onChange()
     }
 
@@ -163,7 +163,7 @@ export default class Line extends Layer<ILineEvent> {
         if (this.lineProps.smooth === value) return this
 
         this.lineProps.smooth = value
-        this.emit<ILineEvent['smooth']>('smooth', [value])
+        this.emit('smooth', [value])
         return this.onChange()
     }
 
@@ -177,7 +177,7 @@ export default class Line extends Layer<ILineEvent> {
         if (value.some(v => typeof v !== 'number')) return this
 
         this.lineProps.dash = value
-        this.emit<ILineEvent['dash']>('dash', [value])
+        this.emit('dash', [value])
         return this.onChange()
     }
 

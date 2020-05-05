@@ -3,7 +3,7 @@ import { ISketchUtils } from './Sketch'
 import { WAYMARK, WAYMARK_COLOR } from './img/waymark/map'
 import { WAYMARK_ALIAS, IWaymarkAlias } from './alias/waymark'
 import { setAlias } from './alias/utils'
-import Img, { IImgEvent } from './Img'
+import Img from './Img'
 import Circle from './Circle'
 import Rect from './Rect'
 import { cloneDeep } from './utils'
@@ -43,7 +43,7 @@ export default class Waymark extends Layer<IWaymarkEvent> {
     constructor(type?: IWaymarkProps['type']) {
         super()
 
-        this.img.on<IImgEvent['loaded']>('loaded', this.onChange.bind(this))
+        this.img.on('loaded', this.onChange.bind(this))
 
         this.type(type)
     }
@@ -57,7 +57,7 @@ export default class Waymark extends Layer<IWaymarkEvent> {
         if (this.waymarkProps.type === _value) return this
 
         this.waymarkProps.type = _value
-        this.emit<IWaymarkEvent['type']>('type', [_value])
+        this.emit('type', [_value])
         return this.onChange()
     }
 
@@ -69,7 +69,7 @@ export default class Waymark extends Layer<IWaymarkEvent> {
         if (this.waymarkProps.size === value) return this
 
         this.waymarkProps.size = value
-        this.emit<IWaymarkEvent['size']>('size', [value])
+        this.emit('size', [value])
         return this.onChange()
     }
 

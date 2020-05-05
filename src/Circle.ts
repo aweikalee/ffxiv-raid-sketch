@@ -65,7 +65,7 @@ export default class Circle extends Layer<ICircleEvent> {
         if (this.circleProps.radius === value) return this
 
         this.circleProps.radius = value
-        this.emit<ICircleEvent['size']>('size', [value])
+        this.emit('size', [value])
         return this.onChange()
     }
 
@@ -79,7 +79,7 @@ export default class Circle extends Layer<ICircleEvent> {
         if (this.circleProps.angle === _value) return this
 
         this.circleProps.angle = _value
-        this.emit<ICircleEvent['angle']>('angle', [_value])
+        this.emit('angle', [_value])
         return this.onChange()
     }
 
@@ -92,7 +92,7 @@ export default class Circle extends Layer<ICircleEvent> {
         if (this.circleProps.arc === value) return this
 
         this.circleProps.arc = value
-        this.emit<ICircleEvent['arc']>('arc', [value])
+        this.emit('arc', [value])
         return this.onChange()
     }
 
@@ -104,7 +104,7 @@ export default class Circle extends Layer<ICircleEvent> {
         if (value.some(v => typeof v !== 'number')) return this
 
         this.circleProps.dash = value
-        this.emit<ICircleEvent['dash']>('dash', [value])
+        this.emit('dash', [value])
         return this.onChange()
     }
 

@@ -3,7 +3,7 @@ import { ISketchUtils } from './Sketch'
 import { JOB, JOB_TYPE, JOB_COLOR } from './img/job/map'
 import { JOB_ALIAS, IJobAlias } from './alias/job'
 import { setAlias } from './alias/utils'
-import Img, { IImgEvent } from './Img'
+import Img from './Img'
 import Circle from './Circle'
 import { cloneDeep } from './utils'
 
@@ -47,7 +47,7 @@ export default class Player extends Layer<IPlayerEvent> {
     constructor(job?: IPlayerProps['job']) {
         super()
 
-        this.img.on<IImgEvent['loaded']>('loaded', this.onChange.bind(this))
+        this.img.on('loaded', this.onChange.bind(this))
 
         this.job(job || this.playerProps.job)
     }
@@ -61,7 +61,7 @@ export default class Player extends Layer<IPlayerEvent> {
         if (this.playerProps.job === _value) return this
 
         this.playerProps.job = _value
-        this.emit<IPlayerEvent['job']>('job', [_value])
+        this.emit('job', [_value])
         return this.onChange()
     }
 
@@ -73,7 +73,7 @@ export default class Player extends Layer<IPlayerEvent> {
         if (this.playerProps.size === value) return this
 
         this.playerProps.size = value
-        this.emit<IPlayerEvent['size']>('size', [value])
+        this.emit('size', [value])
         return this.onChange()
     }
 

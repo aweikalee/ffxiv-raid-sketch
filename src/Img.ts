@@ -30,7 +30,7 @@ export default class Img extends Layer<IImgEvent> {
      */
     imgProps: IImgProps = {
         src: null,
-        size: 'auto'
+        size: 'auto',
     }
     private image: HTMLImageElement
     private raf: number | null = null
@@ -40,7 +40,7 @@ export default class Img extends Layer<IImgEvent> {
 
         this.image = new Image()
         this.image.onload = () => {
-            this.emit<IImgEvent['loaded']>('loaded')
+            this.emit('loaded', [])
             this.onChange()
         }
 
@@ -57,7 +57,7 @@ export default class Img extends Layer<IImgEvent> {
 
         this.imgProps.src = _value
         this.image.src = _value
-        this.emit<IImgEvent['src']>('src', [_value])
+        this.emit('src', [_value])
         return this
     }
 
@@ -73,7 +73,7 @@ export default class Img extends Layer<IImgEvent> {
         if (this.imgProps.size === value) return this
 
         this.imgProps.size = value
-        this.emit<IImgEvent['size']>('size', [value])
+        this.emit('size', [value])
         return this.onChange()
     }
 
@@ -122,7 +122,7 @@ export default class Img extends Layer<IImgEvent> {
             ctx.stroke()
 
             this.raf = requestAnimationFrame(() => {
-                this.emit('change')
+                this.emit('change', [])
                 this.raf = null
             })
             return

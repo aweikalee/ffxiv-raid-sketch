@@ -41,7 +41,7 @@ export default class Monster extends Layer<IMonsterEvent> {
         if (this.monsterProps.size === value) return this
 
         this.monsterProps.size = value
-        this.emit<IMonsterEvent['size']>('size', [value])
+        this.emit('size', [value])
         return this.onChange()
     }
 

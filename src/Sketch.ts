@@ -1,4 +1,4 @@
-import Layer, { ILayerEvent } from './Layer'
+import Layer from './Layer'
 import { mergeOptions } from './utils'
 
 export interface ISketchOptions {
@@ -59,7 +59,7 @@ export default class Sketch {
 
         this.layer = new Layer()
 
-        this.layer.on<ILayerEvent['change']>('change', this.render.bind(this))
+        this.layer.on('change', this.render.bind(this))
 
         this.size(this.options.w, this.options.h)
         this.unit(options.unit || this.options.w / 100)

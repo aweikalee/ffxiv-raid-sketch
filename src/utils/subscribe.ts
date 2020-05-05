@@ -1,8 +1,12 @@
-export class Subscribe<T = string> {
-    map = new Map<T, ((...args: any[]) => void)[]>()
+export type IKey<T> = {
+    [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
+}[keyof T]
+
+export class Subscribe<T extends {}> {
+    map = new Map<IKey<T>, T[IKey<T>][]>()
     constructor() {}
 
-    on<F extends (...args: any[]) => void>(type: T, event: F) {
+    on<K extends IKey<T>>(type: K, event: T[K]) {
         if (!this.map.has(type)) {
             this.map.set(type, [])
         }
@@ -16,15 +20,15 @@ export class Subscribe<T = string> {
         arr.push(event)
     }
 
-    once<F extends (...args: any[]) => void>(type: T, event: F) {
-        const fn = (...args: Parameters<F>) => {
-            event(...args)
-            this.off(type, fn)
+    once<K extends IKey<T>>(type: K, event: T[K]) {
+        const fn: any = (...args: any[]) => {
+            ;(event as any)(...args)
+            this.off(type, fn as T[K])
         }
-        this.on(type, fn)
+        this.on(type, fn as T[K])
     }
 
-    off<F extends (...args: any[]) => void>(type: T, event: F) {
+    off<K extends IKey<T>>(type: K, event: T[K]) {
         if (!this.map.has(type)) {
             return
         }
@@ -36,13 +40,13 @@ export class Subscribe<T = string> {
         }
     }
 
-    emit<F extends (...args: any[]) => void>(type: T, args?: Parameters<F>) {
+    emit<K extends IKey<T>>(type: K, args: Parameters<T[K]>) {
         if (!this.map.has(type)) {
             return
         }
 
-        this.map.get(type).forEach(event => {
-            event(...(args || []))
+        this.map.get(type).forEach((event) => {
+            ;(event as T[K])(...args)
         })
     }
 }

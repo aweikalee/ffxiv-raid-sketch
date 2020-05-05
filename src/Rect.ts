@@ -56,7 +56,7 @@ export default class Rect extends Layer<IRectEvent> {
 
         this.rectProps.w = w
         this.rectProps.h = _h
-        this.emit<IRectEvent['size']>('size', [w, _h])
+        this.emit('size', [w, _h])
         return this.onChange()
     }
 
@@ -68,7 +68,7 @@ export default class Rect extends Layer<IRectEvent> {
         if (value.some(v => typeof v !== 'number')) return this
 
         this.rectProps.dash = value
-        this.emit<IRectEvent['dash']>('dash', [value])
+        this.emit('dash', [value])
         return this.onChange()
     }
 
