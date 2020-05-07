@@ -6,6 +6,7 @@ import {
     rotateVector,
     rotationAngleY,
 } from './utils/index'
+import * as valid from './utils/vaildate'
 
 export interface ILayerState {
     /**
@@ -71,7 +72,7 @@ export interface ILayerEvent {
     change: () => void
     unbindParent: () => void
 
-    add: (layer: Layer) => void
+    add: (value: Layer) => void
     addTo: (layer: Layer) => void
     remove: (layer: Layer) => void
     removeAll: () => void
@@ -88,6 +89,94 @@ export interface ILayerEvent {
     fill: (fill: ILayerState['fill']) => void
     visible: (visible: ILayerState['visible']) => void
 }
+
+const validator = valid.createValidator<ILayerState>({
+    x(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Layer.state.x must be a number')
+        }
+
+        return value
+    },
+    y(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Layer.state.y must be a number')
+        }
+        return value
+    },
+    rotate(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Layer.state.rotate must be a number')
+        }
+
+        return value
+    },
+    scaleX(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Layer.state.scaleX must be a number')
+        }
+
+        return value
+    },
+    scaleY(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Layer.state.scaleY must be a number')
+        }
+
+        return value
+    },
+    opacity(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Layer.state.opacity must be a number')
+        }
+
+        return value
+    },
+    fill(value) {
+        if (
+            !(
+                valid.isString(value) ||
+                valid.isCanvasGradient(value) ||
+                valid.isCanvasPattern(value)
+            )
+        ) {
+            throw new Error(
+                'Layer.state.fill must be a string/CanvasGradient/CanvasPattern'
+            )
+        }
+
+        return value
+    },
+    stroke(value) {
+        if (
+            !(
+                valid.isString(value) ||
+                valid.isCanvasGradient(value) ||
+                valid.isCanvasPattern(value)
+            )
+        ) {
+            throw new Error(
+                'Layer.state.stroke must be a string/CanvasPattern/CanvasPattern'
+            )
+        }
+
+        return value
+    },
+    strokeWidth(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Layer.state.strokeWidth must be a number')
+        }
+
+        return value
+    },
+    visible(value) {
+        if (!valid.isBoolean(value)) {
+            throw new Error(`Layer.state.visible must be a boolean`)
+        }
+
+        return value
+    },
+})
 
 /**
  * 图层
@@ -150,33 +239,16 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
                 visible: true,
             },
             (key, oldValue, newValue) => {
-                switch (true) {
-                    case ['fill', 'stroke'].includes(key):
-                        if (typeof newValue !== 'string')
-                            throw new Error(
-                                `Layer.state.${key} must be a number`
-                            )
-
-                        this.emit<ILayerEvent>(key, [newValue])
-                        break
-                    case 'visible' === key:
-                        if (typeof newValue !== 'boolean')
-                            throw new Error(
-                                `Layer.state.${key} must be a number`
-                            )
-
-                        this.emit<ILayerEvent>(key, [newValue])
-                        break
-                    default:
-                        if (typeof newValue !== 'number')
-                            throw new Error(
-                                `Layer.state.${key} must be a number`
-                            )
-
-                        this.emit<ILayerEvent>(key, [newValue])
-                }
-
-                this.emit<ILayerEvent>('change', [])
+                validator(key, newValue, oldValue).then(
+                    (value) => {
+                        this.emit<ILayerEvent>(key, [value as any])
+                        this.emit<ILayerEvent>('change', [])
+                    },
+                    (err) => {
+                        this.state[key] = oldValue
+                        throw err
+                    }
+                )
             }
         )
         Object.assign(this.state, state)
