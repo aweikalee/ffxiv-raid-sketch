@@ -7,7 +7,7 @@ import {
     rotationAngleY,
 } from './utils/index'
 
-export interface ILayerProps {
+export interface ILayerState {
     /**
      * 相对坐标 x
      *
@@ -77,16 +77,16 @@ export interface ILayerEvent {
     removeAll: () => void
     clone: (clone: Layer) => void
 
-    x: (x: ILayerProps['x']) => void
-    y: (y: ILayerProps['y']) => void
-    opacity: (opacity: ILayerProps['opacity']) => void
-    rotate: (rotate: ILayerProps['rotate']) => void
-    scaleX: (x: ILayerProps['scaleX']) => void
-    scaleY: (y: ILayerProps['scaleY']) => void
-    stroke: (stroke: ILayerProps['stroke']) => void
-    strokeWidth: (strokeWidth: ILayerProps['strokeWidth']) => void
-    fill: (fill: ILayerProps['fill']) => void
-    visible: (visible: ILayerProps['visible']) => void
+    x: (x: ILayerState['x']) => void
+    y: (y: ILayerState['y']) => void
+    opacity: (opacity: ILayerState['opacity']) => void
+    rotate: (rotate: ILayerState['rotate']) => void
+    scaleX: (x: ILayerState['scaleX']) => void
+    scaleY: (y: ILayerState['scaleY']) => void
+    stroke: (stroke: ILayerState['stroke']) => void
+    strokeWidth: (strokeWidth: ILayerState['strokeWidth']) => void
+    fill: (fill: ILayerState['fill']) => void
+    visible: (visible: ILayerState['visible']) => void
 }
 
 /**
@@ -95,7 +95,7 @@ export interface ILayerEvent {
  * 基础类，其他形状、图形类都是继承自 [[Layer]]
  */
 export default class Layer<E extends ILayerEvent = ILayerEvent> {
-    props: ILayerProps
+    state: ILayerState
 
     protected subscribe = new Subscribe<E>()
 
@@ -135,8 +135,8 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
 
     private _parent: Layer<any> | null
 
-    constructor(props: Partial<ILayerProps> = {}) {
-        this.props = proxy<ILayerProps>(
+    constructor(state: Partial<ILayerState> = {}) {
+        this.state = proxy<ILayerState>(
             {
                 x: 0,
                 y: 0,
@@ -154,7 +154,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
                     case ['fill', 'stroke'].includes(key):
                         if (typeof newValue !== 'string')
                             throw new Error(
-                                `Layer.props.${key} must be a number`
+                                `Layer.state.${key} must be a number`
                             )
 
                         this.emit<ILayerEvent>(key, [newValue])
@@ -162,7 +162,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
                     case 'visible' === key:
                         if (typeof newValue !== 'boolean')
                             throw new Error(
-                                `Layer.props.${key} must be a number`
+                                `Layer.state.${key} must be a number`
                             )
 
                         this.emit<ILayerEvent>(key, [newValue])
@@ -170,7 +170,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
                     default:
                         if (typeof newValue !== 'number')
                             throw new Error(
-                                `Layer.props.${key} must be a number`
+                                `Layer.state.${key} must be a number`
                             )
 
                         this.emit<ILayerEvent>(key, [newValue])
@@ -179,8 +179,8 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
                 this.emit<ILayerEvent>('change', [])
             }
         )
-        Object.assign(this.props, props)
-        // mergeOptions(this.props, props)
+        Object.assign(this.state, state)
+        // mergeOptions(this.state, state)
     }
 
     /**
@@ -229,7 +229,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      */
     clone() {
         const clone = this._clone()
-        // clone.props = cloneDeep(this.props)
+        // clone.state = cloneDeep(this.state)
         this.children.forEach((v) => {
             clone.add(v.clone())
         })
@@ -241,7 +241,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * 渲染
      */
     render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
-        if (!this.props.visible) return
+        if (!this.state.visible) return
 
         const {
             x,
@@ -253,7 +253,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
             fill,
             stroke,
             strokeWidth,
-        } = this.props
+        } = this.state
         const { mapping } = utils
 
         ctx.save()
@@ -286,7 +286,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * x, y返回的是相对坐标
      */
     getLayerStatus() {
-        let { x, y, rotate, scaleX, scaleY, opacity } = this.props
+        let { x, y, rotate, scaleX, scaleY, opacity } = this.state
         let parent = this.parent
         while (parent) {
             const {
@@ -296,7 +296,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
                 scaleX: _scaleX,
                 scaleY: _scaleY,
                 opacity: _opacity,
-            } = parent.props
+            } = parent.state
 
             // 旋转
             ;[x, y] = rotateVector(x, y, (_rotate * Math.PI) / 180)
@@ -340,65 +340,65 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         const rotate =
             (rotationAngleY(p2.x - p1.x, p2.y - p1.y) / Math.PI) * 180
 
-        this.rotate(rotate - p1.rotate + this.props.rotate + offset)
+        this.rotate(rotate - p1.rotate + this.state.rotate + offset)
         return this
     }
 
     /**
      * 设置坐标
      */
-    xy(x: ILayerProps['x'], y: ILayerProps['y']) {
-        this.props.x = x
-        this.props.y = y
+    xy(x: ILayerState['x'], y: ILayerState['y']) {
+        this.state.x = x
+        this.state.y = y
         return this
     }
 
     /**
      * 设置透明度
      */
-    opacity(value: ILayerProps['opacity']) {
-        this.props.opacity = value
+    opacity(value: ILayerState['opacity']) {
+        this.state.opacity = value
         return this
     }
 
     /**
      * 设置旋转角度
      */
-    rotate(value: ILayerProps['rotate']) {
-        this.props.rotate = value
+    rotate(value: ILayerState['rotate']) {
+        this.state.rotate = value
         return this
     }
 
     /**
      * 设置缩放
      */
-    scale(x: ILayerProps['scaleX'], y?: ILayerProps['scaleY']) {
-        this.props.scaleX = x
-        this.props.scaleY = y !== undefined ? y : x
+    scale(x: ILayerState['scaleX'], y?: ILayerState['scaleY']) {
+        this.state.scaleX = x
+        this.state.scaleY = y !== undefined ? y : x
         return this
     }
 
     /**
      * 设置描边颜色
      */
-    stroke(value: ILayerProps['stroke']) {
-        this.props.stroke = value
+    stroke(value: ILayerState['stroke']) {
+        this.state.stroke = value
         return this
     }
 
     /**
      * 设置描边宽度
      */
-    strokeWidth(value: ILayerProps['strokeWidth']) {
-        this.props.strokeWidth = value
+    strokeWidth(value: ILayerState['strokeWidth']) {
+        this.state.strokeWidth = value
         return this
     }
 
     /**
      * 设置填充颜色
      */
-    fill(value: ILayerProps['fill']) {
-        this.props.fill = value
+    fill(value: ILayerState['fill']) {
+        this.state.fill = value
         return this
     }
 
@@ -406,7 +406,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * 设置为可见
      */
     show() {
-        this.props.visible = true
+        this.state.visible = true
         return this
     }
 
@@ -414,7 +414,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * 设置为不可见
      */
     hide() {
-        this.props.visible = false
+        this.state.visible = false
         return this
     }
 

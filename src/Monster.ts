@@ -52,7 +52,7 @@ export default class Monster extends Layer<IMonsterEvent> {
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
-        const { strokeWidth } = this.props
+        const { strokeWidth } = this.state
         const { size } = this.monsterProps
         const { mapping } = utils
 

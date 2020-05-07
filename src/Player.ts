@@ -100,7 +100,7 @@ export default class Player extends Layer<IPlayerEvent> {
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
         if (!this.playerProps.job) return
         const { img, circle } = this
-        const { strokeWidth } = this.props
+        const { strokeWidth } = this.state
         const { job, size } = this.playerProps
         const { unmapping } = utils
 

@@ -1,4 +1,4 @@
-import Layer, { ILayerProps, ILayerEvent } from './Layer'
+import Layer, { ILayerState, ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { rotationAngleY } from './utils/index'
 // import { cloneDeep } from './utils'
@@ -188,12 +188,12 @@ export default class Line extends Layer<ILineEvent> {
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
-        const { props, lineProps } = this
+        const { state, lineProps } = this
         const { coordinates: coord, startCap, endCap } = this.lineProps
 
         /* 绘制线 */
         drawLine({
-            props,
+            state,
             lineProps,
             ctx,
             utils
@@ -223,7 +223,7 @@ export default class Line extends Layer<ILineEvent> {
             }
 
             drawCap({
-                props,
+                state,
                 ctx,
                 utils,
                 type: startCap,
@@ -231,7 +231,7 @@ export default class Line extends Layer<ILineEvent> {
                 to: startTo
             })
             drawCap({
-                props,
+                state,
                 ctx,
                 utils,
                 type: endCap,
@@ -246,17 +246,17 @@ export default class Line extends Layer<ILineEvent> {
  * @ignore
  */
 function drawLine({
-    props,
+    state,
     lineProps,
     ctx,
     utils
 }: {
-    props: ILayerProps
+    state: ILayerState
     lineProps: ILineProps
     ctx: CanvasRenderingContext2D
     utils: ISketchUtils
 }) {
-    const { strokeWidth } = props
+    const { strokeWidth } = state
     const { coordinates, dash, smooth } = lineProps
     const { mapping } = utils
 
@@ -344,21 +344,21 @@ function drawLine({
  * @ignore
  */
 function drawCap({
-    props,
+    state,
     ctx,
     utils,
     type,
     from,
     to
 }: {
-    props: ILayerProps
+    state: ILayerState
     ctx: CanvasRenderingContext2D
     utils: ISketchUtils
     type: ILineCap
     from: ILineCoordinate
     to: ILineCoordinate
 }) {
-    const { stroke, strokeWidth } = props
+    const { stroke, strokeWidth } = state
     const { mapping } = utils
 
     ctx.save()

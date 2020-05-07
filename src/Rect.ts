@@ -79,8 +79,8 @@ export default class Rect extends Layer<IRectEvent> {
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
-        const { props, rectProps } = this
-        const { strokeWidth } = props
+        const { state, rectProps } = this
+        const { strokeWidth } = state
         const { mapping } = utils
         const { w, h, dash } = rectProps
 

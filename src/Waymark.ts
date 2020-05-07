@@ -95,7 +95,7 @@ export default class Waymark extends Layer<IWaymarkEvent> {
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
         const { img, circle, rect } = this
-        const { strokeWidth } = this.props
+        const { strokeWidth } = this.state
         const { type, size } = this.waymarkProps
         const { unmapping } = utils
 

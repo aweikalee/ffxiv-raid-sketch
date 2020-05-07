@@ -115,7 +115,7 @@ export default class Circle extends Layer<ICircleEvent> {
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
-        const { strokeWidth } = this.props
+        const { strokeWidth } = this.state
         const { radius, angle, arc, dash } = this.circleProps
         const { mapping } = utils
 
