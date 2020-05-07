@@ -52,6 +52,7 @@ export default class Sketch {
 
     constructor(options: Partial<ISketchOptions> = {}) {
         // this.options = mergeOptions({ ...Sketch.defaultOptions }, options)
+        this.options = Object.assign({...Sketch.defaultOptions}, options)
 
         this.canvas = options.canvas || document.createElement('canvas')
 

@@ -1,5 +1,11 @@
 import { ISketchUtils } from './Sketch'
-import { Subscribe, IKey, rotateVector, rotationAngleY } from './utils/index'
+import {
+    Subscribe,
+    IKey,
+    proxy,
+    rotateVector,
+    rotationAngleY,
+} from './utils/index'
 
 export interface ILayerProps {
     /**
@@ -71,10 +77,12 @@ export interface ILayerEvent {
     removeAll: () => void
     clone: (clone: Layer) => void
 
-    xy: (x: ILayerProps['x'], y: ILayerProps['y']) => void
+    x: (x: ILayerProps['x']) => void
+    y: (y: ILayerProps['y']) => void
     opacity: (opacity: ILayerProps['opacity']) => void
     rotate: (rotate: ILayerProps['rotate']) => void
-    scale: (x: ILayerProps['scaleX'], y: ILayerProps['scaleY']) => void
+    scaleX: (x: ILayerProps['scaleX']) => void
+    scaleY: (y: ILayerProps['scaleY']) => void
     stroke: (stroke: ILayerProps['stroke']) => void
     strokeWidth: (strokeWidth: ILayerProps['strokeWidth']) => void
     fill: (fill: ILayerProps['fill']) => void
@@ -87,21 +95,7 @@ export interface ILayerEvent {
  * 基础类，其他形状、图形类都是继承自 [[Layer]]
  */
 export default class Layer<E extends ILayerEvent = ILayerEvent> {
-    /**
-     * 字段详情：[[ILayerProps]]
-     */
-    props: ILayerProps = {
-        x: 0,
-        y: 0,
-        rotate: 0,
-        scaleX: 1,
-        scaleY: 1,
-        opacity: 1,
-        fill: '#000000',
-        stroke: '#000000',
-        strokeWidth: 2,
-        visible: true,
-    }
+    props: ILayerProps
 
     protected subscribe = new Subscribe<E>()
 
@@ -142,6 +136,50 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
     private _parent: Layer<any> | null
 
     constructor(props: Partial<ILayerProps> = {}) {
+        this.props = proxy<ILayerProps>(
+            {
+                x: 0,
+                y: 0,
+                rotate: 0,
+                scaleX: 1,
+                scaleY: 1,
+                opacity: 1,
+                fill: '#000000',
+                stroke: '#000000',
+                strokeWidth: 2,
+                visible: true,
+            },
+            (key, oldValue, newValue) => {
+                switch (true) {
+                    case ['fill', 'stroke'].includes(key):
+                        if (typeof newValue !== 'string')
+                            throw new Error(
+                                `Layer.props.${key} must be a number`
+                            )
+
+                        this.emit<ILayerEvent>(key, [newValue])
+                        break
+                    case 'visible' === key:
+                        if (typeof newValue !== 'boolean')
+                            throw new Error(
+                                `Layer.props.${key} must be a number`
+                            )
+
+                        this.emit<ILayerEvent>(key, [newValue])
+                        break
+                    default:
+                        if (typeof newValue !== 'number')
+                            throw new Error(
+                                `Layer.props.${key} must be a number`
+                            )
+
+                        this.emit<ILayerEvent>(key, [newValue])
+                }
+
+                this.emit<ILayerEvent>('change', [])
+            }
+        )
+        Object.assign(this.props, props)
         // mergeOptions(this.props, props)
     }
 
@@ -310,110 +348,74 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * 设置坐标
      */
     xy(x: ILayerProps['x'], y: ILayerProps['y']) {
-        if (typeof x !== 'number' || typeof y !== 'number') return this
-        if (this.props.x === x && this.props.y === y) return this
-
         this.props.x = x
         this.props.y = y
-
-        this.emit<ILayerEvent>('xy', [x, y])
-        return this.onChange()
+        return this
     }
 
     /**
      * 设置透明度
      */
     opacity(value: ILayerProps['opacity']) {
-        if (typeof value !== 'number') return this
-        const opacity = Math.max(0, Math.min(value, 1))
-        if (this.props.opacity === opacity) return this
-
-        this.props.opacity = opacity
-
-        this.emit<ILayerEvent>('opacity', [opacity])
-        return this.onChange()
+        this.props.opacity = value
+        return this
     }
 
     /**
      * 设置旋转角度
      */
     rotate(value: ILayerProps['rotate']) {
-        if (typeof value !== 'number') return this
-        if (this.props.rotate === value) return this
         this.props.rotate = value
-
-        this.emit<ILayerEvent>('rotate', [value])
-        return this.onChange()
+        return this
     }
 
     /**
      * 设置缩放
      */
     scale(x: ILayerProps['scaleX'], y?: ILayerProps['scaleY']) {
-        if (typeof x !== 'number') return this
-        const _y = typeof y === 'number' ? y : x
-        if (this.props.scaleX === x && this.props.scaleY === _y) return this
-
         this.props.scaleX = x
-        this.props.scaleY = _y
-        this.emit<ILayerEvent>('scale', [x, _y])
-        return this.onChange()
+        this.props.scaleY = y !== undefined ? y : x
+        return this
     }
 
     /**
      * 设置描边颜色
      */
     stroke(value: ILayerProps['stroke']) {
-        if (!value) return this
-        if (this.props.stroke === value) return this
         this.props.stroke = value
-
-        this.emit<ILayerEvent>('stroke', [value])
-        return this.onChange()
+        return this
     }
 
     /**
      * 设置描边宽度
      */
     strokeWidth(value: ILayerProps['strokeWidth']) {
-        if (!value) return this
-        if (this.props.strokeWidth === value) return this
         this.props.strokeWidth = value
-
-        this.emit<ILayerEvent>('strokeWidth', [value])
-        return this.onChange()
+        return this
     }
 
     /**
      * 设置填充颜色
      */
     fill(value: ILayerProps['fill']) {
-        if (!value) return this
-        if (this.props.fill === value) return this
         this.props.fill = value
-
-        this.emit<ILayerEvent>('fill', [value])
-        return this.onChange()
+        return this
     }
 
     /**
      * 设置为可见
      */
     show() {
-        if (this.props.visible) return this
         this.props.visible = true
-        this.emit<ILayerEvent>('visible', [true])
-        return this.onChange()
+        return this
     }
 
     /**
      * 设置为不可见
      */
     hide() {
-        if (!this.props.visible) return this
         this.props.visible = false
-        this.emit<ILayerEvent>('visible', [])
-        return this.onChange()
+        return this
     }
 
     /**

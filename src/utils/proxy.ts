@@ -5,7 +5,7 @@ export type IProxyChange<T> = <K extends keyof T>(
     oldValue: T[K],
     newValue: unknown,
     target: T
-) => T[K]
+) => void
 
 export function proxy<T extends object>(
     target: T,
