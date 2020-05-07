@@ -1,7 +1,7 @@
 import Layer, { ILayerProps, ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { rotationAngleY } from './utils'
-import { cloneDeep } from './utils'
+import { rotationAngleY } from './utils/index'
+// import { cloneDeep } from './utils'
 
 export interface ILineCoordinate {
     x: number
@@ -183,7 +183,7 @@ export default class Line extends Layer<ILineEvent> {
 
     protected _clone() {
         const layer = new Line()
-        layer.lineProps = cloneDeep(this.lineProps)
+        // layer.lineProps = cloneDeep(this.lineProps)
         return layer
     }
 

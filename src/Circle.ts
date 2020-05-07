@@ -1,6 +1,6 @@
 import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { cloneDeep } from './utils'
+// import { cloneDeep } from './utils'
 
 export interface ICircleProps {
     /**
@@ -110,7 +110,7 @@ export default class Circle extends Layer<ICircleEvent> {
 
     protected _clone() {
         const layer = new Circle()
-        layer.circleProps = cloneDeep(this.circleProps)
+        // layer.circleProps = cloneDeep(this.circleProps)
         return layer
     }
 

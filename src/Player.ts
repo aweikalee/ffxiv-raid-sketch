@@ -5,7 +5,7 @@ import { JOB_ALIAS, IJobAlias } from './alias/job'
 import { setAlias } from './alias/utils'
 import Img from './Img'
 import Circle from './Circle'
-import { cloneDeep } from './utils'
+// import { cloneDeep } from './utils'
 
 export interface IPlayerProps {
     /**
@@ -93,7 +93,7 @@ export default class Player extends Layer<IPlayerEvent> {
 
     protected _clone() {
         const layer = new Player()
-        layer.playerProps = cloneDeep(this.playerProps)
+        // layer.playerProps = cloneDeep(this.playerProps)
         return layer
     }
 

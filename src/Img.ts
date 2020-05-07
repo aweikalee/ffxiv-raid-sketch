@@ -2,7 +2,7 @@ import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { IMG_ALIAS } from './alias/img'
 import { setAliasMapping } from './alias/utils'
-import { cloneDeep } from './utils'
+// import { cloneDeep } from './utils'
 
 export interface IImgProps {
     /**
@@ -92,7 +92,7 @@ export default class Img extends Layer<IImgEvent> {
 
     protected _clone() {
         const layer = new Img(this.imgProps.src)
-        layer.imgProps = cloneDeep(this.imgProps)
+        // layer.imgProps = cloneDeep(this.imgProps)
         return layer
     }
 

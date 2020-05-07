@@ -6,7 +6,7 @@ import { setAlias } from './alias/utils'
 import Img from './Img'
 import Circle from './Circle'
 import Rect from './Rect'
-import { cloneDeep } from './utils'
+// import { cloneDeep } from './utils'
 
 export interface IWaymarkProps {
     /**
@@ -89,7 +89,7 @@ export default class Waymark extends Layer<IWaymarkEvent> {
 
     protected _clone() {
         const layer = new Waymark()
-        layer.waymarkProps = cloneDeep(this.waymarkProps)
+        // layer.waymarkProps = cloneDeep(this.waymarkProps)
         return layer
     }
 

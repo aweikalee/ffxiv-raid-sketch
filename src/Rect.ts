@@ -1,6 +1,6 @@
 import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { cloneDeep } from './utils'
+// import { cloneDeep } from './utils'
 
 export interface IRectProps {
     /**
@@ -74,7 +74,7 @@ export default class Rect extends Layer<IRectEvent> {
 
     protected _clone() {
         const layer = new Rect()
-        layer.rectProps = cloneDeep(this.rectProps)
+        // layer.rectProps = cloneDeep(this.rectProps)
         return layer
     }
 

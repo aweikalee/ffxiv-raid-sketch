@@ -1,6 +1,6 @@
 import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { cloneDeep } from './utils'
+// import { cloneDeep } from './utils'
 
 export interface IMonsterProps {
     /**
@@ -47,7 +47,7 @@ export default class Monster extends Layer<IMonsterEvent> {
 
     protected _clone() {
         const layer = new Monster()
-        layer.monsterProps = cloneDeep(this.monsterProps)
+        // layer.monsterProps = cloneDeep(this.monsterProps)
         return layer
     }
 

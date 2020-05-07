@@ -4,7 +4,7 @@ import { MARK } from './img/mark/map'
 import { MAKR_ALIAS, IMarkAlias } from './alias/mark'
 import { setAlias } from './alias/utils'
 import Img from './Img'
-import { cloneDeep } from './utils'
+// import { cloneDeep } from './utils'
 
 export interface IMarkProps {
     /**
@@ -91,7 +91,7 @@ export default class Mark extends Layer<IMarkEvent> {
 
     protected _clone() {
         const layer = new Mark()
-        layer.markProps = cloneDeep(this.markProps)
+        // layer.markProps = cloneDeep(this.markProps)
         return layer
     }
 

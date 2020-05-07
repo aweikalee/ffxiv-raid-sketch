@@ -1,5 +1,5 @@
 import Layer from './Layer'
-import { mergeOptions } from './utils'
+// import { mergeOptions } from './utils'
 
 export interface ISketchOptions {
     /**
@@ -51,7 +51,7 @@ export default class Sketch {
     private raf?: number
 
     constructor(options: Partial<ISketchOptions> = {}) {
-        this.options = mergeOptions({ ...Sketch.defaultOptions }, options)
+        // this.options = mergeOptions({ ...Sketch.defaultOptions }, options)
 
         this.canvas = options.canvas || document.createElement('canvas')
 

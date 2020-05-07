@@ -1,6 +1,6 @@
 import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { cloneDeep } from './utils'
+// import { cloneDeep } from './utils'
 
 export interface ITextProps {
     /**
@@ -145,7 +145,7 @@ export default class Text extends Layer<ITextEvent> {
 
     protected _clone() {
         const layer = new Text()
-        layer.textProps = cloneDeep(this.textProps)
+        // layer.textProps = cloneDeep(this.textProps)
         return layer
     }
 
