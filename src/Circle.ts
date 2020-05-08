@@ -60,7 +60,7 @@ const validator = valid.createValidator<ICircleProps>({
     },
     dash(value) {
         if (!(value === null || valid.isArray<number>(value, valid.isNumber))) {
-            throw new Error('Layer.state.dash must be a number[]/null')
+            throw new Error('Circle.props.dash must be a number[]/null')
         }
 
         return value

@@ -1,8 +1,9 @@
-import Layer, { ILayerEvent } from './Layer'
+import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { IMG_ALIAS } from './alias/img'
 import { setAliasMapping } from './alias/utils'
-// import { cloneDeep } from './utils'
+import { proxy, deepClone, merge } from './utils/index'
+import * as valid from './utils/vaildate'
 
 export interface IImgProps {
     /**
@@ -24,40 +25,73 @@ export interface IImgEvent extends ILayerEvent {
     size: (size: IImgProps['size']) => void
 }
 
+const validator = valid.createValidator<IImgProps>({
+    src(value) {
+        if (!(value === null || valid.isString(value))) {
+            throw new Error(`Img.props.size must be a string/null`)
+        }
+
+        return value
+    },
+    size(value) {
+        if (!(valid.isNumber(value) || value === 'auto')) {
+            throw new Error(`Img.props.size must be a number/"auto"`)
+        }
+
+        return value
+    },
+})
+
 export default class Img extends Layer<IImgEvent> {
-    /**
-     * 字段详情：[[IImgProps]]
-     */
-    imgProps: IImgProps = {
+    props: IImgProps = {
         src: null,
         size: 'auto',
     }
-    private image: HTMLImageElement
+    private image: HTMLImageElement = new Image()
     private raf: number | null = null
 
-    constructor(src?: string) {
-        super()
+    constructor(
+        state: Partial<ILayerState> = {},
+        props: Partial<IImgProps> = {}
+    ) {
+        super(state)
 
-        this.image = new Image()
         this.image.onload = () => {
             this.emit('loaded', [])
             this.onChange()
         }
 
-        this.src(src || this.imgProps.src)
+        this.props = proxy<IImgProps>(
+            {
+                src: null,
+                size: 'auto',
+            },
+            (key, oldValue, newValue, target) => {
+                validator(key, newValue, oldValue).then(
+                    (value) => {
+                        if (key === 'src') {
+                            this.image.src = target['src'] =
+                                IMG_ALIAS[value] || (value as string)
+                        }
+                        this.emit(key, [value] as any)
+                        this.emit('change', [])
+                    },
+                    (err) => {
+                        target[key] = oldValue
+                        throw err
+                    }
+                )
+            }
+        )
+
+        merge(this.props, props)
     }
 
     /**
      * 设置图片路径
      */
     src(value: string) {
-        if (typeof value !== 'string') return this
-        const _value = IMG_ALIAS[value] || value
-        if (this.imgProps.src === _value) return this
-
-        this.imgProps.src = _value
-        this.image.src = _value
-        this.emit('src', [_value])
+        this.props.src = value
         return this
     }
 
@@ -69,12 +103,8 @@ export default class Img extends Layer<IImgEvent> {
      * 若想改变比例请使用 [[Img.scale]]
      */
     size(value: number) {
-        if (typeof value !== 'number') return this
-        if (this.imgProps.size === value) return this
-
-        this.imgProps.size = value
-        this.emit('size', [value])
-        return this.onChange()
+        this.props.size = value
+        return this
     }
 
     /**
@@ -91,14 +121,12 @@ export default class Img extends Layer<IImgEvent> {
     }
 
     protected _clone() {
-        const layer = new Img(this.imgProps.src)
-        // layer.imgProps = cloneDeep(this.imgProps)
-        return layer
+        return new Img(deepClone(this.state), deepClone(this.props))
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
-        const { imgProps, image } = this
-        const { size } = imgProps
+        const { props, image } = this
+        const { size } = props
         const { mapping } = utils
 
         if (this.raf) {
