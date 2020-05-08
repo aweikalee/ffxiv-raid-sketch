@@ -5,6 +5,8 @@ import {
     proxy,
     rotateVector,
     rotationAngleY,
+    merge,
+    deepClone,
 } from './utils/index'
 import * as valid from './utils/vaildate'
 
@@ -228,8 +230,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
                 )
             }
         )
-        Object.assign(this.state, state)
-        // mergeOptions(this.state, state)
+        merge(this.state, state)
 
         let onParentChange: ILayerEvent['change']
         this._parent = proxy<{ value: Layer<any> | null }>(
@@ -347,7 +348,6 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      */
     clone() {
         const clone = this._clone()
-        // clone.state = cloneDeep(this.state)
         this.children.forEach((v) => {
             clone.add(v.clone())
         })
@@ -584,8 +584,8 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         return this
     }
 
-    protected _clone() {
-        return new Layer() as Layer<any>
+    protected _clone(): Layer<any> {
+        return new Layer(deepClone(this.state))
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {}
