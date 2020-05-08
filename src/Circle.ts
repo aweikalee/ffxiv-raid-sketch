@@ -6,7 +6,7 @@ export interface ICircleProps {
     /**
      * 半径
      */
-    radius: number
+    size: number
 
     /**
      * 张开角度
@@ -29,7 +29,7 @@ export interface ICircleProps {
 }
 
 export interface ICircleEvent extends ILayerEvent {
-    size: (radius: ICircleProps['radius']) => void
+    size: (radius: ICircleProps['size']) => void
     angle: (angle: ICircleProps['angle']) => void
     arc: (arc: ICircleProps['arc']) => void
     dash: (dash: ICircleProps['dash']) => void
@@ -43,7 +43,7 @@ export default class Circle extends Layer<ICircleEvent> {
      * 字段详情：[[ICircleProps]]
      */
     circleProps: ICircleProps = {
-        radius: 30,
+        size: 30,
         angle: 360,
         arc: false,
         dash: null
@@ -60,11 +60,11 @@ export default class Circle extends Layer<ICircleEvent> {
      * 设置半径
      * @param value [[ICircleProps]]['radius']
      */
-    size(value: ICircleProps['radius']) {
+    size(value: ICircleProps['size']) {
         if (typeof value !== 'number') return this
-        if (this.circleProps.radius === value) return this
+        if (this.circleProps.size === value) return this
 
-        this.circleProps.radius = value
+        this.circleProps.size = value
         this.emit('size', [value])
         return this.onChange()
     }
@@ -116,7 +116,7 @@ export default class Circle extends Layer<ICircleEvent> {
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
         const { strokeWidth } = this.state
-        const { radius, angle, arc, dash } = this.circleProps
+        const { size, angle, arc, dash } = this.circleProps
         const { mapping } = utils
 
         if (dash) {
@@ -127,7 +127,7 @@ export default class Circle extends Layer<ICircleEvent> {
         ctx.rotate(-(Math.PI + _angle) / 2)
 
         ctx.beginPath()
-        ctx.arc(0, 0, mapping(radius), 0, _angle)
+        ctx.arc(0, 0, mapping(size), 0, _angle)
 
         if (!arc) {
             if (angle !== 360) {
