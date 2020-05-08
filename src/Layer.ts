@@ -193,12 +193,12 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         this._parent.value = value
     }
 
-    private _children: Layer<any>[]
+    private _children: { value: Layer<any>[] }
     get children() {
-        return this._children
+        return this._children.value
     }
     set children(value) {
-        throw new Error(`Layer.children's pointer not be allowed to modified`)
+        this._children.value = value
     }
 
     constructor(state: Partial<ILayerState> = {}) {
@@ -263,17 +263,37 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
             }
         )
 
-        this._children = proxy<Layer<any>[]>(
-            [],
+        this._children = proxy<{ value: Layer<any>[] }>(
+            { value: [] },
             (key, oldValue, newValue, target) => {
-                if (key >= 0 && !(newValue instanceof Layer)) {
-                    if (oldValue) {
-                        target[key] = oldValue
-                    } else {
-                        target.splice(Number(key), 1)
-                    }
-                    throw new Error(`Layer.children must inherit Class Layer`)
+                if (key !== 'value') return
+
+                if (
+                    !Array.isArray(newValue) ||
+                    newValue.some((v) => !(v instanceof Layer))
+                ) {
+                    target[key] = oldValue
+                    throw new Error(`Layer.children must be Layer[]`)
                 }
+
+                target[key] = proxy<Layer<any>[]>(
+                    newValue,
+                    (key, oldValue, newValue, target) => {
+                        if (key >= 0 && !(newValue instanceof Layer)) {
+                            if (oldValue) {
+                                target[key] = oldValue
+                            } else {
+                                target.splice(Number(key), 1)
+                            }
+                            throw new Error(
+                                `Layer.children must inherit Class Layer`
+                            )
+                        }
+
+                        this.emit<ILayerEvent>('children', [this.children])
+                        this.emit<ILayerEvent>('change', [])
+                    }
+                )
 
                 this.emit<ILayerEvent>('children', [this.children])
                 this.emit<ILayerEvent>('change', [])
