@@ -237,9 +237,9 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
             (key, oldValue, newValue, target) => {
                 if (key !== 'value') return
 
-                if (!(newValue instanceof Layer || newValue === null)) {
+                if (!(isLayer(newValue) || newValue === null)) {
                     target[key] = oldValue
-                    throw new Error(`Layer.parent must inherit Class Layer`)
+                    throw new Error(`Layer.parent must be a Layer`)
                 }
 
                 // 从旧的父图层中移除
@@ -270,23 +270,23 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
 
                 if (
                     !Array.isArray(newValue) ||
-                    newValue.some((v) => !(v instanceof Layer))
+                    newValue.some((v) => !isLayer(v))
                 ) {
                     target[key] = oldValue
-                    throw new Error(`Layer.children must be Layer[]`)
+                    throw new Error(`Layer.children must be a Layer[]`)
                 }
 
                 target[key] = proxy<Layer<any>[]>(
                     newValue,
                     (key, oldValue, newValue, target) => {
-                        if (key >= 0 && !(newValue instanceof Layer)) {
+                        if (key >= 0 && !isLayer(newValue)) {
                             if (oldValue) {
                                 target[key] = oldValue
                             } else {
                                 target.splice(Number(key), 1)
                             }
                             throw new Error(
-                                `Layer.children must inherit Class Layer`
+                                `Layer.children's value must be a Layer`
                             )
                         }
 
@@ -305,7 +305,9 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * 添加子图层
      */
     add(layer: Layer<any>) {
-        if (!(layer instanceof Layer)) return this
+        if (!isLayer(layer)) {
+            throw new Error(`add(value), value must be a Layer`)
+        }
         layer.parent = this
         return this
     }
@@ -314,7 +316,9 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * 添加到父图层
      */
     addTo(layer: Layer<any>) {
-        if (!(layer instanceof Layer)) return this
+        if (!isLayer(layer)) {
+            throw new Error(`addTo(value), value must be a Layer`)
+        }
         this.parent = layer
         return this
     }
@@ -323,7 +327,9 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * 移除子图层
      */
     remove(layer: Layer<any>) {
-        if (!(layer instanceof Layer)) return this
+        if (!isLayer(layer)) {
+            throw new Error(`remove(value), value must be a Layer`)
+        }
         layer.parent = null
         return this
     }
@@ -446,7 +452,12 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      * @param offset 偏移角度
      */
     turnTo(layer: Layer, offset: number = 0) {
-        if (!(layer instanceof Layer)) return this
+        if (!isLayer(layer)) {
+            throw new Error(`turnTo(value, offset), value must be a Layer`)
+        }
+        if (!valid.isNumber(offset)) {
+            throw new Error(`turnTo(value, offset), offset must be a number`)
+        }
         const p1 = this.getLayerStatus()
         const p2 = layer.getLayerStatus()
         const rotate =
@@ -578,4 +589,8 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {}
+}
+
+export function isLayer(value: unknown): value is Layer<any> {
+    return value instanceof Layer
 }
