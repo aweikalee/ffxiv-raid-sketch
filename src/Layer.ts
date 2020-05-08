@@ -70,14 +70,11 @@ export interface ILayerEvent {
     render: (ctx: CanvasRenderingContext2D, utils: ISketchUtils) => void
     rendered: () => void
     change: () => void
-    unbindParent: () => void
+    parent: (value: Layer<any>) => void
+    children: (value: Layer<any>[]) => void
+    clone: (value: Layer<any>) => void
 
-    add: (value: Layer) => void
-    addTo: (layer: Layer) => void
-    remove: (layer: Layer) => void
-    removeAll: () => void
-    clone: (clone: Layer) => void
-
+    /* state */
     x: (x: ILayerState['x']) => void
     y: (y: ILayerState['y']) => void
     opacity: (opacity: ILayerState['opacity']) => void
@@ -188,41 +185,21 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
 
     protected subscribe = new Subscribe<E>()
 
-    children: Layer<any>[] = []
-
+    private _parent: { value: Layer<any> | null }
     get parent() {
-        return this._parent
+        return this._parent.value
+    }
+    set parent(value) {
+        this._parent.value = value
     }
 
-    set parent(newParent) {
-        // 发起解绑
-        this.emit<ILayerEvent>('unbindParent', [])
-
-        this._parent = newParent
-
-        if (newParent === null) return
-
-        const render = this.render.bind(this)
-        const change = () => newParent.emit<ILayerEvent>('change', [])
-
-        // 绑定
-        newParent.children.push(this)
-        newParent.on<ILayerEvent>('render', render)
-        this.on<ILayerEvent>('change', change)
-
-        // 绑定新的解绑事件
-        this.once<ILayerEvent>('unbindParent', () => {
-            const index = newParent.children.indexOf(this)
-            if (index !== -1) {
-                newParent.children.splice(index, 1)
-            }
-
-            newParent.off('render', render)
-            this.off<ILayerEvent>('change', change)
-        })
+    private _children: Layer<any>[]
+    get children() {
+        return this._children
     }
-
-    private _parent: Layer<any> | null
+    set children(value) {
+        throw new Error(`Layer.children's pointer not be allowed to modified`)
+    }
 
     constructor(state: Partial<ILayerState> = {}) {
         this.state = proxy<ILayerState>(
@@ -238,14 +215,14 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
                 strokeWidth: 2,
                 visible: true,
             },
-            (key, oldValue, newValue) => {
+            (key, oldValue, newValue, target) => {
                 validator(key, newValue, oldValue).then(
                     (value) => {
                         this.emit<ILayerEvent>(key, [value as any])
                         this.emit<ILayerEvent>('change', [])
                     },
                     (err) => {
-                        this.state[key] = oldValue
+                        target[key] = oldValue
                         throw err
                     }
                 )
@@ -253,6 +230,55 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         )
         Object.assign(this.state, state)
         // mergeOptions(this.state, state)
+
+        let onParentChange: ILayerEvent['change']
+        this._parent = proxy<{ value: Layer<any> | null }>(
+            { value: null },
+            (key, oldValue, newValue, target) => {
+                if (key !== 'value') return
+
+                if (!(newValue instanceof Layer || newValue === null)) {
+                    target[key] = oldValue
+                    throw new Error(`Layer.parent must inherit Class Layer`)
+                }
+
+                // 从旧的父图层中移除
+                if (oldValue !== null) {
+                    const index = oldValue.children.indexOf(this)
+                    if (index !== -1) {
+                        oldValue.children.splice(index, 1)
+                    }
+                    this.off<ILayerEvent>('change', onParentChange)
+                }
+
+                // 添加到新的父图层
+                if (newValue !== null) {
+                    newValue.children.push(this)
+                    onParentChange = () => newValue.emit('change', [])
+                    this.on<ILayerEvent>('change', onParentChange)
+                }
+
+                this.emit<ILayerEvent>('parent', [this.parent])
+                this.emit<ILayerEvent>('change', [])
+            }
+        )
+
+        this._children = proxy<Layer<any>[]>(
+            [],
+            (key, oldValue, newValue, target) => {
+                if (key >= 0 && !(newValue instanceof Layer)) {
+                    if (oldValue) {
+                        target[key] = oldValue
+                    } else {
+                        target.splice(Number(key), 1)
+                    }
+                    throw new Error(`Layer.children must inherit Class Layer`)
+                }
+
+                this.emit<ILayerEvent>('children', [this.children])
+                this.emit<ILayerEvent>('change', [])
+            }
+        )
     }
 
     /**
@@ -260,31 +286,26 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      */
     add(layer: Layer<any>) {
         if (!(layer instanceof Layer)) return this
-        if (layer.parent === this) return this
         layer.parent = this
-        this.emit<ILayerEvent>('add', [layer])
-        return this.onChange()
+        return this
     }
 
     /**
      * 添加到父图层
      */
-    addTo(layer: Layer) {
+    addTo(layer: Layer<any>) {
         if (!(layer instanceof Layer)) return this
-        if (layer.parent === this) return this
         this.parent = layer
-        this.emit<ILayerEvent>('addTo', [layer])
-        return this.onChange()
+        return this
     }
 
     /**
      * 移除子图层
      */
-    remove(layer: Layer) {
+    remove(layer: Layer<any>) {
         if (!(layer instanceof Layer)) return this
         layer.parent = null
-        this.emit<ILayerEvent>('remove', [layer])
-        return this.onChange()
+        return this
     }
 
     /**
@@ -292,8 +313,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
      */
     removeAll() {
         this.children.forEach((child) => this.remove(child))
-        this.emit<ILayerEvent>('removeAll', [])
-        return this.onChange()
+        return this
     }
 
     /**
@@ -345,7 +365,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
             console.error(err)
         }
 
-        this.emit<ILayerEvent>('render', [ctx, utils])
+        this.children.forEach((child) => child.render(ctx, utils))
 
         ctx.restore()
 
