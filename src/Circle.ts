@@ -1,5 +1,7 @@
 import Layer, { ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
+import { proxy, IProxyChange } from './utils/index'
+import * as valid from './utils/vaildate'
 // import { cloneDeep } from './utils'
 
 export interface ICircleProps {
@@ -29,44 +31,108 @@ export interface ICircleProps {
 }
 
 export interface ICircleEvent extends ILayerEvent {
-    size: (radius: ICircleProps['size']) => void
+    size: (size: ICircleProps['size']) => void
     angle: (angle: ICircleProps['angle']) => void
     arc: (arc: ICircleProps['arc']) => void
     dash: (dash: ICircleProps['dash']) => void
 }
 
+const validator = valid.createValidator<ICircleProps>({
+    size(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Circle.props.size must be a number')
+        }
+
+        return value
+    },
+    angle(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Circle.props.angle must be a number')
+        }
+
+        return value
+    },
+    arc(value) {
+        if (!valid.isBoolean(value)) {
+            throw new Error('Circle.props.arc must be a boolean')
+        }
+
+        return value
+    },
+    dash(value) {
+        if (!(value === null || valid.isArray<number>(value, valid.isNumber))) {
+            throw new Error('Layer.state.dash must be a number[]/null')
+        }
+
+        return value
+    },
+})
+
 /**
  * 可绘制 圆形、扇形、弧形
  */
 export default class Circle extends Layer<ICircleEvent> {
-    /**
-     * 字段详情：[[ICircleProps]]
-     */
-    circleProps: ICircleProps = {
-        size: 30,
-        angle: 360,
-        arc: false,
-        dash: null
-    }
+    props: ICircleProps
 
     constructor() {
         super({
             fill: '#c79a667F',
-            stroke: '#c79a66'
+            stroke: '#c79a66',
         })
+
+        const onDashChange: IProxyChange<number[]> = (
+            key,
+            oldValue,
+            newValue,
+            target
+        ) => {
+            if (key >= 0 && !valid.isNumber(newValue)) {
+                if (oldValue) {
+                    target[key] = oldValue
+                } else {
+                    target.splice(Number(key), 1)
+                }
+                throw new Error(`Circle.props.dash's value must be a number`)
+            }
+            this.emit('dash', [this.props.dash])
+            this.emit('change', [])
+        }
+
+        this.props = proxy<ICircleProps>(
+            {
+                size: 30,
+                angle: 360,
+                arc: false,
+                dash: null,
+            },
+            (key, oldValue, newValue, target) => {
+                validator(key, newValue, oldValue).then(
+                    (value) => {
+                        if (key === 'dash' && valid.isArray(value)) {
+                            target[key as 'dash'] = proxy<number[]>(
+                                value,
+                                onDashChange
+                            )
+                        }
+                        this.emit(key, [value] as any)
+                        this.emit('change', [])
+                    },
+                    (err) => {
+                        target[key] = oldValue
+                        throw err
+                    }
+                )
+            }
+        )
     }
 
     /**
      * 设置半径
-     * @param value [[ICircleProps]]['radius']
+     * @param value [[ICircleProps]]['size']
      */
     size(value: ICircleProps['size']) {
-        if (typeof value !== 'number') return this
-        if (this.circleProps.size === value) return this
-
-        this.circleProps.size = value
-        this.emit('size', [value])
-        return this.onChange()
+        this.props.size = value
+        return this
     }
 
     /**
@@ -74,13 +140,8 @@ export default class Circle extends Layer<ICircleEvent> {
      * @param value
      */
     angle(value: ICircleProps['angle']) {
-        if (typeof value !== 'number') return this
-        const _value = Math.max(0, Math.min(value, 360))
-        if (this.circleProps.angle === _value) return this
-
-        this.circleProps.angle = _value
-        this.emit('angle', [_value])
-        return this.onChange()
+        this.props.angle = value
+        return this
     }
 
     /**
@@ -88,39 +149,31 @@ export default class Circle extends Layer<ICircleEvent> {
      * @param value 值为 `true` 时，将不会渲染扇形两条直线的边。
      */
     arc(value: ICircleProps['arc']) {
-        if (typeof value !== 'boolean') return this
-        if (this.circleProps.arc === value) return this
-
-        this.circleProps.arc = value
-        this.emit('arc', [value])
-        return this.onChange()
+        this.props.arc = value
+        return this
     }
 
     /**
      * 设置线段样式
      */
     dash(value: ICircleProps['dash']) {
-        if (!Array.isArray(value)) return this
-        if (value.some(v => typeof v !== 'number')) return this
-
-        this.circleProps.dash = value
-        this.emit('dash', [value])
-        return this.onChange()
+        this.props.dash = value
+        return this
     }
 
     protected _clone() {
         const layer = new Circle()
-        // layer.circleProps = cloneDeep(this.circleProps)
+        // layer.props = cloneDeep(this.props)
         return layer
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
         const { strokeWidth } = this.state
-        const { size, angle, arc, dash } = this.circleProps
+        const { size, angle, arc, dash } = this.props
         const { mapping } = utils
 
         if (dash) {
-            ctx.setLineDash(dash.map(v => v * strokeWidth))
+            ctx.setLineDash(dash.map((v) => v * strokeWidth))
         }
 
         const _angle = (angle * Math.PI) / 180

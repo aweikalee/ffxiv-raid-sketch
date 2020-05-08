@@ -43,3 +43,13 @@ export function isCanvasGradient(value: unknown): value is CanvasGradient {
 export function isCanvasPattern(value: unknown): value is CanvasPattern {
     return value instanceof CanvasPattern
 }
+
+export function isArray<T = any>(
+    value: unknown,
+    typeCheck?: (value: unknown) => boolean
+): value is T[] {
+    return (
+        Array.isArray(value) &&
+        (typeCheck ? value.every((v) => typeCheck(v)) : true)
+    )
+}
