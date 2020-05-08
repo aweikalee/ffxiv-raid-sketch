@@ -1,8 +1,7 @@
-import Layer, { ILayerEvent } from './Layer'
+import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { proxy, IProxyChange } from './utils/index'
+import { proxy, IProxyChange, deepClone, merge } from './utils/index'
 import * as valid from './utils/vaildate'
-// import { cloneDeep } from './utils'
 
 export interface ICircleProps {
     /**
@@ -74,10 +73,14 @@ const validator = valid.createValidator<ICircleProps>({
 export default class Circle extends Layer<ICircleEvent> {
     props: ICircleProps
 
-    constructor() {
+    constructor(
+        state: Partial<ILayerState> = {},
+        props: Partial<ICircleProps> = {}
+    ) {
         super({
             fill: '#c79a667F',
             stroke: '#c79a66',
+            ...state,
         })
 
         const onDashChange: IProxyChange<number[]> = (
@@ -124,6 +127,8 @@ export default class Circle extends Layer<ICircleEvent> {
                 )
             }
         )
+
+        merge(this.props, props)
     }
 
     /**
@@ -162,9 +167,7 @@ export default class Circle extends Layer<ICircleEvent> {
     }
 
     protected _clone() {
-        const layer = new Circle()
-        // layer.props = cloneDeep(this.props)
-        return layer
+        return new Circle(deepClone(this.state), deepClone(this.props))
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
