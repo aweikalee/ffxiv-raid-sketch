@@ -5,7 +5,7 @@
  * @param target object/array
  */
 export function deepClone<T>(target: T): T {
-    if (typeof target === 'object') {
+    if (typeof target === 'object' && target !== null) {
         let cloneTarget = (Array.isArray(target) ? [] : {}) as T
         for (const key in target) {
             cloneTarget[key] = deepClone(target[key])
