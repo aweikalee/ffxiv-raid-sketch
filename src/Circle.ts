@@ -1,6 +1,6 @@
 import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { proxy, IProxyChange, deepClone, merge } from './utils/index'
+import { proxy, deepClone, merge } from './utils/index'
 import * as valid from './utils/vaildate'
 
 export interface ICircleProps {
@@ -26,7 +26,7 @@ export interface ICircleProps {
     /**
      * 线段样式
      */
-    dash: number[] | null
+    dash: readonly number[] | null
 }
 
 export interface ICircleEvent extends ILayerEvent {
@@ -63,7 +63,7 @@ const validator = valid.createValidator<ICircleProps>({
             throw new Error('Circle.props.dash must be a number[]/null')
         }
 
-        return value
+        return Object.freeze(value)
     },
 })
 
@@ -83,24 +83,6 @@ export default class Circle extends Layer<ICircleEvent> {
             ...state,
         })
 
-        const onDashChange: IProxyChange<number[]> = (
-            key,
-            oldValue,
-            newValue,
-            target
-        ) => {
-            if (key >= 0 && !valid.isNumber(newValue)) {
-                if (oldValue) {
-                    target[key] = oldValue
-                } else {
-                    target.splice(Number(key), 1)
-                }
-                throw new Error(`Circle.props.dash's value must be a number`)
-            }
-            this.emit('dash', [this.props.dash])
-            this.emit('change', [])
-        }
-
         this.props = proxy<ICircleProps>(
             {
                 size: 30,
@@ -111,12 +93,6 @@ export default class Circle extends Layer<ICircleEvent> {
             (key, oldValue, newValue, target) => {
                 validator(key, newValue, oldValue).then(
                     (value) => {
-                        if (key === 'dash' && valid.isArray(value)) {
-                            target[key as 'dash'] = proxy<number[]>(
-                                value,
-                                onDashChange
-                            )
-                        }
                         this.emit(key, [value] as any)
                         this.emit('change', [])
                     },
