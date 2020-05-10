@@ -184,126 +184,46 @@ const validator = valid.createValidator<ILayerState>({
  */
 export default class Layer<E extends ILayerEvent = ILayerEvent> {
     state: ILayerState
-
+    parent: Layer<any> | null
+    children: Layer<any>[]
     protected subscribe = new Subscribe<E>()
 
-    private _parent: { value: Layer<any> | null }
-    get parent() {
-        return this._parent.value
-    }
-    set parent(value) {
-        this._parent.value = value
-    }
-
-    private _children: { value: Layer<any>[] }
-    get children() {
-        return this._children.value
-    }
-    set children(value) {
-        this._children.value = value
-    }
-
     constructor(state: Partial<ILayerState> = {}) {
-        this.state = proxy<ILayerState>(
-            {
-                x: 0,
-                y: 0,
-                rotate: 0,
-                scaleX: 1,
-                scaleY: 1,
-                opacity: 1,
-                fill: '#000000',
-                stroke: '#000000',
-                strokeWidth: 2,
-                visible: true,
+        this.state = proxyState(this, {
+            x: 0,
+            y: 0,
+            rotate: 0,
+            scaleX: 1,
+            scaleY: 1,
+            opacity: 1,
+            fill: '#000000',
+            stroke: '#000000',
+            strokeWidth: 2,
+            visible: true,
+        })
+
+        const parent = proxyParent(this, null)
+        const children = proxyChildren(this, [])
+        Object.defineProperties(this, {
+            parent: {
+                get() {
+                    return parent.value
+                },
+                set(v) {
+                    parent.value = v
+                },
             },
-            (key, oldValue, newValue, target) => {
-                validator(key, newValue, oldValue).then(
-                    (value) => {
-                        this.emit<ILayerEvent>(key, [value as any])
-                        this.emit<ILayerEvent>('change', [])
-                    },
-                    (err) => {
-                        target[key] = oldValue
-                        throw err
-                    }
-                )
-            }
-        )
+            children: {
+                get() {
+                    return children.value
+                },
+                set(v) {
+                    children.value = v
+                },
+            },
+        })
+
         merge(this.state, state)
-
-        let onParentChange: ILayerEvent['change']
-        this._parent = proxy<{ value: Layer<any> | null }>(
-            { value: null },
-            (key, oldValue, newValue, target) => {
-                if (key !== 'value') return
-
-                if (!(isLayer(newValue) || newValue === null)) {
-                    target[key] = oldValue
-                    throw new Error(`Layer.parent must be a Layer`)
-                }
-
-                // 从旧的父图层中移除
-                if (oldValue !== null) {
-                    const index = oldValue.children.indexOf(this)
-                    if (index !== -1) {
-                        oldValue.children.splice(index, 1)
-                    }
-                    this.off<ILayerEvent>('change', onParentChange)
-                }
-
-                // 添加到新的父图层
-                if (newValue !== null) {
-                    newValue.children.push(this)
-                    onParentChange = () => newValue.emit('change', [])
-                    this.on<ILayerEvent>('change', onParentChange)
-                }
-
-                this.emit<ILayerEvent>('parent', [this.parent])
-                this.emit<ILayerEvent>('change', [])
-            }
-        )
-
-        const proxyChildren = (target: Layer['children']) => {
-            return proxy<Layer<any>[]>(
-                target,
-                (key, oldValue, newValue, target) => {
-                    if (key >= 0 && !isLayer(newValue)) {
-                        if (oldValue) {
-                            target[key] = oldValue
-                        } else {
-                            target.splice(Number(key), 1)
-                        }
-                        throw new Error(
-                            `Layer.children's value must be a Layer`
-                        )
-                    }
-
-                    this.emit<ILayerEvent>('children', [this.children])
-                    this.emit<ILayerEvent>('change', [])
-                }
-            )
-        }
-
-        this._children = proxy<{ value: Layer<any>[] }>(
-            { value: proxyChildren([]) },
-            (key, oldValue, newValue, target) => {
-                if (key !== 'value') return
-
-                if (
-                    !Array.isArray(newValue) ||
-                    newValue.some((v) => !isLayer(v))
-                ) {
-                    target[key] = oldValue
-                    throw new Error(`Layer.children must be a Layer[]`)
-                }
-
-                target[key] = proxyChildren(newValue)
-
-                this.emit<ILayerEvent>('children', [this.children])
-                this.emit<ILayerEvent>('change', [])
-            }
-        )
     }
 
     /**
@@ -597,4 +517,94 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
 
 export function isLayer(value: unknown): value is Layer<any> {
     return value instanceof Layer
+}
+
+function proxyState(that: Layer<any>, initialValue: ILayerState) {
+    return proxy<ILayerState>(
+        initialValue,
+        (key, oldValue, newValue, target) => {
+            validator(key, newValue, oldValue).then(
+                (value) => {
+                    that.emit<ILayerEvent>(key, [value as any])
+                    that.emit<ILayerEvent>('change', [])
+                },
+                (err) => {
+                    target[key] = oldValue
+                    throw err
+                }
+            )
+        }
+    )
+}
+
+function proxyParent(that: Layer<any>, initialValue: Layer['parent']) {
+    let onParentChange: ILayerEvent['change']
+    return proxy<{ value: Layer['parent'] }>(
+        { value: initialValue },
+        (key, oldValue, newValue, target) => {
+            if (key !== 'value') return
+
+            if (!(isLayer(newValue) || newValue === null)) {
+                target[key] = oldValue
+                throw new Error(`Layer.parent must be a Layer`)
+            }
+
+            // 从旧的父图层中移除
+            if (oldValue !== null) {
+                const index = oldValue.children.indexOf(this)
+                if (index !== -1) {
+                    oldValue.children.splice(index, 1)
+                }
+                that.off<ILayerEvent>('change', onParentChange)
+            }
+
+            // 添加到新的父图层
+            if (newValue !== null) {
+                newValue.children.push(this)
+                onParentChange = () => newValue.emit('change', [])
+                that.on<ILayerEvent>('change', onParentChange)
+            }
+
+            that.emit<ILayerEvent>('parent', [that.parent])
+            that.emit<ILayerEvent>('change', [])
+        }
+    )
+}
+
+function proxyChildren(that: Layer<any>, initialValue: Layer['children']) {
+    return proxy<{ value: Layer['children'] }>(
+        { value: proxyChildrenArray(that, initialValue) },
+        (key, oldValue, newValue, target) => {
+            if (key !== 'value') return
+
+            if (!Array.isArray(newValue) || newValue.some((v) => !isLayer(v))) {
+                target[key] = oldValue
+                throw new Error(`Layer.children must be a Layer[]`)
+            }
+
+            target[key] = proxyChildrenArray(that, newValue)
+
+            that.emit<ILayerEvent>('children', [that.children])
+            that.emit<ILayerEvent>('change', [])
+        }
+    )
+}
+
+function proxyChildrenArray(that: Layer<any>, initialValue: Layer['children']) {
+    return proxy<Layer['children']>(
+        initialValue,
+        (key, oldValue, newValue, target) => {
+            if (key >= 0 && !isLayer(newValue)) {
+                if (oldValue) {
+                    target[key] = oldValue
+                } else {
+                    target.splice(Number(key), 1)
+                }
+                throw new Error(`Layer.children's value must be a Layer`)
+            }
+
+            that.emit<ILayerEvent>('children', [that.children])
+            that.emit<ILayerEvent>('change', [])
+        }
+    )
 }
