@@ -1,6 +1,7 @@
-import Layer, { ILayerEvent } from './Layer'
+import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
-// import { cloneDeep } from './utils'
+import { proxy, deepClone, merge } from './utils/index'
+import * as valid from './utils/vaildate'
 
 export interface ITextProps {
     /**
@@ -43,66 +44,100 @@ export interface ITextEvent extends ILayerEvent {
     italic: (italic: ITextProps['italic']) => void
 }
 
+const validator = valid.createValidator<ITextProps>({
+    value(value) {
+        if (!valid.isString(value)) {
+            throw new Error('Text.props.value must be a string')
+        }
+
+        return value
+    },
+    align(value) {
+        if (!valid.isCanvasTextAlign(value)) {
+            throw new Error('Text.props.align must be a CanvasTextAlign')
+        }
+
+        return value
+    },
+    size(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Text.props.size must be a number')
+        }
+
+        return value
+    },
+    font(value) {
+        if (!valid.isString(value)) {
+            throw new Error('Text.props.font must be a string')
+        }
+
+        return value
+    },
+    bold(value) {
+        if (!valid.isBoolean(value)) {
+            throw new Error('Text.props.bold must be a boolean')
+        }
+
+        return value
+    },
+    italic(value) {
+        if (!valid.isBoolean(value)) {
+            throw new Error('Text.props.italic must be a boolean')
+        }
+
+        return value
+    },
+})
+
 /**
  * 绘制文本
  */
 export default class Text extends Layer<ITextEvent> {
-    /**
-     * 字段详情：[[ITextProps]]
-     */
-    textProps: ITextProps = {
-        value: '',
-        align: 'center',
-        size: 2.5,
-        font: '',
-        bold: false,
-        italic: false
-    }
+    props: ITextProps
 
-    constructor(value?: ITextProps['value']) {
+    constructor(
+        state: Partial<ILayerState> = {},
+        props: Partial<ITextProps> = {}
+    ) {
         super({
-            fill: '#ffffff'
+            fill: '#ffffff',
+            ...state,
         })
 
-        this.value(value)
+        this.props = proxyProps(this, {
+            value: '',
+            align: 'center',
+            size: 2.5,
+            font: '',
+            bold: false,
+            italic: false,
+        })
+
+        merge(this.props, props)
     }
 
     /**
      * 设置文本内容
      */
     value(value: ITextProps['value']) {
-        if (typeof value !== 'string' && typeof value !== 'number') return this
-        const _value = `${value}`
-        if (this.textProps.value === _value) return this
-
-        this.textProps.value = _value
-        this.emit('value', [_value])
-        return this.onChange()
+        this.props.value = value
+        return this
     }
 
     /**
      * 设置字体大小
      */
     size(value: ITextProps['size']) {
-        if (typeof value !== 'number') return this
-        if (this.textProps.size === value) return this
-
-        this.textProps.size = value
-        this.emit('size', [value])
-        return this.onChange()
+        this.props.size = value
+        return this
     }
 
     /**
      * 设置左右对齐方式
      */
     align(value: ITextProps['align']) {
-        if (!['start', 'end', 'left', 'center', 'right'].includes(value))
-            return this
-        if (this.textProps.align === value) return this
-
-        this.textProps.align = value
-        this.emit('align', [value])
-        return this.onChange()
+        this.props.align = value
+        return this
     }
 
     /**
@@ -111,46 +146,32 @@ export default class Text extends Layer<ITextEvent> {
      * 没有特殊需求不建议随便更改字体
      */
     font(value: ITextProps['font']) {
-        if (typeof value !== 'string') return this
-        if (this.textProps.font === value) return this
-
-        this.textProps.font = value
-        this.emit('font', [value])
-        return this.onChange()
+        this.props.font = value
+        return this
     }
 
     /**
      * 设置加粗
      */
     bold(value: ITextProps['bold']) {
-        if (typeof value !== 'boolean') return this
-        if (this.textProps.bold === value) return this
-
-        this.textProps.bold = value
-        this.emit('bold', [value])
-        return this.onChange()
+        this.props.bold = value
+        return this
     }
 
     /**
      * 设置斜体
      */
     italic(value: ITextProps['italic']) {
-        if (typeof value !== 'boolean') return this
-        if (this.textProps.italic === value) return this
-
-        this.textProps.italic = value
-        this.emit('italic', [value])
-        return this.onChange()
+        this.props.italic = value
+        return this
     }
 
     protected _clone() {
-        const layer = new Text()
-        // layer.textProps = cloneDeep(this.textProps)
-        return layer
+        return new Text(deepClone(this.state), deepClone(this.props))
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
-        const { value, font, size, align, bold, italic } = this.textProps
+        const { value, font, size, align, bold, italic } = this.props
         const { mapping } = utils
 
         const fontStyle = italic ? 'italic' : 'normal'
@@ -167,4 +188,25 @@ export default class Text extends Layer<ITextEvent> {
         ctx.shadowColor = '#000000'
         ctx.fillText(value, 0, 0)
     }
+}
+
+/**
+ * @ignore
+ */
+function proxyProps(that: Text, initialValue: ITextProps) {
+    return proxy<ITextProps>(
+        initialValue,
+        (key, oldValue, newValue, target) => {
+            validator(key, newValue, oldValue).then(
+                (value) => {
+                    that.emit(key, [value] as any)
+                    that.emit('change', [])
+                },
+                (err) => {
+                    target[key] = oldValue
+                    throw err
+                }
+            )
+        }
+    )
 }

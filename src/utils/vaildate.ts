@@ -44,6 +44,10 @@ export function isCanvasPattern(value: unknown): value is CanvasPattern {
     return value instanceof CanvasPattern
 }
 
+export function isCanvasTextAlign(value: unknown): value is CanvasTextAlign {
+    return ['center', 'end', 'left', 'right', 'start'].includes(value as string)
+}
+
 export function isArray<T = any>(
     value: unknown,
     typeCheck?: (value: unknown) => boolean
