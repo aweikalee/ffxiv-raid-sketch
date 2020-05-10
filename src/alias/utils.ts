@@ -11,15 +11,3 @@ export function setAlias<T>(map: T, name: keyof T, alias: string) {
 
     map[alias] = map[name]
 }
-
-/**
- * @ignore
- */
-export function setAliasMapping<T>(map: T, alias: string, value: string) {
-    if (!alias) throw new Error('alias is not a string')
-    if (!value) throw new Error('value is not a string')
-    if (alias in map)
-        console.warn('alias already exists, value will be replaced')
-
-    map[alias] = value
-}

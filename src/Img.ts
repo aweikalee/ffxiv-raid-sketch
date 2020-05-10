@@ -1,7 +1,5 @@
 import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { IMG_ALIAS } from './alias/img'
-import { setAliasMapping } from './alias/utils'
 import { proxy, deepClone, merge } from './utils/index'
 import * as valid from './utils/vaildate'
 
@@ -31,7 +29,7 @@ const validator = valid.createValidator<IImgProps>({
             throw new Error(`Img.props.src must be a string/null`)
         }
 
-        return IMG_ALIAS[value] || value
+        return value
     },
     size(value) {
         if (!(valid.isNumber(value) || value === 'auto')) {
@@ -84,19 +82,6 @@ export default class Img extends Layer<IImgEvent> {
     size(value: number) {
         this.props.size = value
         return this
-    }
-
-    /**
-     * 定义图片地址的别名，方便后期使用
-     *
-     * 比如 `Img.setAlias('buff', 'https://example/buff.png')`
-     *
-     * 之后就可以使用 `Img('buff')` 来使用这张图片了
-     * @param alias 别名
-     * @param value 值
-     */
-    static setAlias(alias: string, value: string) {
-        setAliasMapping(IMG_ALIAS, alias, value)
     }
 
     protected _clone() {
