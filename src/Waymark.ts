@@ -6,7 +6,7 @@ import { setAlias } from './alias/utils'
 import Img from './Img'
 import Circle from './Circle'
 import Rect from './Rect'
-import { proxy, deepClone, merge } from './utils/index'
+import { proxy, deepClone, merge, defineImmutable } from './utils/index'
 import * as valid from './utils/vaildate'
 
 export interface IWaymarkProps {
@@ -60,10 +60,12 @@ export default class Waymark extends Layer<IWaymarkEvent> {
 
         this.img.on('loaded', () => this.emit('change', []))
 
-        this.props = proxyProps(this, {
+        const theProps = proxyProps(this, {
             type: 'A',
             size: 5,
         })
+
+        defineImmutable(this, 'props', theProps)
 
         merge(this.props, props)
     }

@@ -4,7 +4,7 @@ import { MARK } from './img/mark/map'
 import { MAKR_ALIAS, IMarkAlias } from './alias/mark'
 import { setAlias } from './alias/utils'
 import Img from './Img'
-import { proxy, deepClone, merge } from './utils/index'
+import { proxy, deepClone, merge, defineImmutable } from './utils/index'
 import * as valid from './utils/vaildate'
 
 export interface IMarkProps {
@@ -60,10 +60,12 @@ export default class Mark extends Layer<IMarkEvent> {
 
         this.img.on('loaded', () => this.emit('change', []))
 
-        this.props = proxyProps(this, {
+        const theProps = proxyProps(this, {
             type: 'attack1',
             size: 7,
         })
+
+        defineImmutable(this, 'props', theProps)
 
         merge(this.props, props)
     }

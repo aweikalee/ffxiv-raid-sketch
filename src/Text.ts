@@ -1,6 +1,6 @@
 import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { proxy, deepClone, merge } from './utils/index'
+import { proxy, deepClone, merge, defineImmutable } from './utils/index'
 import * as valid from './utils/vaildate'
 
 export interface ITextProps {
@@ -104,7 +104,7 @@ export default class Text extends Layer<ITextEvent> {
             ...state,
         })
 
-        this.props = proxyProps(this, {
+        const theProps = proxyProps(this, {
             value: '',
             align: 'center',
             size: 2.5,
@@ -112,6 +112,8 @@ export default class Text extends Layer<ITextEvent> {
             bold: false,
             italic: false,
         })
+
+        defineImmutable(this, 'props', theProps)
 
         merge(this.props, props)
     }

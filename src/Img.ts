@@ -1,6 +1,6 @@
 import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { proxy, deepClone, merge } from './utils/index'
+import { proxy, deepClone, merge, defineImmutable } from './utils/index'
 import * as valid from './utils/vaildate'
 
 export interface IImgProps {
@@ -56,10 +56,12 @@ export default class Img extends Layer<IImgEvent> {
             this.emit('change', [])
         }
 
-        this.props = proxyProps(this, {
+        const theProps = proxyProps(this, {
             src: null,
             size: 'auto',
         })
+
+        defineImmutable(this, 'props', theProps)
 
         merge(this.props, props)
     }

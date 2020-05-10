@@ -1,5 +1,5 @@
 import Layer from './Layer'
-import { proxy, merge } from './utils/index'
+import { proxy, merge, defineImmutable, defineProperties } from './utils/index'
 import * as valid from './utils/vaildate'
 
 export interface ISketchOptions {
@@ -93,15 +93,8 @@ export default class Sketch {
         })
         const layer = proxyLayer(this, new Layer())
 
-        Object.defineProperties(this, {
-            options: {
-                get() {
-                    return theOptions
-                },
-                set() {
-                    throw new Error(`Sketch.options's pointer is immutable`)
-                },
-            },
+        defineImmutable(this, 'options', theOptions)
+        defineProperties<Sketch>(this, {
             layer: {
                 get() {
                     return layer.value

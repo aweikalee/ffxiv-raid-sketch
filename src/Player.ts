@@ -5,7 +5,7 @@ import { JOB_ALIAS, IJobAlias } from './alias/job'
 import { setAlias } from './alias/utils'
 import Img from './Img'
 import Circle from './Circle'
-import { proxy, deepClone, merge } from './utils/index'
+import { proxy, deepClone, merge, defineImmutable } from './utils/index'
 import * as valid from './utils/vaildate'
 
 export interface IPlayerProps {
@@ -64,10 +64,12 @@ export default class Player extends Layer<IPlayerEvent> {
 
         this.img.on('loaded', () => this.emit('change', []))
 
-        this.props = proxyProps(this, {
+        const theProps = proxyProps(this, {
             job: 'archer',
             size: 5,
         })
+
+        defineImmutable(this, 'props', theProps)
 
         merge(this.props, props)
     }

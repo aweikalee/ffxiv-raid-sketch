@@ -1,6 +1,12 @@
 import Layer, { ILayerState, ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { proxy, deepClone, merge, rotationAngleY } from './utils/index'
+import {
+    proxy,
+    deepClone,
+    merge,
+    rotationAngleY,
+    defineImmutable,
+} from './utils/index'
 import * as valid from './utils/vaildate'
 
 export interface ILineCoordinate {
@@ -108,13 +114,15 @@ export default class Line extends Layer<ILineEvent> {
             ...state,
         })
 
-        this.props = proxyProps(this, {
+        const theProps = proxyProps(this, {
             coordinates: proxyCoordinates(this, []),
             smooth: false,
             dash: null,
             startCap: 'none',
             endCap: 'none',
         })
+
+        defineImmutable(this, 'props', theProps)
 
         merge(this.props, props)
     }

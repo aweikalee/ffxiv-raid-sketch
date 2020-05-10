@@ -7,6 +7,8 @@ import {
     rotationAngleY,
     merge,
     deepClone,
+    defineImmutable,
+    defineProperties,
 } from './utils/index'
 import * as valid from './utils/vaildate'
 
@@ -189,7 +191,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
     protected subscribe = new Subscribe<E>()
 
     constructor(state: Partial<ILayerState> = {}) {
-        this.state = proxyState(this, {
+        const theState = proxyState(this, {
             x: 0,
             y: 0,
             rotate: 0,
@@ -201,10 +203,11 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
             strokeWidth: 2,
             visible: true,
         })
-
         const parent = proxyParent(this, null)
         const children = proxyChildren(this, [])
-        Object.defineProperties(this, {
+
+        defineImmutable(this, 'state', theState)
+        defineProperties<Layer<any>>(this, {
             parent: {
                 get() {
                     return parent.value

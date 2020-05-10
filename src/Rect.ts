@@ -1,6 +1,6 @@
 import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { proxy, deepClone, merge } from './utils/index'
+import { proxy, deepClone, merge, defineImmutable } from './utils/index'
 import * as valid from './utils/vaildate'
 
 export interface IRectProps {
@@ -66,11 +66,13 @@ export default class Rect extends Layer<IRectEvent> {
             ...state,
         })
 
-        this.props = proxyProps(this, {
+        const theProps = proxyProps(this, {
             w: 30,
             h: 30,
             dash: null,
         })
+
+        defineImmutable(this, 'props', theProps)
 
         merge(this.props, props)
     }

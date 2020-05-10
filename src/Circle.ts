@@ -1,6 +1,6 @@
 import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { proxy, deepClone, merge } from './utils/index'
+import { proxy, deepClone, merge, defineImmutable } from './utils/index'
 import * as valid from './utils/vaildate'
 
 export interface ICircleProps {
@@ -83,12 +83,14 @@ export default class Circle extends Layer<ICircleEvent> {
             ...state,
         })
 
-        this.props = proxyProps(this, {
+        const theProps = proxyProps(this, {
             size: 30,
             angle: 360,
             arc: false,
             dash: null,
         })
+
+        defineImmutable(this, 'props', theProps)
 
         merge(this.props, props)
     }
