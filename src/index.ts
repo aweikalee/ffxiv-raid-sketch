@@ -1,6 +1,6 @@
 export { default as Sketch } from './Sketch'
 export { default as Layer } from './Layer'
-// export { default as Line } from './Line'
+export { default as Line } from './Line'
 // export { default as Rect } from './Rect'
 export { default as Circle } from './Circle'
 export { default as Img } from './Img'

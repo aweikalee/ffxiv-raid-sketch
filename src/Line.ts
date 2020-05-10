@@ -1,7 +1,7 @@
 import Layer, { ILayerState, ILayerEvent } from './Layer'
 import { ISketchUtils } from './Sketch'
-import { rotationAngleY } from './utils/index'
-// import { cloneDeep } from './utils'
+import { proxy, deepClone, merge, rotationAngleY } from './utils/index'
+import * as valid from './utils/vaildate'
 
 export interface ILineCoordinate {
     x: number
@@ -14,7 +14,7 @@ export interface ILineProps {
     /**
      * 点的坐标
      */
-    coordinates: number[][]
+    coordinates: (readonly number[])[]
 
     /**
      * 光滑
@@ -24,7 +24,7 @@ export interface ILineProps {
     /**
      * 线段样式
      */
-    dash: number[] | null
+    dash: readonly number[] | null
 
     /**
      * 出发端点样式
@@ -38,12 +38,11 @@ export interface ILineProps {
 }
 
 export interface ILineEvent extends ILayerEvent {
-    to: (coordinate: number[]) => void
-    clear: () => void
-    startCap: (cap: ILineCap) => void
-    endCap: (cap: ILineCap) => void
+    coordinates: (coordinates: ILineProps['coordinates']) => void
     smooth: (smooth: ILineProps['smooth']) => void
     dash: (dash: ILineProps['dash']) => void
+    startCap: (cap: ILineCap) => void
+    endCap: (cap: ILineCap) => void
 }
 
 /**
@@ -51,26 +50,73 @@ export interface ILineEvent extends ILayerEvent {
  */
 const LINECAP: ILineCap[] = ['none', 'point', 'arrow', 'triangle']
 
+const validator = valid.createValidator<ILineProps>({
+    coordinates(value) {
+        if (
+            !valid.isArray<number[]>(value, (v) => {
+                return valid.isArray<number>(v, valid.isNumber) && v.length >= 2
+            })
+        ) {
+            throw new Error('Line.props.coordinates must be a number[][]')
+        }
+
+        return value
+    },
+    smooth(value) {
+        if (!valid.isBoolean(value)) {
+            throw new Error('Line.props.smooth must be a boolean')
+        }
+
+        return value
+    },
+    dash(value) {
+        if (!(value === null || valid.isArray<number>(value, valid.isNumber))) {
+            throw new Error('Line.props.dash must be a number[]/null')
+        }
+
+        return Object.freeze(value)
+    },
+    startCap(value) {
+        if (!isLineCap(value)) {
+            throw new Error('Line.props.startCap must be a number[]/null')
+        }
+
+        return value
+    },
+    endCap(value) {
+        if (!isLineCap(value)) {
+            throw new Error('Line.props.endCap must be a number[]/null')
+        }
+
+        return value
+    },
+})
+
 /**
  * 可绘制 折线、二次曲线、贝塞尔曲线（任意组合）
  */
 export default class Line extends Layer<ILineEvent> {
-    /**
-     * 字段详情：[[ILineProps]]
-     */
-    lineProps: ILineProps = {
-        coordinates: [],
-        smooth: false,
-        dash: null,
-        startCap: 'none',
-        endCap: 'none'
-    }
+    props: ILineProps
 
-    constructor() {
+    constructor(
+        state: Partial<ILayerState> = {},
+        props: Partial<ILineProps> = {}
+    ) {
         super({
             fill: 'transparent',
-            stroke: '#c79a66'
+            stroke: '#c79a66',
+            ...state,
         })
+
+        this.props = proxyProps(this, {
+            coordinates: proxyCoordinates(this, []),
+            smooth: false,
+            dash: null,
+            startCap: 'none',
+            endCap: 'none',
+        })
+
+        merge(this.props, props)
     }
 
     /**
@@ -96,75 +142,49 @@ export default class Line extends Layer<ILineEvent> {
         cp2x?: number,
         cp2y?: number
     ) {
-        if (typeof x !== 'number' || typeof y !== 'number') return this
-        const coordinate: number[] = []
-
-        const cp1 = [cp1x, cp1y].filter(v => typeof v === 'number')
-        if (cp1.length === 2) {
-            if (this.lineProps.coordinates.length === 0) {
-                this.lineProps.coordinates.push(cp1)
+        const arr = [x, y, cp1x, cp1y, cp2x, cp2y]
+        while (arr.length) {
+            const cur = arr.pop()
+            if (cur !== undefined) {
+                arr.push(cur)
+                break
             }
-            coordinate.push(...cp1)
         }
+        this.props.coordinates.push(arr)
 
-        const cp2 = [cp2x, cp2y].filter(v => typeof v === 'number')
-        if (cp2.length === 2) {
-            coordinate.push(...cp2)
-        }
-
-        coordinate.push(x, y)
-
-        this.lineProps.coordinates.push(coordinate)
-        this.emit('to', [coordinate])
-        return this.onChange()
+        return this
     }
 
     /**
      * 清空所有坐标点
      */
     clear() {
-        const arr = this.lineProps.coordinates
-        if (arr.length === 0) return this
-
-        arr.splice(0, arr.length)
-        this.emit('clear', [])
-        return this.onChange()
+        this.props.coordinates = []
+        return this
     }
 
     /**
      * 设置出发端点样式
      */
     startCap(value: ILineCap) {
-        if (!LINECAP.includes(value)) return this
-        if (this.lineProps.startCap === value) return this
-
-        this.lineProps.startCap = value
-        this.emit('startCap', [value])
-        return this.onChange()
+        this.props.startCap = value
+        return this
     }
 
     /**
      * 设置结束端点样式
      */
     endCap(value: ILineCap) {
-        if (!LINECAP.includes(value)) return this
-        if (this.lineProps.endCap === value) return this
-
-        this.lineProps.endCap = value
-        this.emit('endCap', [value])
-        return this.onChange()
+        this.props.endCap = value
+        return this
     }
 
     /**
      * 光滑折线（曲线点不受影响）
      */
     smooth(value: ILineProps['smooth']) {
-        if (typeof value !== 'boolean') return this
-        if (this.lineProps.smooth === value) return this
-
-        this.lineProps.smooth = value
-        this.emit('smooth', [value])
-        return this.onChange()
+        this.props.smooth = value
+        return this
     }
 
     /**
@@ -173,30 +193,24 @@ export default class Line extends Layer<ILineEvent> {
      * 数值最后将 * strokeWidth 后再被应用
      */
     dash(value: ILineProps['dash']) {
-        if (!Array.isArray(value)) return this
-        if (value.some(v => typeof v !== 'number')) return this
-
-        this.lineProps.dash = value
-        this.emit('dash', [value])
-        return this.onChange()
+        this.props.dash = value
+        return this
     }
 
     protected _clone() {
-        const layer = new Line()
-        // layer.lineProps = cloneDeep(this.lineProps)
-        return layer
+        return new Line(deepClone(this.state), deepClone(this.props))
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
-        const { state, lineProps } = this
-        const { coordinates: coord, startCap, endCap } = this.lineProps
+        const { state, props } = this
+        const { coordinates: coord, startCap, endCap } = this.props
 
         /* 绘制线 */
         drawLine({
             state,
-            lineProps,
+            props,
             ctx,
-            utils
+            utils,
         })
 
         /* 绘制线帽 */
@@ -205,21 +219,21 @@ export default class Line extends Layer<ILineEvent> {
             const startFrom = { x: coord[1][0], y: coord[1][1] }
             const startTo = {
                 x: coord[0][coord[0].length - 2],
-                y: coord[0][coord[0].length - 1]
+                y: coord[0][coord[0].length - 1],
             }
             const endFrom =
                 end[1].length === 2
                     ? {
                           x: end[0][end[0].length - 2],
-                          y: end[0][end[0].length - 1]
+                          y: end[0][end[0].length - 1],
                       }
                     : {
                           x: end[1][end[1].length - 4],
-                          y: end[1][end[1].length - 3]
+                          y: end[1][end[1].length - 3],
                       }
             const endTo = {
                 x: end[1][end[1].length - 2],
-                y: end[1][end[1].length - 1]
+                y: end[1][end[1].length - 1],
             }
 
             drawCap({
@@ -228,7 +242,7 @@ export default class Line extends Layer<ILineEvent> {
                 utils,
                 type: startCap,
                 from: startFrom,
-                to: startTo
+                to: startTo,
             })
             drawCap({
                 state,
@@ -236,7 +250,7 @@ export default class Line extends Layer<ILineEvent> {
                 utils,
                 type: endCap,
                 from: endFrom,
-                to: endTo
+                to: endTo,
             })
         }
     }
@@ -245,19 +259,86 @@ export default class Line extends Layer<ILineEvent> {
 /**
  * @ignore
  */
+function proxyProps(that: Line, initialValue: ILineProps) {
+    return proxy<ILineProps>(
+        initialValue,
+        (key, oldValue, newValue, target) => {
+            validator(key, newValue, oldValue).then(
+                (value) => {
+                    if (key === 'coordinates') {
+                        target['coordinates'] = proxyCoordinates(
+                            that,
+                            value as ILineProps['coordinates']
+                        )
+                    }
+
+                    that.emit(key, [value] as any)
+                    that.emit('change', [])
+                },
+                (err) => {
+                    target[key] = oldValue
+                    throw err
+                }
+            )
+        }
+    )
+}
+
+/**
+ * @ignore
+ */
+function proxyCoordinates(that: Line, initialValue: ILineProps['coordinates']) {
+    return proxy<ILineProps['coordinates']>(
+        initialValue,
+        (key, oldValue, newValue, target) => {
+            if (key >= 0) {
+                if (!valid.isArray<number>(newValue, valid.isNumber)) {
+                    oldValue
+                        ? (target[key] = oldValue)
+                        : target.splice(Number(key), 1)
+                    throw new Error(
+                        `Line.props.coordinates's value must be a number[]`
+                    )
+                }
+
+                const length = newValue.length
+                if (key == 0 && length !== 2) {
+                    throw new Error(
+                        `Line.props.coordinates[0]'s length must equals 2`
+                    )
+                } else if (
+                    key != 0 &&
+                    (length % 2 !== 0 || length > 6 || length < 2)
+                ) {
+                    throw new Error(
+                        `Line.props.coordinates value's length must equals 2/4/6`
+                    )
+                }
+
+                target[key as number] = Object.freeze(newValue)
+            }
+            that.emit('coordinates', [that.props.coordinates])
+            that.emit('change', [])
+        }
+    )
+}
+
+/**
+ * @ignore
+ */
 function drawLine({
     state,
-    lineProps,
+    props,
     ctx,
-    utils
+    utils,
 }: {
     state: ILayerState
-    lineProps: ILineProps
+    props: ILineProps
     ctx: CanvasRenderingContext2D
     utils: ISketchUtils
 }) {
     const { strokeWidth } = state
-    const { coordinates, dash, smooth } = lineProps
+    const { coordinates, dash, smooth } = props
     const { mapping } = utils
 
     ctx.save()
@@ -267,7 +348,7 @@ function drawLine({
 
     /* 线段样式 */
     if (dash) {
-        ctx.setLineDash(dash.map(v => v * strokeWidth))
+        ctx.setLineDash(dash.map((v) => v * strokeWidth))
     }
 
     /* 绘制线段 */
@@ -275,14 +356,14 @@ function drawLine({
         coordinates[0],
         coordinates[0],
         ...coordinates,
-        coordinates[coordinates.length - 1]
+        coordinates[coordinates.length - 1],
     ]
     for (let i = 2, len = _coordinates.length - 1; i < len; i += 1) {
         const now = _coordinates[i]
         if (now.length === 6) {
             ctx.bezierCurveTo.apply(
                 ctx,
-                now.map(v => mapping(v))
+                now.map((v) => mapping(v))
             )
             continue
         }
@@ -290,7 +371,7 @@ function drawLine({
         if (now.length === 4) {
             ctx.quadraticCurveTo.apply(
                 ctx,
-                now.map(v => mapping(v))
+                now.map((v) => mapping(v))
             )
             continue
         }
@@ -305,7 +386,7 @@ function drawLine({
             _coordinates[i - 2],
             _coordinates[i - 1],
             now,
-            _coordinates[i + 1]
+            _coordinates[i + 1],
         ]
 
         const level = 8
@@ -317,7 +398,7 @@ function drawLine({
         if (i === len - 1) {
             ctx.quadraticCurveTo.apply(
                 ctx,
-                [cp1x, cp1y, now[0], now[1]].map(v => mapping(v))
+                [cp1x, cp1y, now[0], now[1]].map((v) => mapping(v))
             )
             continue
         }
@@ -325,14 +406,14 @@ function drawLine({
         if (i === 3) {
             ctx.quadraticCurveTo.apply(
                 ctx,
-                [cp2x, cp2y, now[0], now[1]].map(v => mapping(v))
+                [cp2x, cp2y, now[0], now[1]].map((v) => mapping(v))
             )
             continue
         }
 
         ctx.bezierCurveTo.apply(
             ctx,
-            [cp1x, cp1y, cp2x, cp2y, now[0], now[1]].map(v => mapping(v))
+            [cp1x, cp1y, cp2x, cp2y, now[0], now[1]].map((v) => mapping(v))
         )
     }
     ctx.fill()
@@ -349,7 +430,7 @@ function drawCap({
     utils,
     type,
     from,
-    to
+    to,
 }: {
     state: ILayerState
     ctx: CanvasRenderingContext2D
@@ -400,4 +481,11 @@ function drawCap({
     }
 
     ctx.restore()
+}
+
+/**
+ * @ignore
+ */
+function isLineCap(value: unknown): value is ILineCap {
+    return LINECAP.includes(value as ILineCap)
 }
