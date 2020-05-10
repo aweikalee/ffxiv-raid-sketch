@@ -28,7 +28,7 @@ export interface IImgEvent extends ILayerEvent {
 const validator = valid.createValidator<IImgProps>({
     src(value) {
         if (!(value === null || valid.isString(value))) {
-            throw new Error(`Img.props.size must be a string/null`)
+            throw new Error(`Img.props.src must be a string/null`)
         }
 
         return value
@@ -155,7 +155,7 @@ function proxyProps(that: Img, initialValue: IImgProps) {
         validator(key, newValue, oldValue).then(
             (value) => {
                 if (key === 'src') {
-                    this.image.src = target['src'] =
+                    that.image.src = target['src'] =
                         IMG_ALIAS[value] || (value as string)
                 }
                 that.emit(key, [value] as any)
