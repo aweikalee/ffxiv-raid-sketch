@@ -1,6 +1,7 @@
-import Layer, { ILayerEvent } from './Layer'
+import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
-// import { cloneDeep } from './utils'
+import { proxy, deepClone, merge } from './utils/index'
+import * as valid from './utils/vaildate'
 
 export interface IMonsterProps {
     /**
@@ -13,47 +14,56 @@ export interface IMonsterEvent extends ILayerEvent {
     size: (size: IMonsterProps['size']) => void
 }
 
+const validator = valid.createValidator<IMonsterProps>({
+    size(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Monster.props.size must be a number')
+        }
+
+        return value
+    },
+})
+
 /**
  * 绘制目标圈
  *
  * 即选中怪时可以分辨面向和侧背的圈
  */
 export default class Monster extends Layer<IMonsterEvent> {
-    /**
-     * 字段详情：[[IMonsterProps]]
-     */
-    monsterProps: IMonsterProps = {
-        size: 15
-    }
+    props: IMonsterProps
 
-    constructor() {
+    constructor(
+        state: Partial<ILayerState> = {},
+        props: Partial<IMonsterProps> = {}
+    ) {
         super({
             fill: '#ffcdbf60',
-            stroke: '#ffcdbf'
+            stroke: '#ffcdbf',
+            ...state,
         })
+
+        this.props = proxyProps(this, {
+            size: 15,
+        })
+
+        merge(this.props, props)
     }
 
     /**
      * 设置尺寸
      */
     size(value: number) {
-        if (typeof value !== 'number') return this
-        if (this.monsterProps.size === value) return this
-
-        this.monsterProps.size = value
-        this.emit('size', [value])
-        return this.onChange()
+        this.props.size = value
+        return this
     }
 
     protected _clone() {
-        const layer = new Monster()
-        // layer.monsterProps = cloneDeep(this.monsterProps)
-        return layer
+        return new Monster(deepClone(this.state), deepClone(this.props))
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
         const { strokeWidth } = this.state
-        const { size } = this.monsterProps
+        const { size } = this.props
         const { mapping } = utils
 
         ctx.rotate(Math.PI * 0.75)
@@ -95,4 +105,25 @@ export default class Monster extends Layer<IMonsterEvent> {
         ctx.stroke()
         ctx.fill()
     }
+}
+
+/**
+ * @ignore
+ */
+function proxyProps(that: Monster, initialValue: IMonsterProps) {
+    return proxy<IMonsterProps>(
+        initialValue,
+        (key, oldValue, newValue, target) => {
+            validator(key, newValue, oldValue).then(
+                (value) => {
+                    that.emit(key, [value] as any)
+                    that.emit('change', [])
+                },
+                (err) => {
+                    target[key] = oldValue
+                    throw err
+                }
+            )
+        }
+    )
 }
