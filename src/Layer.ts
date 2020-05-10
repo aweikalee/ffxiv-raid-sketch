@@ -519,6 +519,9 @@ export function isLayer(value: unknown): value is Layer<any> {
     return value instanceof Layer
 }
 
+/**
+ * @ignore
+ */
 function proxyState(that: Layer<any>, initialValue: ILayerState) {
     return proxy<ILayerState>(
         initialValue,
@@ -537,6 +540,9 @@ function proxyState(that: Layer<any>, initialValue: ILayerState) {
     )
 }
 
+/**
+ * @ignore
+ */
 function proxyParent(that: Layer<any>, initialValue: Layer['parent']) {
     let onParentChange: ILayerEvent['change']
     return proxy<{ value: Layer['parent'] }>(
@@ -571,6 +577,9 @@ function proxyParent(that: Layer<any>, initialValue: Layer['parent']) {
     )
 }
 
+/**
+ * @ignore
+ */
 function proxyChildren(that: Layer<any>, initialValue: Layer['children']) {
     return proxy<{ value: Layer['children'] }>(
         { value: proxyChildrenArray(that, initialValue) },
@@ -590,6 +599,9 @@ function proxyChildren(that: Layer<any>, initialValue: Layer['children']) {
     )
 }
 
+/**
+ * @ignore
+ */
 function proxyChildrenArray(that: Layer<any>, initialValue: Layer['children']) {
     return proxy<Layer['children']>(
         initialValue,

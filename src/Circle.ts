@@ -156,6 +156,9 @@ export default class Circle extends Layer<ICircleEvent> {
     }
 }
 
+/**
+ * @ignore
+ */
 function proxyProps(that: Circle, initialValue: ICircleProps) {
     return proxy<ICircleProps>(
         initialValue,
