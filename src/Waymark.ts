@@ -1,4 +1,4 @@
-import Layer, { ILayerEvent } from './Layer'
+import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
 import { WAYMARK, WAYMARK_COLOR } from './img/waymark/map'
 import { WAYMARK_ALIAS, IWaymarkAlias } from './alias/waymark'
@@ -6,13 +6,14 @@ import { setAlias } from './alias/utils'
 import Img from './Img'
 import Circle from './Circle'
 import Rect from './Rect'
-// import { cloneDeep } from './utils'
+import { proxy, deepClone, merge } from './utils/index'
+import * as valid from './utils/vaildate'
 
 export interface IWaymarkProps {
     /**
      * 场景标记类型（名称）
      */
-    type: IWaymarkAlias | null
+    type: IWaymarkAlias
 
     /**
      * 显示尺寸
@@ -25,52 +26,62 @@ export interface IWaymarkEvent extends ILayerEvent {
     size: (size: IWaymarkProps['size']) => void
 }
 
+const validator = valid.createValidator<IWaymarkProps>({
+    type(value) {
+        if (!isWaymarkAlias(value)) {
+            throw new Error('Waymark.props.type is invalid')
+        }
+
+        return value
+    },
+    size(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Waymark.props.size must be a number')
+        }
+
+        return value
+    },
+})
+
 /**
  * 绘制 `场景标记`
  */
 export default class Waymark extends Layer<IWaymarkEvent> {
-    /**
-     * 字段详情：[[IWaymarkProps]]
-     */
-    waymarkProps: IWaymarkProps = {
-        type: null,
-        size: 5
-    }
+    props: IWaymarkProps
     private img = new Img()
     private circle = new Circle()
     private rect = new Rect()
 
-    constructor(type?: IWaymarkProps['type']) {
-        super()
+    constructor(
+        state: Partial<ILayerState> = {},
+        props: Partial<IWaymarkProps> = {}
+    ) {
+        super(state)
 
-        this.img.on('loaded', this.onChange.bind(this))
+        this.img.on('loaded', () => this.emit('change', []))
 
-        this.type(type)
+        this.props = proxyProps(this, {
+            type: 'A',
+            size: 5,
+        })
+
+        merge(this.props, props)
     }
 
     /**
      * 设置目标标记类型（名称）
      */
     type(value: IWaymarkProps['type']) {
-        if (!(value in WAYMARK_ALIAS)) return this
-        const _value = WAYMARK_ALIAS[value]
-        if (this.waymarkProps.type === _value) return this
-
-        this.waymarkProps.type = _value
-        this.emit('type', [_value])
-        return this.onChange()
+        this.props.type = value
+        return this
     }
 
     /**
      * 设置尺寸
      */
     size(value: number) {
-        if (typeof value !== 'number') return this
-        if (this.waymarkProps.size === value) return this
-
-        this.waymarkProps.size = value
-        this.emit('size', [value])
-        return this.onChange()
+        this.props.size = value
+        return this
     }
 
     /**
@@ -88,15 +99,13 @@ export default class Waymark extends Layer<IWaymarkEvent> {
     }
 
     protected _clone() {
-        const layer = new Waymark()
-        // layer.waymarkProps = cloneDeep(this.waymarkProps)
-        return layer
+        return new Waymark(deepClone(this.state), deepClone(this.props))
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
         const { img, circle, rect } = this
         const { strokeWidth } = this.state
-        const { type, size } = this.waymarkProps
+        const { type, size } = this.props
         const { unmapping } = utils
 
         const isCircle = ['A', 'B', 'C', 'D'].includes(type as any)
@@ -119,4 +128,35 @@ export default class Waymark extends Layer<IWaymarkEvent> {
         img.size(size - unmapping(strokeWidth * 2))
         img.render(ctx, utils)
     }
+}
+
+/**
+ * @ignore
+ */
+function proxyProps(that: Waymark, initialValue: IWaymarkProps) {
+    return proxy<IWaymarkProps>(
+        initialValue,
+        (key, oldValue, newValue, target) => {
+            validator(key, newValue, oldValue).then(
+                (value) => {
+                    if (key === 'type') {
+                        target['type'] = WAYMARK_ALIAS[value]
+                    }
+                    that.emit(key, [value] as any)
+                    that.emit('change', [])
+                },
+                (err) => {
+                    target[key] = oldValue
+                    throw err
+                }
+            )
+        }
+    )
+}
+
+/**
+ * @ignore
+ */
+function isWaymarkAlias(value: unknown): value is IWaymarkAlias {
+    return value in WAYMARK_ALIAS
 }
