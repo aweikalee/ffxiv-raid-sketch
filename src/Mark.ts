@@ -34,7 +34,7 @@ const validator = valid.createValidator<IMarkProps>({
             throw new Error('Mark.props.type is invalid')
         }
 
-        return value
+        return MAKR_ALIAS[value]
     },
     size(value) {
         if (!valid.isNumber(value)) {
@@ -122,9 +122,6 @@ function proxyProps(that: Mark, initialValue: IMarkProps) {
         (key, oldValue, newValue, target) => {
             validator(target, key, newValue, oldValue).then(
                 (value) => {
-                    if (key === 'type') {
-                        target['type'] = MAKR_ALIAS[value]
-                    }
                     that.emit(key, [value] as any)
                     that.emit('change', [])
                 },

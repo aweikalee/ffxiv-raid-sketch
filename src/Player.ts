@@ -37,7 +37,7 @@ const validator = valid.createValidator<IPlayerProps>({
             throw new Error('Player.props.job is invalid')
         }
 
-        return value
+        return JOB_ALIAS[value]
     },
     size(value) {
         if (!valid.isNumber(value)) {
@@ -137,9 +137,6 @@ function proxyProps(that: Player, initialValue: IPlayerProps) {
         (key, oldValue, newValue, target) => {
             validator(target, key, newValue, oldValue).then(
                 (value) => {
-                    if (key === 'job') {
-                        target['job'] = JOB_ALIAS[value]
-                    }
                     that.emit(key, [value] as any)
                     that.emit('change', [])
                 },

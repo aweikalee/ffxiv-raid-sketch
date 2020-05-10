@@ -31,7 +31,7 @@ const validator = valid.createValidator<IImgProps>({
             throw new Error(`Img.props.src must be a string/null`)
         }
 
-        return value
+        return IMG_ALIAS[value] || value
     },
     size(value) {
         if (!(valid.isNumber(value) || value === 'auto')) {
@@ -155,8 +155,7 @@ function proxyProps(that: Img, initialValue: IImgProps) {
         validator(target, key, newValue, oldValue).then(
             (value) => {
                 if (key === 'src') {
-                    that.image.src = target['src'] =
-                        IMG_ALIAS[value] || (value as string)
+                    that.image.src = target['src']
                 }
                 that.emit(key, [value] as any)
                 that.emit('change', [])
