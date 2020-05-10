@@ -43,11 +43,8 @@ const validator = valid.createValidator<IImgProps>({
 })
 
 export default class Img extends Layer<IImgEvent> {
-    props: IImgProps = {
-        src: null,
-        size: 'auto',
-    }
-    private image: HTMLImageElement = new Image()
+    props: IImgProps
+    image: HTMLImageElement = new Image()
     private raf: number | null = null
 
     constructor(
@@ -58,31 +55,13 @@ export default class Img extends Layer<IImgEvent> {
 
         this.image.onload = () => {
             this.emit('loaded', [])
-            this.onChange()
+            this.emit('change', [])
         }
 
-        this.props = proxy<IImgProps>(
-            {
-                src: null,
-                size: 'auto',
-            },
-            (key, oldValue, newValue, target) => {
-                validator(key, newValue, oldValue).then(
-                    (value) => {
-                        if (key === 'src') {
-                            this.image.src = target['src'] =
-                                IMG_ALIAS[value] || (value as string)
-                        }
-                        this.emit(key, [value] as any)
-                        this.emit('change', [])
-                    },
-                    (err) => {
-                        target[key] = oldValue
-                        throw err
-                    }
-                )
-            }
-        )
+        this.props = proxyProps(this, {
+            src: null,
+            size: 'auto',
+        })
 
         merge(this.props, props)
     }
@@ -167,4 +146,25 @@ export default class Img extends Layer<IImgEvent> {
 
         ctx.drawImage(this.image, -w / 2, -h / 2, w, h)
     }
+}
+/**
+ * @ignore
+ */
+function proxyProps(that: Img, initialValue: IImgProps) {
+    return proxy<IImgProps>(initialValue, (key, oldValue, newValue, target) => {
+        validator(key, newValue, oldValue).then(
+            (value) => {
+                if (key === 'src') {
+                    this.image.src = target['src'] =
+                        IMG_ALIAS[value] || (value as string)
+                }
+                that.emit(key, [value] as any)
+                that.emit('change', [])
+            },
+            (err) => {
+                target[key] = oldValue
+                throw err
+            }
+        )
+    })
 }
