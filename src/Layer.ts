@@ -500,14 +500,6 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
         return this
     }
 
-    /**
-     * 通知变更
-     */
-    protected onChange() {
-        this.emit<ILayerEvent>('change', [])
-        return this
-    }
-
     protected _clone(): Layer<any> {
         return new Layer(deepClone(this.state))
     }
