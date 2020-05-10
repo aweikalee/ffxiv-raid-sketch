@@ -264,8 +264,29 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
             }
         )
 
+        const proxyChildren = (target: Layer['children']) => {
+            return proxy<Layer<any>[]>(
+                target,
+                (key, oldValue, newValue, target) => {
+                    if (key >= 0 && !isLayer(newValue)) {
+                        if (oldValue) {
+                            target[key] = oldValue
+                        } else {
+                            target.splice(Number(key), 1)
+                        }
+                        throw new Error(
+                            `Layer.children's value must be a Layer`
+                        )
+                    }
+
+                    this.emit<ILayerEvent>('children', [this.children])
+                    this.emit<ILayerEvent>('change', [])
+                }
+            )
+        }
+
         this._children = proxy<{ value: Layer<any>[] }>(
-            { value: [] },
+            { value: proxyChildren([]) },
             (key, oldValue, newValue, target) => {
                 if (key !== 'value') return
 
@@ -277,24 +298,7 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
                     throw new Error(`Layer.children must be a Layer[]`)
                 }
 
-                target[key] = proxy<Layer<any>[]>(
-                    newValue,
-                    (key, oldValue, newValue, target) => {
-                        if (key >= 0 && !isLayer(newValue)) {
-                            if (oldValue) {
-                                target[key] = oldValue
-                            } else {
-                                target.splice(Number(key), 1)
-                            }
-                            throw new Error(
-                                `Layer.children's value must be a Layer`
-                            )
-                        }
-
-                        this.emit<ILayerEvent>('children', [this.children])
-                        this.emit<ILayerEvent>('change', [])
-                    }
-                )
+                target[key] = proxyChildren(newValue)
 
                 this.emit<ILayerEvent>('children', [this.children])
                 this.emit<ILayerEvent>('change', [])
