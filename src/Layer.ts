@@ -526,7 +526,7 @@ function proxyState(that: Layer<any>, initialValue: ILayerState) {
     return proxy<ILayerState>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            validator(key, newValue, oldValue).then(
+            validator(target, key, newValue, oldValue).then(
                 (value) => {
                     that.emit<ILayerEvent>(key, [value as any])
                     that.emit<ILayerEvent>('change', [])

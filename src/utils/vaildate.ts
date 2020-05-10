@@ -3,6 +3,7 @@ export type IValidtorRule<T> = {
 }
 
 export type IValidtor<T, K extends keyof T> = (
+    target: T,
     key: K,
     newValue: unknown,
     oldValue: unknown
@@ -11,7 +12,7 @@ export type IValidtor<T, K extends keyof T> = (
 export function createValidator<T, K extends keyof T = keyof T>(
     validators: IValidtorRule<T>
 ): IValidtor<T, K> {
-    return (key, newValue, oldValue) => {
+    return (target, key, newValue, oldValue) => {
         return new Promise((resolve) => {
             let res: T[K]
             if (key in validators) {
@@ -19,6 +20,7 @@ export function createValidator<T, K extends keyof T = keyof T>(
             } else {
                 res = newValue as T[K]
             }
+            target[key] = res
             return resolve(res)
         })
     }

@@ -197,7 +197,7 @@ function proxyProps(that: Text, initialValue: ITextProps) {
     return proxy<ITextProps>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            validator(key, newValue, oldValue).then(
+            validator(target, key, newValue, oldValue).then(
                 (value) => {
                     that.emit(key, [value] as any)
                     that.emit('change', [])

@@ -152,7 +152,7 @@ export default class Img extends Layer<IImgEvent> {
  */
 function proxyProps(that: Img, initialValue: IImgProps) {
     return proxy<IImgProps>(initialValue, (key, oldValue, newValue, target) => {
-        validator(key, newValue, oldValue).then(
+        validator(target, key, newValue, oldValue).then(
             (value) => {
                 if (key === 'src') {
                     that.image.src = target['src'] =

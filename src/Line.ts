@@ -263,7 +263,7 @@ function proxyProps(that: Line, initialValue: ILineProps) {
     return proxy<ILineProps>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            validator(key, newValue, oldValue).then(
+            validator(target, key, newValue, oldValue).then(
                 (value) => {
                     if (key === 'coordinates') {
                         target['coordinates'] = proxyCoordinates(

@@ -120,7 +120,7 @@ function proxyProps(that: Mark, initialValue: IMarkProps) {
     return proxy<IMarkProps>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            validator(key, newValue, oldValue).then(
+            validator(target, key, newValue, oldValue).then(
                 (value) => {
                     if (key === 'type') {
                         target['type'] = MAKR_ALIAS[value]

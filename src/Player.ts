@@ -135,7 +135,7 @@ function proxyProps(that: Player, initialValue: IPlayerProps) {
     return proxy<IPlayerProps>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            validator(key, newValue, oldValue).then(
+            validator(target, key, newValue, oldValue).then(
                 (value) => {
                     if (key === 'job') {
                         target['job'] = JOB_ALIAS[value]

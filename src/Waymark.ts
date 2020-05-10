@@ -137,7 +137,7 @@ function proxyProps(that: Waymark, initialValue: IWaymarkProps) {
     return proxy<IWaymarkProps>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            validator(key, newValue, oldValue).then(
+            validator(target, key, newValue, oldValue).then(
                 (value) => {
                     if (key === 'type') {
                         target['type'] = WAYMARK_ALIAS[value]
