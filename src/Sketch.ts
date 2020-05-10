@@ -1,5 +1,6 @@
 import Layer from './Layer'
-// import { mergeOptions } from './utils'
+import { proxy, merge } from './utils/index'
+import * as valid from './utils/vaildate'
 
 export interface ISketchOptions {
     /**
@@ -26,13 +27,44 @@ export interface ISketchOptions {
      *
      * 若不传入该值，则会在内部创建一个 Canvas DOM，则必须通过appendTo 添加到文档上
      */
-    canvas?: HTMLCanvasElement
+    canvas: HTMLCanvasElement | null
 }
 
 export interface ISketchUtils {
     mapping: (value: number) => number
     unmapping: (value: number) => number
 }
+
+const validator = valid.createValidator<ISketchOptions>({
+    w(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Sketch.options.w must be a number')
+        }
+
+        return value
+    },
+    h(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Sketch.options.h must be a number')
+        }
+
+        return value
+    },
+    unit(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Sketch.options.unit must be a number')
+        }
+
+        return value
+    },
+    canvas(value) {
+        if (!(value instanceof HTMLCanvasElement || value === null)) {
+            throw new Error('Sketch.options.angle must be a number')
+        }
+
+        return value
+    },
+})
 
 /**
  * 画布
@@ -41,29 +73,57 @@ export default class Sketch {
     static defaultOptions: ISketchOptions = {
         w: 600,
         h: 600,
-        unit: 6
+        unit: 6,
+        canvas: null,
     }
 
-    canvas: HTMLCanvasElement
-    ctx: CanvasRenderingContext2D
+    canvas: HTMLCanvasElement | null
+    ctx: CanvasRenderingContext2D | null
     options: ISketchOptions
     layer: Layer
     private raf?: number
 
     constructor(options: Partial<ISketchOptions> = {}) {
-        // this.options = mergeOptions({ ...Sketch.defaultOptions }, options)
-        this.options = Object.assign({...Sketch.defaultOptions}, options)
+        /* 抽出canvas重新赋值 是为了触发proxy内的连带设置 */
+        const { canvas, ...defaultOptions } = Sketch.defaultOptions
 
-        this.canvas = options.canvas || document.createElement('canvas')
+        const theOptions = proxyOptions(this, {
+            canvas: null,
+            ...defaultOptions,
+        })
+        const layer = proxyLayer(this, new Layer())
 
-        this.ctx = this.canvas.getContext('2d')
+        Object.defineProperties(this, {
+            options: {
+                get() {
+                    return theOptions
+                },
+                set() {
+                    throw new Error(`Sketch.options's pointer is immutable`)
+                },
+            },
+            layer: {
+                get() {
+                    return layer.value
+                },
+                set(v) {
+                    layer.value = v
+                },
+            },
+            canvas: {
+                get() {
+                    return theOptions.canvas
+                },
+                set(v) {
+                    theOptions.canvas = v
+                },
+            },
+        })
 
-        this.layer = new Layer()
-
-        this.layer.on('change', this.render.bind(this))
-
-        this.size(this.options.w, this.options.h)
-        this.unit(options.unit || this.options.w / 100)
+        merge(this.options, {
+            canvas,
+            ...options,
+        })
     }
 
     /**
@@ -94,12 +154,9 @@ export default class Sketch {
      * @param h 高度
      */
     size(w: number, h?: number) {
-        if (typeof w !== 'number') return this
         this.options.w = w
-        this.options.h = typeof h === 'number' ? h : w
-        this.canvas.width = this.options.w
-        this.canvas.height = this.options.h
-        return this.render()
+        this.options.h = h === undefined ? w : h
+        return this
     }
 
     /**
@@ -107,21 +164,22 @@ export default class Sketch {
      * @param value 推荐是画布宽度或高度的 1%
      */
     unit(value: number) {
-        if (typeof value !== 'number' || value <= 0) return this
         this.options.unit = value
-        return this.render()
+        return this
     }
 
     private _render() {
         const { ctx } = this
         const { w, h, unit } = this.options
+        if (!ctx) return
+
         const utils: ISketchUtils = {
             mapping(value) {
                 return value * unit
             },
             unmapping(value) {
                 return value / unit
-            }
+            },
         }
 
         ctx.clearRect(0, 0, w, h)
@@ -130,4 +188,73 @@ export default class Sketch {
         this.layer.render(ctx, utils)
         ctx.restore()
     }
+}
+
+/**
+ * @ignore
+ */
+function proxyOptions(that: Sketch, initialValue: ISketchOptions) {
+    return proxy<ISketchOptions>(
+        initialValue,
+        (key, oldValue, newValue, target) => {
+            validator(target, key, newValue, oldValue).then(
+                () => {
+                    const canvas = target['canvas']
+                    switch (key) {
+                        case 'canvas':
+                            if (canvas) {
+                                that.ctx = canvas.getContext('2d')
+                                canvas.width = target['w']
+                                canvas.height = target['h']
+                            } else {
+                                that.ctx = null
+                            }
+                            break
+                        case 'w':
+                            if (canvas) {
+                                target['canvas'].width = target['w']
+                            }
+                            break
+                        case 'h':
+                            if (canvas) {
+                                target['canvas'].height = target['h']
+                            }
+                            break
+                    }
+
+                    that.render()
+                },
+                (err) => {
+                    target[key] = oldValue
+                    throw err
+                }
+            )
+        }
+    )
+}
+
+/**
+ * @ignore
+ */
+function proxyLayer(that: Sketch, initialValue: Layer<any>) {
+    const onChange = that.render.bind(that)
+    initialValue.on('change', onChange)
+    return proxy<{ value: Layer<any> }>(
+        { value: initialValue },
+        (key, oldValue, newValue, target) => {
+            if (key !== 'value') return
+            if (!(newValue instanceof Layer)) {
+                target[key] = oldValue
+                throw new Error(`Sketch.layer must be a Layer`)
+            }
+
+            if (oldValue) {
+                oldValue.off('change', onChange)
+            }
+
+            newValue.on('change', onChange)
+
+            that.render()
+        }
+    )
 }
