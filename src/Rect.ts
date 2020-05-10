@@ -1,6 +1,7 @@
-import Layer, { ILayerEvent } from './Layer'
+import Layer, { ILayerEvent, ILayerState } from './Layer'
 import { ISketchUtils } from './Sketch'
-// import { cloneDeep } from './utils'
+import { proxy, deepClone, merge } from './utils/index'
+import * as valid from './utils/vaildate'
 
 export interface IRectProps {
     /**
@@ -16,32 +17,62 @@ export interface IRectProps {
     /**
      * 线段样式
      */
-    dash: number[] | null
+    dash: readonly number[] | null
 }
 
 export interface IRectEvent extends ILayerEvent {
-    size: (w: IRectProps['w'], h: IRectProps['h']) => void
+    w: (w: IRectProps['w']) => void
+    h: (h: IRectProps['h']) => void
     dash: (dash: IRectProps['dash']) => void
 }
+
+const validator = valid.createValidator<IRectProps>({
+    w(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Rect.props.w must be a number')
+        }
+
+        return value
+    },
+    h(value) {
+        if (!valid.isNumber(value)) {
+            throw new Error('Rect.props.h must be a number')
+        }
+
+        return value
+    },
+    dash(value) {
+        if (!(value === null || valid.isArray<number>(value, valid.isNumber))) {
+            throw new Error('Rect.props.dash must be a number[]/null')
+        }
+
+        return Object.freeze(value)
+    },
+})
 
 /**
  * 绘制矩形
  */
 export default class Rect extends Layer<IRectEvent> {
-    /**
-     * 字段详情：[[IPlayerProps]]
-     */
-    rectProps: IRectProps = {
-        w: 30,
-        h: 30,
-        dash: null
-    }
+    props: IRectProps
 
-    constructor() {
+    constructor(
+        state: Partial<ILayerState> = {},
+        props: Partial<IRectProps> = {}
+    ) {
         super({
             fill: '#c79a667F',
-            stroke: '#c79a66'
+            stroke: '#c79a66',
+            ...state,
         })
+
+        this.props = proxyProps(this, {
+            w: 30,
+            h: 30,
+            dash: null,
+        })
+
+        merge(this.props, props)
     }
 
     /**
@@ -50,42 +81,31 @@ export default class Rect extends Layer<IRectEvent> {
      * @param h 高
      */
     size(w: number, h?: number) {
-        if (typeof w !== 'number') return this
-        const _h = typeof h === 'number' ? h : w
-        if (this.rectProps.w === w && this.rectProps.h === _h) return this
-
-        this.rectProps.w = w
-        this.rectProps.h = _h
-        this.emit('size', [w, _h])
-        return this.onChange()
+        this.props.w = w
+        this.props.h = h === undefined ? w : h
+        return this
     }
 
     /**
      * 设置线段样式
      */
     dash(value: IRectProps['dash']) {
-        if (!Array.isArray(value)) return this
-        if (value.some(v => typeof v !== 'number')) return this
-
-        this.rectProps.dash = value
-        this.emit('dash', [value])
-        return this.onChange()
+        this.props.dash = value
+        return this
     }
 
     protected _clone() {
-        const layer = new Rect()
-        // layer.rectProps = cloneDeep(this.rectProps)
-        return layer
+        return new Rect(deepClone(this.state), deepClone(this.props))
     }
 
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {
-        const { state, rectProps } = this
+        const { state, props } = this
         const { strokeWidth } = state
         const { mapping } = utils
-        const { w, h, dash } = rectProps
+        const { w, h, dash } = props
 
         if (dash) {
-            ctx.setLineDash(dash.map(v => v * strokeWidth))
+            ctx.setLineDash(dash.map((v) => v * strokeWidth))
         }
 
         const _w = mapping(w)
@@ -97,4 +117,25 @@ export default class Rect extends Layer<IRectEvent> {
         ctx.stroke()
         ctx.closePath()
     }
+}
+
+/**
+ * @ignore
+ */
+function proxyProps(that: Rect, initialValue: IRectProps) {
+    return proxy<IRectProps>(
+        initialValue,
+        (key, oldValue, newValue, target) => {
+            validator(key, newValue, oldValue).then(
+                (value) => {
+                    that.emit(key, [value] as any)
+                    that.emit('change', [])
+                },
+                (err) => {
+                    target[key] = oldValue
+                    throw err
+                }
+            )
+        }
+    )
 }
