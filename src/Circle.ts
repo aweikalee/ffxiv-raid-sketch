@@ -83,33 +83,18 @@ export default class Circle extends Layer<ICircleEvent> {
             ...state,
         })
 
-        this.props = proxy<ICircleProps>(
-            {
-                size: 30,
-                angle: 360,
-                arc: false,
-                dash: null,
-            },
-            (key, oldValue, newValue, target) => {
-                validator(key, newValue, oldValue).then(
-                    (value) => {
-                        this.emit(key, [value] as any)
-                        this.emit('change', [])
-                    },
-                    (err) => {
-                        target[key] = oldValue
-                        throw err
-                    }
-                )
-            }
-        )
+        this.props = proxyProps(this, {
+            size: 30,
+            angle: 360,
+            arc: false,
+            dash: null,
+        })
 
         merge(this.props, props)
     }
 
     /**
      * 设置半径
-     * @param value [[ICircleProps]]['size']
      */
     size(value: ICircleProps['size']) {
         this.props.size = value
@@ -118,7 +103,6 @@ export default class Circle extends Layer<ICircleEvent> {
 
     /**
      * 设置张开角度
-     * @param value
      */
     angle(value: ICircleProps['angle']) {
         this.props.angle = value
@@ -170,4 +154,22 @@ export default class Circle extends Layer<ICircleEvent> {
         ctx.fill()
         ctx.stroke()
     }
+}
+
+function proxyProps(that: Circle, initialValue: ICircleProps) {
+    return proxy<ICircleProps>(
+        initialValue,
+        (key, oldValue, newValue, target) => {
+            validator(key, newValue, oldValue).then(
+                (value) => {
+                    that.emit(key, [value] as any)
+                    that.emit('change', [])
+                },
+                (err) => {
+                    target[key] = oldValue
+                    throw err
+                }
+            )
+        }
+    )
 }
