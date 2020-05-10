@@ -557,7 +557,7 @@ function proxyParent(that: Layer<any>, initialValue: Layer['parent']) {
 
             // 从旧的父图层中移除
             if (oldValue !== null) {
-                const index = oldValue.children.indexOf(this)
+                const index = oldValue.children.indexOf(that)
                 if (index !== -1) {
                     oldValue.children.splice(index, 1)
                 }
@@ -566,7 +566,7 @@ function proxyParent(that: Layer<any>, initialValue: Layer['parent']) {
 
             // 添加到新的父图层
             if (newValue !== null) {
-                newValue.children.push(this)
+                newValue.children.push(that)
                 onParentChange = () => newValue.emit('change', [])
                 that.on<ILayerEvent>('change', onParentChange)
             }
