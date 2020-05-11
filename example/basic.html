@@ -32,10 +32,10 @@
             .addTo(layer)
 
         // 场地标记
-        new FRS.Waymark('A').xy(0, -37.5).addTo(layer)
-        new FRS.Waymark('B').xy(37.5, 0).addTo(layer)
-        new FRS.Waymark('C').xy(0, 37.5).addTo(layer)
-        new FRS.Waymark('D').xy(-37.5, 0).addTo(layer)
+        new FRS.Waymark().type('A').xy(0, -37.5).addTo(layer)
+        new FRS.Waymark().type('B').xy(37.5, 0).addTo(layer)
+        new FRS.Waymark().type('C').xy(0, 37.5).addTo(layer)
+        new FRS.Waymark().type('D').xy(-37.5, 0).addTo(layer)
 
         // 怪物
         new FRS.Monster()
@@ -44,11 +44,11 @@
             .addTo(layer)
 
         // 玩家
-        new FRS.Player('吟游诗人')
+        new FRS.Player().job('吟游诗人')
             .addTo(layer)
 
         // 标记
-        new FRS.Mark('攻击1')
+        new FRS.Mark().type('攻击1')
             .xy(5, -25)
             .addTo(layer)
     </script>
