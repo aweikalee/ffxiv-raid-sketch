@@ -1,0 +1,358 @@
+<title>Basic Example - FFXIV RAID SKETCH</title>
+<script src="../dist/ffxiv-raid-sketch.umd.js"></script>
+
+<div id="container"></div>
+<script>
+    const {
+        Sketch,
+        Layer,
+        Circle,
+        Rect,
+        Img,
+        Text,
+        Monster,
+        Player,
+        Line,
+        Mark,
+        Waymark
+    } = FRS
+
+    /* 创建怪物 */
+    const createMonster = {
+        justice() {
+            const monster = new Monster({
+                stroke: '#47672c',
+                fill: '#47672c36'
+            }, {
+                size: 24
+            })
+            const name = new Text().value('残暴正义号').addTo(monster)
+            monster.on('rotate', (value) => {
+                name.rotate(-value)
+            })
+
+            return monster
+        },
+        cruise() {
+            const monster = new Monster({
+                stroke: '#9f452a',
+                fill: '#9f452a36'
+            }, {
+                size: 24
+            })
+            const name = new Text().value('巡航驱逐者').addTo(monster)
+            monster.on('rotate', (value) => {
+                name.rotate(-value)
+            })
+
+            return monster
+        }
+    }
+
+    const createDebuffFactory = (filename) => {
+        return () => new Img({
+            x: 1.67,
+            y: -2.5
+        }, {
+            src: `./ultimates-alexander-p2/${filename}`,
+            size: 4
+        })
+    }
+
+    /* 创建负面状态 */
+    const createDebuff = {
+        /* 水分摊 */
+        water: createDebuffFactory('water.png'),
+
+        /* 雷分摊 */
+        thunder: createDebuffFactory('thunder.png'),
+
+        /* 水弱 */
+        awayWater: createDebuffFactory('awayWater.png'),
+
+        /* 雷弱 */
+        awayThunder: createDebuffFactory('awayThunder.png')
+    }
+
+    /* 创建小队 */
+    const createParty = (layer) => {
+        return {
+            mt: new Player().job('暗黑骑士').addTo(layer),
+            st: new Player().job('骑士').addTo(layer),
+            h1: new Player().job('白魔法师').addTo(layer),
+            h2: new Player().job('占星术士').addTo(layer),
+            d1: new Player().job('忍者').addTo(layer),
+            d2: new Player().job('黑魔法师').addTo(layer),
+            d3: new Player().job('吟游诗人').addTo(layer),
+            d4: new Player().job('召唤师').addTo(layer)
+        }
+    }
+
+    /* 创建场景标记 */
+    const createWaymark = (layer) => {
+        return {
+            waymarkA: new Waymark().type('A').xy(0, -37.5).opacity(0.5).addTo(layer),
+            waymarkB: new Waymark().type('B').xy(37.5, 0).opacity(0.5).addTo(layer),
+            waymarkC: new Waymark().type('C').xy(0, 37.5).opacity(0.5).addTo(layer),
+            waymarkD: new Waymark().type('D').xy(-37.5, 0).opacity(0.5).addTo(layer),
+            waymark1: new Waymark().type('1').opacity(0.5).hide().addTo(layer),
+            waymark2: new Waymark().type('2').opacity(0.5).hide().addTo(layer)
+        }
+    }
+
+    const createText = {
+        title(text) {
+            return new Text({
+                x: -47,
+                y: -45,
+            }, {
+                value: text,
+                align: 'left',
+                size: 3
+            })
+        },
+        content(texts) {
+            return texts.map((text, index) => {
+                return new Text({
+                    x: -47,
+                    y: -40 + index * 5,
+                }, {
+                    value: text,
+                    align: 'left'
+                })
+            })
+        }
+    }
+
+    const createLine = {
+        tank() {
+            return new Line()
+                .endCap('arrow')
+                .stroke('#4494f0')
+        },
+        healer() {
+            return new Line()
+                .endCap('arrow')
+                .stroke('#64aa4f')
+        },
+        dps() {
+            return new Line()
+                .endCap('arrow')
+                .stroke('#c25859')
+        }
+    }
+
+    /* 创建地图 */
+    const createMap = () => {
+        /* 底色 */
+        const base = new Rect()
+            .size(100, 100)
+            .fill('#21252b')
+            .stroke('transparent')
+
+        /* 圆形场地 */
+        new Circle()
+            .size(40)
+            .fill('#282c34')
+            .stroke('#61afef')
+            .strokeWidth(4)
+            .addTo(base)
+
+        /* 绘制花纹 */
+        const radius = [6.26, 14.47, 24.3, 26.67, 37.96]
+        const greyCircle = new Circle().fill('transparent').stroke('#666')
+        const greyLine = new Line().fill('transparent').stroke('#666')
+        const gap = 1
+
+        radius.slice(0, 3).forEach(r => {
+            greyCircle
+                .clone()
+                .size(r)
+                .addTo(base)
+        })
+
+        radius.slice(3, 5).forEach(r => {
+            const angle = (Math.asin(gap / r) * 180) / Math.PI
+            for (let i = 0; i < 4; i += 1) {
+                greyCircle
+                    .clone()
+                    .arc(true)
+                    .size(r)
+                    .angle(90 - angle * 2)
+                    .rotate(90 * i - 45)
+                    .addTo(base)
+            }
+        })
+        for (let i = 0; i < 4; i += 1) {
+            greyLine
+                .clone()
+                .rotate(90 * i)
+                .to(radius[3], gap)
+                .to(radius[4], gap)
+                .addTo(base)
+            greyLine
+                .clone()
+                .rotate(90 * i)
+                .to(gap, radius[3])
+                .to(gap, radius[4])
+                .addTo(base)
+        }
+
+        return base
+    }
+
+    const createStage = (layer) => {
+        createMap().addTo(layer)
+
+        const waymark = createWaymark(layer)
+        const justice = createMonster.justice().addTo(layer)
+        const cruise = createMonster.cruise().addTo(layer)
+        const players = createParty(layer)
+
+        return { justice, cruise, ...waymark, ...players }
+    }
+
+    /* 图1 */
+    !function () {
+        const { justice, cruise, mt, st, h1, h2, d1, d2, d3, d4 } = createStage(this)
+
+        mt.xy(-1.00, -18.83).add(createDebuff.awayThunder())
+        st.xy(-3.17, 16.17)
+        h1.xy(-0.67, 1.17).add(createDebuff.thunder())
+        h2.xy(-1.83, -9.33)
+        d1.xy(-13.33, -19.50).add(createDebuff.awayWater())
+        d2.xy(-13.00, 8.17)
+        d3.xy(-14.67, -1.17).add(createDebuff.water())
+        d4.xy(-13.67, -10.50)
+
+        justice.xy(0.00, -26.50).turnTo(mt) // 调整面向
+        cruise.xy(0.00, 21.50).turnTo(st) // 调整面向
+
+        /* 移动路线 */
+        /* mt */
+        createLine.tank()
+            .addTo(this)
+            .to(-1.50, -19.17)
+            .to(-11.50, 5.00)
+
+        /* st */
+        createLine.tank()
+            .addTo(this)
+            .to(-3.50, 16.17)
+            .to(-11.17, -8.67)
+
+        /* h1 */
+        createLine.healer()
+            .addTo(this)
+            .to(-2.33, -9.50)
+            .to(-12.00, -2.83)
+
+        /* h2 */
+        createLine.healer()
+            .addTo(this)
+            .to(-1.33, 1.17)
+            .to(-11.00, -17.33)
+
+        createText.title('第三次传毒 初始站位').addTo(this)
+        createText.content([
+            '假设DPS是锤子'
+        ]).forEach(v => v.addTo(this))
+    }.apply(new Sketch().appendTo(document.getElementById('container')).layer)
+
+    /* 图2 */
+    !function () {
+        const { justice, cruise, mt, st, h1, h2, d1, d2, d3, d4 } = createStage(this)
+
+        mt.xy(-11.67, 7.50).add(createDebuff.awayThunder())
+        st.xy(-12.33, -10.83)
+        h1.xy(-11.83, -19.00).add(createDebuff.thunder())
+        h2.xy(-12.00, -1.00)
+        d1.xy(-13.33, -19.50).add(createDebuff.awayWater())
+        d2.xy(-13.00, 8.17)
+        d3.xy(-14.67, -1.17).add(createDebuff.water())
+        d4.xy(-13.67, -10.50)
+
+        justice.xy(-7.83, -3.83).turnTo(mt)
+        cruise.xy(-7.67, 2.50).turnTo(st)
+
+
+        /* 移动路线 */
+        /* d1 */
+        createLine.dps()
+            .addTo(this)
+            .to(-14.00, -19.83)
+            .to(-18.00, -19.83)
+
+        /* d2 */
+        createLine.dps()
+            .addTo(this)
+            .to(-13.17, 8.33)
+            .to(23.17, 5.33)
+
+        /* d3 */
+        createLine.dps()
+            .addTo(this)
+            .to(-14.67, -1.33)
+            .to(24.17, 0.00)
+
+        /* d4 */
+        createLine.dps()
+            .addTo(this)
+            .to(-13.50, -10.83)
+            .to(23.83, -4.67)
+
+        createText.title('第三次传毒 传毒后（DPS）').addTo(this)
+        createText.content([
+            '不想动或水弱的DPS向左，水分摊向右',
+            '水弱注意不要吃到雷分摊'
+        ]).forEach(v => v.addTo(this))
+    }.apply(new Sketch().appendTo(document.getElementById('container')).layer)
+
+    /* 图3 */
+    !function () {
+        const { justice, cruise, mt, st, h1, h2, d1, d2, d3, d4 } = createStage(this)
+
+        mt.xy(-11.67, 7.50).add(createDebuff.awayThunder())
+        st.xy(-12.33, -10.83)
+        h1.xy(-11.83, -19.00).add(createDebuff.thunder())
+        h2.xy(-12.00, -1.00)
+        d1.xy(-16.00, -19.83).add(createDebuff.awayWater())
+        d2.xy(23.17, 5.33)
+        d3.xy(24.17, 0.00).add(createDebuff.water())
+        d4.xy(23.83, -4.67)
+
+        justice.xy(-7.83, -3.83).turnTo(mt)
+        cruise.xy(-7.67, 2.50).turnTo(st)
+
+        /* 移动路线 */
+        /* mt */
+        createLine.tank()
+            .addTo(this)
+            .to(-12.83, -10.67)
+            .to(-28.00, -15.17)
+            .to(-25.50, -24.33)
+            .to(-17.50, -29.50)
+
+        /* st */
+        createLine.tank()
+            .addTo(this)
+            .to(-12.00, 7.50)
+            .to(-21.83, 24.50)
+
+        /* h1 */
+        createLine.healer()
+            .addTo(this)
+            .to(-12.00, -18.83)
+            .to(-9.67, -30.50)
+
+        /* h2 */
+        createLine.healer()
+            .addTo(this)
+            .to(-12.83, -1.67)
+            .to(16.50, 0.00)
+
+        /* 移动路线 */
+
+        createText.title('第三次传毒 传毒后（TH）').addTo(this)
+    }.apply(new Sketch().appendTo(document.getElementById('container')).layer)
+</script>
