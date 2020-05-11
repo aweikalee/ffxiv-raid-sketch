@@ -48,8 +48,8 @@ new FRS.Circle().addTo(sketch.layer)
 ### 按需引入
 
 ```js
-import Sketch from 'ffxiv-raid-sketch/es/Sketch'
-import Circle from 'ffxiv-raid-sketch/es/Circle'
+import { Sketch, Circle } from 'ffxiv-raid-sketch/es'
+
 
 const sketch = new Sketch().appendTo(document.body)
 new Circle().addTo(sketch.layer)
