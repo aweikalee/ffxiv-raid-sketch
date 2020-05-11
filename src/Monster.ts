@@ -20,7 +20,7 @@ export interface IMonsterEvent extends ILayerEvent {
 const validator = valid.createValidator<IMonsterProps>({
     size(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Monster.props.size must be a number')
+            throw new Error('size must be a number')
         }
 
         return value

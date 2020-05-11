@@ -41,28 +41,28 @@ export interface ISketchUtils {
 const validator = valid.createValidator<ISketchOptions>({
     w(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Sketch.options.w must be a number')
+            throw new Error('w must be a number')
         }
 
         return value
     },
     h(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Sketch.options.h must be a number')
+            throw new Error('h must be a number')
         }
 
         return value
     },
     unit(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Sketch.options.unit must be a number')
+            throw new Error('unit must be a number')
         }
 
         return value
     },
     canvas(value) {
         if (!(value instanceof HTMLCanvasElement || value === null)) {
-            throw new Error('Sketch.options.angle must be a number')
+            throw new Error('angle must be a number')
         }
 
         return value
@@ -242,7 +242,7 @@ function proxyLayer(that: Sketch, initialValue: Layer<any>) {
             if (key !== 'value') return
             if (!(newValue instanceof Layer)) {
                 target[key] = oldValue
-                throw new Error(`Sketch.layer must be a Layer`)
+                throw new Error(`layer must be a Layer`)
             }
 
             if (oldValue) {

@@ -32,21 +32,21 @@ export interface IRectEvent extends ILayerEvent {
 const validator = valid.createValidator<IRectProps>({
     w(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Rect.props.w must be a number')
+            throw new Error('w must be a number')
         }
 
         return value
     },
     h(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Rect.props.h must be a number')
+            throw new Error('h must be a number')
         }
 
         return value
     },
     dash(value) {
         if (!(value === null || valid.isArray<number>(value, valid.isNumber))) {
-            throw new Error('Rect.props.dash must be a number[]/null')
+            throw new Error('dash must be a number[]/null')
         }
 
         return Object.freeze(value)

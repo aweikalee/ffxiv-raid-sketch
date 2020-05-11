@@ -32,14 +32,14 @@ export interface IWaymarkEvent extends ILayerEvent {
 const validator = valid.createValidator<IWaymarkProps>({
     type(value) {
         if (!isWaymarkAlias(value)) {
-            throw new Error('Waymark.props.type is invalid')
+            throw new Error('type is invalid')
         }
 
         return WAYMARK_ALIAS[value]
     },
     size(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Waymark.props.size must be a number')
+            throw new Error('size must be a number')
         }
 
         return value

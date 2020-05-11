@@ -94,41 +94,41 @@ export interface ILayerEvent {
 const validator = valid.createValidator<ILayerState>({
     x(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Layer.state.x must be a number')
+            throw new Error('x must be a number')
         }
 
         return value
     },
     y(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Layer.state.y must be a number')
+            throw new Error('y must be a number')
         }
         return value
     },
     rotate(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Layer.state.rotate must be a number')
+            throw new Error('rotate must be a number')
         }
 
         return value
     },
     scaleX(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Layer.state.scaleX must be a number')
+            throw new Error('scaleX must be a number')
         }
 
         return value
     },
     scaleY(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Layer.state.scaleY must be a number')
+            throw new Error('scaleY must be a number')
         }
 
         return value
     },
     opacity(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Layer.state.opacity must be a number')
+            throw new Error('opacity must be a number')
         }
 
         return value
@@ -142,7 +142,7 @@ const validator = valid.createValidator<ILayerState>({
             )
         ) {
             throw new Error(
-                'Layer.state.fill must be a string/CanvasGradient/CanvasPattern'
+                'fill must be a string/CanvasGradient/CanvasPattern'
             )
         }
 
@@ -157,7 +157,7 @@ const validator = valid.createValidator<ILayerState>({
             )
         ) {
             throw new Error(
-                'Layer.state.stroke must be a string/CanvasPattern/CanvasPattern'
+                'stroke must be a string/CanvasPattern/CanvasPattern'
             )
         }
 
@@ -165,14 +165,14 @@ const validator = valid.createValidator<ILayerState>({
     },
     strokeWidth(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Layer.state.strokeWidth must be a number')
+            throw new Error('strokeWidth must be a number')
         }
 
         return value
     },
     visible(value) {
         if (!valid.isBoolean(value)) {
-            throw new Error(`Layer.state.visible must be a boolean`)
+            throw new Error(`visible must be a boolean`)
         }
 
         return value
@@ -550,7 +550,7 @@ function proxyParent(that: Layer<any>, initialValue: Layer['parent']) {
 
             if (!(isLayer(newValue) || newValue === null)) {
                 target[key] = oldValue
-                throw new Error(`Layer.parent must be a Layer`)
+                throw new Error(`parent must be a Layer`)
             }
 
             // 从旧的父图层中移除
@@ -586,7 +586,7 @@ function proxyChildren(that: Layer<any>, initialValue: Layer['children']) {
 
             if (!Array.isArray(newValue) || newValue.some((v) => !isLayer(v))) {
                 target[key] = oldValue
-                throw new Error(`Layer.children must be a Layer[]`)
+                throw new Error(`children must be a Layer[]`)
             }
 
             target[key] = proxyChildrenArray(that, newValue)
@@ -616,7 +616,7 @@ function proxyChildrenArray(that: Layer<any>, initialValue: Layer['children']) {
                     } else {
                         target.splice(Number(key), 1)
                     }
-                    throw new Error(`Layer.children's value must be a Layer`)
+                    throw new Error(`children's value must be a Layer`)
                 }
             }
 

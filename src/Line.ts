@@ -66,35 +66,35 @@ const validator = valid.createValidator<ILineProps>({
                 return valid.isArray<number>(v, valid.isNumber) && v.length >= 2
             })
         ) {
-            throw new Error('Line.props.coordinates must be a number[][]')
+            throw new Error('coordinates must be a number[][]')
         }
 
         return value
     },
     smooth(value) {
         if (!valid.isBoolean(value)) {
-            throw new Error('Line.props.smooth must be a boolean')
+            throw new Error('smooth must be a boolean')
         }
 
         return value
     },
     dash(value) {
         if (!(value === null || valid.isArray<number>(value, valid.isNumber))) {
-            throw new Error('Line.props.dash must be a number[]/null')
+            throw new Error('dash must be a number[]/null')
         }
 
         return Object.freeze(value)
     },
     startCap(value) {
         if (!isLineCap(value)) {
-            throw new Error('Line.props.startCap must be a number[]/null')
+            throw new Error('startCap must be a number[]/null')
         }
 
         return value
     },
     endCap(value) {
         if (!isLineCap(value)) {
-            throw new Error('Line.props.endCap must be a number[]/null')
+            throw new Error('endCap must be a number[]/null')
         }
 
         return value
@@ -308,21 +308,21 @@ function proxyCoordinates(that: Line, initialValue: ILineProps['coordinates']) {
                         ? (target[key] = oldValue)
                         : target.splice(Number(key), 1)
                     throw new Error(
-                        `Line.props.coordinates's value must be a number[]`
+                        `coordinates's value must be a number[]`
                     )
                 }
 
                 const length = newValue.length
                 if (key == 0 && length !== 2) {
                     throw new Error(
-                        `Line.props.coordinates[0]'s length must equals 2`
+                        `coordinates[0]'s length must equals 2`
                     )
                 } else if (
                     key != 0 &&
                     (length % 2 !== 0 || length > 6 || length < 2)
                 ) {
                     throw new Error(
-                        `Line.props.coordinates value's length must equals 2/4/6`
+                        `coordinates value's length must equals 2/4/6`
                     )
                 }
 

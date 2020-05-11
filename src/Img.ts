@@ -29,14 +29,14 @@ export interface IImgEvent extends ILayerEvent {
 const validator = valid.createValidator<IImgProps>({
     src(value) {
         if (!(value === null || valid.isString(value))) {
-            throw new Error(`Img.props.src must be a string/null`)
+            throw new Error(`src must be a string/null`)
         }
 
         return value
     },
     size(value) {
         if (!(valid.isNumber(value) || value === 'auto')) {
-            throw new Error(`Img.props.size must be a number/"auto"`)
+            throw new Error(`size must be a number/"auto"`)
         }
 
         return value

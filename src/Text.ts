@@ -50,42 +50,42 @@ export interface ITextEvent extends ILayerEvent {
 const validator = valid.createValidator<ITextProps>({
     value(value) {
         if (!valid.isString(value)) {
-            throw new Error('Text.props.value must be a string')
+            throw new Error('value must be a string')
         }
 
         return value
     },
     align(value) {
         if (!valid.isCanvasTextAlign(value)) {
-            throw new Error('Text.props.align must be a CanvasTextAlign')
+            throw new Error('align must be a CanvasTextAlign')
         }
 
         return value
     },
     size(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Text.props.size must be a number')
+            throw new Error('size must be a number')
         }
 
         return value
     },
     font(value) {
         if (!valid.isString(value)) {
-            throw new Error('Text.props.font must be a string')
+            throw new Error('font must be a string')
         }
 
         return value
     },
     bold(value) {
         if (!valid.isBoolean(value)) {
-            throw new Error('Text.props.bold must be a boolean')
+            throw new Error('bold must be a boolean')
         }
 
         return value
     },
     italic(value) {
         if (!valid.isBoolean(value)) {
-            throw new Error('Text.props.italic must be a boolean')
+            throw new Error('italic must be a boolean')
         }
 
         return value

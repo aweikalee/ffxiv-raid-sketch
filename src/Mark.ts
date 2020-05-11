@@ -34,14 +34,14 @@ export interface IMarkEvent extends ILayerEvent {
 const validator = valid.createValidator<IMarkProps>({
     type(value) {
         if (!isMarkAlias(value)) {
-            throw new Error('Mark.props.type is invalid')
+            throw new Error('type is invalid')
         }
 
         return MAKR_ALIAS[value]
     },
     size(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Mark.props.size must be a number')
+            throw new Error('size must be a number')
         }
 
         return value

@@ -42,28 +42,28 @@ export interface ICircleEvent extends ILayerEvent {
 const validator = valid.createValidator<ICircleProps>({
     size(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Circle.props.size must be a number')
+            throw new Error('size must be a number')
         }
 
         return value
     },
     angle(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Circle.props.angle must be a number')
+            throw new Error('angle must be a number')
         }
 
         return value
     },
     arc(value) {
         if (!valid.isBoolean(value)) {
-            throw new Error('Circle.props.arc must be a boolean')
+            throw new Error('arc must be a boolean')
         }
 
         return value
     },
     dash(value) {
         if (!(value === null || valid.isArray<number>(value, valid.isNumber))) {
-            throw new Error('Circle.props.dash must be a number[]/null')
+            throw new Error('dash must be a number[]/null')
         }
 
         return Object.freeze(value)

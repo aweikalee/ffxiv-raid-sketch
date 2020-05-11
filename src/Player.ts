@@ -37,14 +37,14 @@ export interface IPlayerEvent extends ILayerEvent {
 const validator = valid.createValidator<IPlayerProps>({
     job(value) {
         if (!isJobAlias(value)) {
-            throw new Error('Player.props.job is invalid')
+            throw new Error('job is invalid')
         }
 
         return JOB_ALIAS[value]
     },
     size(value) {
         if (!valid.isNumber(value)) {
-            throw new Error('Player.props.size must be a number')
+            throw new Error('size must be a number')
         }
 
         return value
