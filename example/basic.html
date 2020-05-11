@@ -1,57 +1,46 @@
-<!DOCTYPE html>
-<html>
+<title>Basic Example - FFXIV RAID SKETCH</title>
+<script src="../dist/ffxiv-raid-sketch.umd.js"></script>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Basic Example - FFXIV RAID SKETCH</title>
-    <script src="../dist/ffxiv-raid-sketch.umd.js"></script>
-</head>
+<canvas id="canvas"></canvas>
+<script>
+    var sketch = new FRS.Sketch({
+        canvas: document.getElementById('canvas')
+    })
 
-<body>
-    <canvas id="canvas"></canvas>
-    <script>
-        var sketch = new FRS.Sketch({
-            canvas: document.getElementById('canvas')
-        })
+    var layer = sketch.layer
 
-        var layer = sketch.layer
+    // 背景
+    new FRS.Rect()
+        .size(100, 100)
+        .fill('#21252b')
+        .addTo(layer)
 
-        // 背景
-        new FRS.Rect()
-            .size(100, 100)
-            .fill('#21252b')
-            .addTo(layer)
+    // 圆形场地
+    new FRS.Circle()
+        .size(40)
+        .fill('#282c34')
+        .stroke('#61afef')
+        .strokeWidth(4)
+        .addTo(layer)
 
-        // 圆形场地
-        new FRS.Circle()
-            .size(40)
-            .fill('#282c34')
-            .stroke('#61afef')
-            .strokeWidth(4)
-            .addTo(layer)
+    // 场地标记
+    new FRS.Waymark().type('A').xy(0, -37.5).addTo(layer)
+    new FRS.Waymark().type('B').xy(37.5, 0).addTo(layer)
+    new FRS.Waymark().type('C').xy(0, 37.5).addTo(layer)
+    new FRS.Waymark().type('D').xy(-37.5, 0).addTo(layer)
 
-        // 场地标记
-        new FRS.Waymark().type('A').xy(0, -37.5).addTo(layer)
-        new FRS.Waymark().type('B').xy(37.5, 0).addTo(layer)
-        new FRS.Waymark().type('C').xy(0, 37.5).addTo(layer)
-        new FRS.Waymark().type('D').xy(-37.5, 0).addTo(layer)
+    // 怪物
+    new FRS.Monster()
+        .xy(0, -20)
+        .rotate(180)
+        .addTo(layer)
 
-        // 怪物
-        new FRS.Monster()
-            .xy(0, -20)
-            .rotate(180)
-            .addTo(layer)
+    // 玩家
+    new FRS.Player().job('吟游诗人')
+        .addTo(layer)
 
-        // 玩家
-        new FRS.Player().job('吟游诗人')
-            .addTo(layer)
-
-        // 标记
-        new FRS.Mark().type('攻击1')
-            .xy(5, -25)
-            .addTo(layer)
-    </script>
-</body>
-
-</html>
+    // 标记
+    new FRS.Mark().type('攻击1')
+        .xy(5, -25)
+        .addTo(layer)
+</script>
