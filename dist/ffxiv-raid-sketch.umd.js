@@ -1103,6 +1103,7 @@
     }, {
       key: "appendTo",
       value: function appendTo(element) {
+        if (!this.canvas) this.canvas = document.createElement('canvas');
         element.appendChild(this.canvas);
         return this.render();
       }

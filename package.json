@@ -1,6 +1,6 @@
 {
   "name": "ffxiv-raid-sketch",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "main": "dist/ffxiv-raid-sketch.umd.js",
   "typings": "es",
   "sideEffects": false,

@@ -140,6 +140,7 @@ export default class Sketch {
      * 将 Canvas 添加到 ...
      */
     appendTo(element: HTMLElement) {
+        if (!this.canvas) this.canvas = document.createElement('canvas')
         element.appendChild(this.canvas)
         return this.render()
     }
