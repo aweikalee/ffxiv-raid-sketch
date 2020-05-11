@@ -11,3 +11,18 @@ export function setAlias<T>(map: T, name: keyof T, alias: string) {
 
     map[alias] = map[name]
 }
+
+/**
+ * @ignore
+ */
+export function keyToKeyValue<T extends {}>(target: T) {
+    const res = {} as {
+        [K in keyof T]: K
+    }
+
+    Object.keys(target).forEach((key) => {
+        res[key] = key
+    })
+
+    return res
+}

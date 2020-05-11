@@ -1,4 +1,5 @@
-import { IMark } from '../img/mark/map'
+import { IMark, MARK } from '../img/mark/map'
+import { keyToKeyValue } from './utils'
 
 export type IMarkAlias =
     | IMark
@@ -37,37 +38,7 @@ export type IMarkAlias =
 export const MAKR_ALIAS: {
     [key in IMarkAlias]: IMark
 } = {
-    attack1: 'attack1',
-    attack2: 'attack2',
-    attack3: 'attack3',
-    attack4: 'attack4',
-    attack5: 'attack5',
-    attack6: 'attack6',
-    attack7: 'attack7',
-    attack8: 'attack8',
-
-    bind1: 'bind1',
-    bind2: 'bind2',
-    bind3: 'bind3',
-    bind4: 'bind4',
-    bind5: 'bind5',
-    bind6: 'bind6',
-    bind7: 'bind7',
-    bind8: 'bind8',
-
-    stop1: 'stop1',
-    stop2: 'stop2',
-    stop3: 'stop3',
-    stop4: 'stop4',
-    stop5: 'stop5',
-    stop6: 'stop6',
-    stop7: 'stop7',
-    stop8: 'stop8',
-
-    square: 'square',
-    circle: 'circle',
-    cross: 'cross',
-    triangle: 'triangle',
+    ...keyToKeyValue(MARK),
 
     攻击1: 'attack1',
     攻击2: 'attack2',

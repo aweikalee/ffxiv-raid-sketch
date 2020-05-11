@@ -1,4 +1,5 @@
-import { IWaymark } from '../img/waymark/map'
+import { IWaymark, WAYMARK } from '../img/waymark/map'
+import { keyToKeyValue } from './utils'
 
 export type IWaymarkAlias =
     | IWaymark
@@ -17,14 +18,7 @@ export type IWaymarkAlias =
 export const WAYMARK_ALIAS: {
     [key in IWaymarkAlias]: IWaymark
 } = {
-    1: 1,
-    2: 2,
-    3: 3,
-    // 4: 4,
-    A: 'A',
-    B: 'B',
-    C: 'C',
-    D: 'D',
+    ...keyToKeyValue(WAYMARK),
     a: 'A',
     b: 'B',
     c: 'C',

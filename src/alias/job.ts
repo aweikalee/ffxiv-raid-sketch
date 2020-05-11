@@ -1,4 +1,5 @@
 import { JOB, IJob } from '../img/job/map'
+import { keyToKeyValue } from './utils'
 
 export type IJobAlias =
     | IJob
@@ -45,43 +46,7 @@ export type IJobAlias =
 export const JOB_ALIAS: {
     [key in IJobAlias]: keyof typeof JOB
 } = {
-    tank: 'tank',
-    gladiator: 'gladiator',
-    marauder: 'marauder',
-    paladin: 'paladin',
-    warrior: 'warrior',
-    darkknight: 'darkknight',
-    gunbreaker: 'gunbreaker',
-
-    healer: 'healer',
-    conjurer: 'conjurer',
-    whitemage: 'whitemage',
-    scholar: 'scholar',
-    astrologian: 'astrologian',
-
-    dps: 'dps',
-    melee: 'melee',
-    physicalranged: 'physicalranged',
-    magicalranged: 'magicalranged',
-    pugilist: 'pugilist',
-    lancer: 'lancer',
-    rogue: 'rogue',
-    archer: 'archer',
-    thaumaturge: 'thaumaturge',
-    arcanist: 'arcanist',
-    monk: 'monk',
-    dragoon: 'dragoon',
-    ninja: 'ninja',
-    samurai: 'samurai',
-    bard: 'bard',
-    machinist: 'machinist',
-    dancer: 'dancer',
-    blackmage: 'blackmage',
-    summoner: 'summoner',
-    redmage: 'redmage',
-    bluemage: 'bluemage',
-    bluemagetank: 'bluemagetank',
-    bluemagehealer: 'bluemagehealer',
+    ...keyToKeyValue(JOB),
 
     libero: 'libero',
 
