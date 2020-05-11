@@ -553,7 +553,7 @@ function proxyState(that: Layer<any>, initialValue: ILayerState) {
  * @ignore
  */
 function proxyParent(that: Layer<any>, initialValue: Layer['parent']) {
-    let onParentChange: ILayerEvent['change']
+    let onChildrenChange: ILayerEvent['change']
     return proxy<{ value: Layer['parent'] }>(
         { value: initialValue },
         (key, oldValue, newValue, target) => {
@@ -570,14 +570,14 @@ function proxyParent(that: Layer<any>, initialValue: Layer['parent']) {
                 if (index !== -1) {
                     oldValue.children.splice(index, 1)
                 }
-                that.off<ILayerEvent>('change', onParentChange)
+                that.off<ILayerEvent>('change', onChildrenChange)
             }
 
             // 添加到新的父图层
             if (newValue !== null) {
                 newValue.children.push(that)
-                onParentChange = () => newValue.emit('change', [])
-                that.on<ILayerEvent>('change', onParentChange)
+                onChildrenChange = () => newValue.emit('change', [])
+                that.on<ILayerEvent>('change', onChildrenChange)
             }
 
             that.emit<ILayerEvent>('parent', [that.parent])
