@@ -32,10 +32,10 @@ import * as FRS from 'ffxiv-raid-sketch'
 
 // 创建实例 添加到页面上
 const sketch = new FRS.Sketch({
-    canvas: document.getElementById('canvas'),
-    w: 400,
-    h: 400,
-    unit: 4
+    canvas: document.getElementById('canvas'), // 绑定的 Canvas DOM
+    w: 400, // 画布宽度（px）
+    h: 400, // 画布高度（px）
+    unit: 4 // 基础单位（px）
 })
 
 // 创建一个半径为40的圆
@@ -62,95 +62,138 @@ var sketch = new FRS.Sketch().appendTo(document.body) // 圆形场地 new
 FRS.Circle().addTo(sketch.layer)
 ```
 
-## Layer
+## Layer 图层
 
 一切图形继承于 `Layer` 类。
 
-### 方法
+### state 图层状态
+可通过以下方法进行设置。
 
-#### add 添加子图层
-
+#### 实例化参数
 ```js
-new Circle().add(new FRS.Rect())
+const layer = new Layer({
+    x: 0, // 图层位置 坐标x
+    y: 0, // 图层位置 坐标y
+    rotate: 0, // 图层旋转角度
+    scaleX: 1, // 图层x轴缩放
+    scaleY: 1, // 图层y轴缩放
+    opacity: 1, // 不透明度
+    fill: '#000000', // 填充色
+    stroke: '#000000', // 描边色
+    strokeWidth: 2, // 描边宽度（px）
+    visible: true, // 可见（设为不可见将会跳过渲染 节省开支）
+})
+```
+坐标、尺寸的单位都是 `Sketch.options.unit`，
+只有一个例外——`strokeWidth`，单位是 `px`。
+
+#### 实例方法
+```js
+const layer = new Layer()
+layer.xy(0, 0)
+    .rotate(0)
+    .scale(1, 1)
+    .opacity(1)
+    .fill('#000')
+    .stroke('#000')
+    .strokeWidth(2)
+    .show() // visible = true
+    .hide() // visible = false
 ```
 
-将 `Rect` 添加到了 `Circle` 图层里。 `Rect` 将会随着 `Circle` 移动、旋转、缩放、设置不透明度。
-
-相关方法：`addTo`, `remove`, `removeAll`
-
-#### xy 坐标
-
+#### 实例属性
 ```js
-new Rect().xy(10, 10)
+const layer = new Layer()
+layer.state.x = 0
+layer.state.y = 0
+layer.state.rotate = 0
+layer.state.scaleX = 1
+layer.state.scaleY = 1
+layer.state.opacity = 1
+layer.state.fill = '#000'
+layer.state.stroke = '#000'
+layer.state.strokeWidth = 2
+layer.state.visible = true
 ```
 
-将 `Rect` 设置在相对坐标(10, 10)的位置。
+### parent, children 父图层, 子图层
 
-#### rotate 旋转
-
+#### 图层操作
 ```js
-new Rect().rotate(45)
+const a = new Circle()
+const b = new Rect()
+
+a.add(b) // 将 b 添加到 a
+b.addTo(a) // 将 b 添加到 a
+b.parent = a // 将 b 添加到 a
+a.children.push(b) // 将 b 添加到 a
+
+a.remove(b) // 将 b 从 a 中移除
+a.removeAll() // 移除 a 所有子图层
+```
+`a.children` 是一个数组，添加的时候用数组方法是毫无问题的。
+如果通过数组方法删除，无法将 `b.parent` 修改为 `null`。
+虽然也没什么大问题，但建议还是通过 `remove` 方法进行删除。
+
+### 图层状态的继承
+图层嵌套，子图层状态将会在父图层状态下，再进行计算。
+与一般的图形处理软件的图层嵌套类似。
+
+比如：
+```js
+const a = new Circle({
+    x: 10,
+    y: 10,
+    rotate: 45,
+    scaleX: 2,
+    scaleY: 2,
+    opacity: 0.5
+})
+const b = new Rect({
+    x: -10,
+    y: -10,
+    rotate: -45,
+    scaleX: 0.5,
+    scaleY: 0.5,
+    opacity: 0.5
+}).addTo(a)
 ```
 
-将 `Rect` 顺时针旋转 45 度。
-
-#### scale 缩放
-
+最后渲染时的状态就会变成：
 ```js
-new Rect().scale(1.5, 2)
+a.state = {
+    x: 10,
+    y: 10,
+    rotate: 45,
+    scaleX: 2,
+    scaleY: 2,
+    opacity: 0.5
+}
+
+b.state = {
+    x: 0,
+    y: 0,
+    rotate: 0,
+    scaleX: 1,
+    scaleY: 1,
+    opacity: 0.25
+}
 ```
+注：`fill`, `stroke`, `storkeWidth` 不受父图层影响。
 
-将 `Rect` 横向缩放设为 1.5 倍，纵向缩放设为2倍。
-
-#### opacity 不透明度
-
-```js
-new Rect().scale(0.5)
-```
-
-将 `Rect` 不透明度设为 0.5。
-
-#### fill 填充颜色
-```js
-new Rect().fill('#f00')
-```
-
-#### stroke 描边颜色
-```js
-new Rect().stroke('#f00')
-```
-
-#### stokeWidth 描边宽度
-```js
-new Rect().strokeWidth(4)
-```
-`strokeWidth` 不受 `unit` 影响，设为 4 就是 4px。
-
-#### show, hide 设置可见 / 不可见
-```js
-const boss = new Monster()
-
-boss.hide()
-
-boss.show()
-```
-设为不可见后，渲染时将会被跳过，节省开销。
-
-
+### 其他方法
 #### getLayerStatus 获得图层状态
 ```js
 new Rect().addTo(sketch.layer).getLayerStatus()
 ```
 获得图层当前在画布中的状态（位置、被旋转角度、透明度、缩放）。
 
-主要针对嵌套图层，嵌套图层将会进行多次位移、旋转、改透明度、缩放。该方法则是多次嵌套后，计算得到最终状态。
-
-属性从自身累加到最顶层的父图层。如果图层没有父图层，获得的值就等于自身的`props`。
+更多说明：[图层状态的继承](#图层状态的继承)
 
 
 #### turnTo 转向
 ```js
-const mt = new Player('战士').addTo(sketch.layer).xy(0, 20)
+const mt = new Player().job('战士').addTo(sketch.layer).xy(0, 20)
 const boss = new Monster().addTo(sketch.layer).turnTo(mt)
 ```
 将 `boss` 转向MT。(`boss`图层的北面)
@@ -159,13 +202,15 @@ const boss = new Monster().addTo(sketch.layer).turnTo(mt)
 
 一次性的，移动后请重新调用。
 
-注：这个方法是建立在`getLayerStatus`基础上的，不建议在添加到画布上之前调用 `turnTo`。
+注：这个方法是建立在`getLayerStatus`基础上的，不要在添加到画布上之前调用 `turnTo`。
 
 
 #### clone 克隆、复制
 
 ```js
-const doll = new Monster().add(new Text('狩猎人偶')).addTo(sketch.layer)
+const doll = new Monster()
+    .addTo(sketch.layer)
+    .add(new Text().value('狩猎人偶'))
 
 const doll2 = doll.clone().addTo(sketch.layer)
 ```
@@ -197,9 +242,11 @@ boss.emit('test', ['参数1', '参数2']) // 将会输出: 参数1, 参数2
 boss.off('test', fn)
 ```
 
-#### 其他
-
+### 图形类（继承于 Layer）
 每种图形类有独有的属性和操作方法，请到 [API Document](https://aweikalee.github.io/ffxiv-raid-sketch/) 进行查询。
+
+图形类独有的属性都放入了 `props` 中。`props` 和 `state` 一样可以通过 3 种方法设置（见 [state 图层状态](#state-图层状态)）。
+
 
 ## 动画
 
@@ -229,4 +276,3 @@ new Player('诗人')
 为 `吟游诗人` 设置别名 `诗人` 之后，设置职业时就可以用 `诗人` 代替 `吟游诗人`了。
 
 `Mark`, `Waymark`, `Player` 都有别名系统，最终都会定向到预设好的官方英文全名。
-而 `Img` 的别名系统则就是一个字符串映射。
