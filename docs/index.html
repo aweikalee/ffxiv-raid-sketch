@@ -95,10 +95,10 @@
 
 <span class="hljs-comment">// 创建实例 添加到页面上</span>
 <span class="hljs-keyword">const</span> sketch = <span class="hljs-keyword">new</span> FRS.Sketch({
-    <span class="hljs-attr">canvas</span>: <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'canvas'</span>),
-    <span class="hljs-attr">w</span>: <span class="hljs-number">400</span>,
-    <span class="hljs-attr">h</span>: <span class="hljs-number">400</span>,
-    <span class="hljs-attr">unit</span>: <span class="hljs-number">4</span>
+    <span class="hljs-attr">canvas</span>: <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'canvas'</span>), <span class="hljs-comment">// 绑定的 Canvas DOM</span>
+    <span class="hljs-attr">w</span>: <span class="hljs-number">400</span>, <span class="hljs-comment">// 画布宽度（px）</span>
+    <span class="hljs-attr">h</span>: <span class="hljs-number">400</span>, <span class="hljs-comment">// 画布高度（px）</span>
+    <span class="hljs-attr">unit</span>: <span class="hljs-number">4</span> <span class="hljs-comment">// 基础单位（px）</span>
 })
 
 <span class="hljs-comment">// 创建一个半径为40的圆</span>
@@ -118,65 +118,142 @@
 				</a>
 				<pre><code class="language-js"><span class="hljs-keyword">var</span> sketch = <span class="hljs-keyword">new</span> FRS.Sketch().appendTo(<span class="hljs-built_in">document</span>.body) <span class="hljs-comment">// 圆形场地 new</span>
 FRS.Circle().addTo(sketch.layer)</code></pre>
-				<a href="#layer" id="layer" style="color: inherit; text-decoration: none;">
-					<h2>Layer</h2>
+				<a href="#layer-图层" id="layer-图层" style="color: inherit; text-decoration: none;">
+					<h2>Layer 图层</h2>
 				</a>
 				<p>一切图形继承于 <code>Layer</code> 类。</p>
-				<a href="#方法" id="方法" style="color: inherit; text-decoration: none;">
-					<h3>方法</h3>
+				<a href="#state-图层状态" id="state-图层状态" style="color: inherit; text-decoration: none;">
+					<h3>state 图层状态</h3>
 				</a>
-				<a href="#add-添加子图层" id="add-添加子图层" style="color: inherit; text-decoration: none;">
-					<h4>add 添加子图层</h4>
+				<p>可通过以下方法进行设置。</p>
+				<a href="#实例化参数" id="实例化参数" style="color: inherit; text-decoration: none;">
+					<h4>实例化参数</h4>
 				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">new</span> Circle().add(<span class="hljs-keyword">new</span> FRS.Rect())</code></pre>
-				<p>将 <code>Rect</code> 添加到了 <code>Circle</code> 图层里。 <code>Rect</code> 将会随着 <code>Circle</code> 移动、旋转、缩放、设置不透明度。</p>
-				<p>相关方法：<code>addTo</code>, <code>remove</code>, <code>removeAll</code></p>
-				<a href="#xy-坐标" id="xy-坐标" style="color: inherit; text-decoration: none;">
-					<h4>xy 坐标</h4>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> layer = <span class="hljs-keyword">new</span> Layer({
+    <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>, <span class="hljs-comment">// 图层位置 坐标x</span>
+    <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>, <span class="hljs-comment">// 图层位置 坐标y</span>
+    <span class="hljs-attr">rotate</span>: <span class="hljs-number">0</span>, <span class="hljs-comment">// 图层旋转角度</span>
+    <span class="hljs-attr">scaleX</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// 图层x轴缩放</span>
+    <span class="hljs-attr">scaleY</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// 图层y轴缩放</span>
+    <span class="hljs-attr">opacity</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// 不透明度</span>
+    <span class="hljs-attr">fill</span>: <span class="hljs-string">'#000000'</span>, <span class="hljs-comment">// 填充色</span>
+    <span class="hljs-attr">stroke</span>: <span class="hljs-string">'#000000'</span>, <span class="hljs-comment">// 描边色</span>
+    <span class="hljs-attr">strokeWidth</span>: <span class="hljs-number">2</span>, <span class="hljs-comment">// 描边宽度（px）</span>
+    <span class="hljs-attr">visible</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// 可见（设为不可见将会跳过渲染 节省开支）</span>
+})</code></pre>
+				<p>坐标、尺寸的单位都是 <code>Sketch.options.unit</code>，
+				只有一个例外——<code>strokeWidth</code>，单位是 <code>px</code>。</p>
+				<a href="#实例方法" id="实例方法" style="color: inherit; text-decoration: none;">
+					<h4>实例方法</h4>
 				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().xy(<span class="hljs-number">10</span>, <span class="hljs-number">10</span>)</code></pre>
-				<p>将 <code>Rect</code> 设置在相对坐标(10, 10)的位置。</p>
-				<a href="#rotate-旋转" id="rotate-旋转" style="color: inherit; text-decoration: none;">
-					<h4>rotate 旋转</h4>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> layer = <span class="hljs-keyword">new</span> Layer()
+layer.xy(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>)
+    .rotate(<span class="hljs-number">0</span>)
+    .scale(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>)
+    .opacity(<span class="hljs-number">1</span>)
+    .fill(<span class="hljs-string">'#000'</span>)
+    .stroke(<span class="hljs-string">'#000'</span>)
+    .strokeWidth(<span class="hljs-number">2</span>)
+    .show() <span class="hljs-comment">// visible = true</span>
+    .hide() <span class="hljs-comment">// visible = false</span></code></pre>
+				<a href="#实例属性" id="实例属性" style="color: inherit; text-decoration: none;">
+					<h4>实例属性</h4>
 				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().rotate(<span class="hljs-number">45</span>)</code></pre>
-				<p>将 <code>Rect</code> 顺时针旋转 45 度。</p>
-				<a href="#scale-缩放" id="scale-缩放" style="color: inherit; text-decoration: none;">
-					<h4>scale 缩放</h4>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> layer = <span class="hljs-keyword">new</span> Layer()
+layer.state.x = <span class="hljs-number">0</span>
+layer.state.y = <span class="hljs-number">0</span>
+layer.state.rotate = <span class="hljs-number">0</span>
+layer.state.scaleX = <span class="hljs-number">1</span>
+layer.state.scaleY = <span class="hljs-number">1</span>
+layer.state.opacity = <span class="hljs-number">1</span>
+layer.state.fill = <span class="hljs-string">'#000'</span>
+layer.state.stroke = <span class="hljs-string">'#000'</span>
+layer.state.strokeWidth = <span class="hljs-number">2</span>
+layer.state.visible = <span class="hljs-literal">true</span></code></pre>
+				<a href="#parent-children-父图层-子图层" id="parent-children-父图层-子图层" style="color: inherit; text-decoration: none;">
+					<h3>parent, children 父图层, 子图层</h3>
 				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().scale(<span class="hljs-number">1.5</span>, <span class="hljs-number">2</span>)</code></pre>
-				<p>将 <code>Rect</code> 横向缩放设为 1.5 倍，纵向缩放设为2倍。</p>
-				<a href="#opacity-不透明度" id="opacity-不透明度" style="color: inherit; text-decoration: none;">
-					<h4>opacity 不透明度</h4>
+				<a href="#图层操作" id="图层操作" style="color: inherit; text-decoration: none;">
+					<h4>图层操作</h4>
 				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().scale(<span class="hljs-number">0.5</span>)</code></pre>
-				<p>将 <code>Rect</code> 不透明度设为 0.5。</p>
-				<a href="#fill-填充颜色" id="fill-填充颜色" style="color: inherit; text-decoration: none;">
-					<h4>fill 填充颜色</h4>
-				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().fill(<span class="hljs-string">'#f00'</span>)</code></pre>
-				<a href="#stroke-描边颜色" id="stroke-描边颜色" style="color: inherit; text-decoration: none;">
-					<h4>stroke 描边颜色</h4>
-				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().stroke(<span class="hljs-string">'#f00'</span>)</code></pre>
-				<a href="#stokewidth-描边宽度" id="stokewidth-描边宽度" style="color: inherit; text-decoration: none;">
-					<h4>stokeWidth 描边宽度</h4>
-				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().strokeWidth(<span class="hljs-number">4</span>)</code></pre>
-				<p><code>strokeWidth</code> 不受 <code>unit</code> 影响，设为 4 就是 4px。</p>
-				<a href="#show-hide-设置可见--不可见" id="show-hide-设置可见--不可见" style="color: inherit; text-decoration: none;">
-					<h4>show, hide 设置可见 / 不可见</h4>
-				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">const</span> boss = <span class="hljs-keyword">new</span> Monster()
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> a = <span class="hljs-keyword">new</span> Circle()
+<span class="hljs-keyword">const</span> b = <span class="hljs-keyword">new</span> Rect()
 
-boss.hide()
+a.add(b) <span class="hljs-comment">// 将 b 添加到 a</span>
+b.addTo(a) <span class="hljs-comment">// 将 b 添加到 a</span>
+b.parent = a <span class="hljs-comment">// 将 b 添加到 a</span>
+a.children.push(b) <span class="hljs-comment">// 将 b 添加到 a</span>
 
-boss.show()</code></pre>
-				<p>设为不可见后，渲染时将会被跳过，节省开销。</p>
+a.remove(b) <span class="hljs-comment">// 将 b 从 a 中移除</span>
+a.removeAll() <span class="hljs-comment">// 移除 a 所有子图层</span></code></pre>
+				<p><code>a.children</code> 是一个数组，添加的时候用数组方法是毫无问题的。
+					如果通过数组方法删除，无法将 <code>b.parent</code> 修改为 <code>null</code>。
+				虽然也没什么大问题，但建议还是通过 <code>remove</code> 方法进行删除。</p>
+				<a href="#图层状态的继承" id="图层状态的继承" style="color: inherit; text-decoration: none;">
+					<h3>图层状态的继承</h3>
+				</a>
+				<p>图层嵌套，子图层状态将会在父图层状态下，再进行计算。
+				与一般的图形处理软件的图层嵌套类似。</p>
+				<p>比如：</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> a = <span class="hljs-keyword">new</span> Circle({
+    <span class="hljs-attr">x</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">rotate</span>: <span class="hljs-number">45</span>,
+    <span class="hljs-attr">scaleX</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">scaleY</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.5</span>
+})
+<span class="hljs-keyword">const</span> b = <span class="hljs-keyword">new</span> Rect({
+    <span class="hljs-attr">x</span>: <span class="hljs-number">-10</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-number">-10</span>,
+    <span class="hljs-attr">rotate</span>: <span class="hljs-number">-45</span>,
+    <span class="hljs-attr">scaleX</span>: <span class="hljs-number">0.5</span>,
+    <span class="hljs-attr">scaleY</span>: <span class="hljs-number">0.5</span>,
+    <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.5</span>
+}).addTo(a)</code></pre>
+				<p>最后渲染时的状态就会变成：</p>
+				<pre><code class="language-js">a.state = {
+    <span class="hljs-attr">x</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">rotate</span>: <span class="hljs-number">45</span>,
+    <span class="hljs-attr">scaleX</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">scaleY</span>: <span class="hljs-number">2</span>,
+    <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.5</span>
+}
+
+b.state = {
+    <span class="hljs-attr">x</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attr">rotate</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attr">scaleX</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">scaleY</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">opacity</span>: <span class="hljs-number">0.25</span>
+}</code></pre>
+				<p>注：<code>fill</code>, <code>stroke</code>, <code>storkeWidth</code> 不受父图层影响。</p>
+				<a href="#其他方法" id="其他方法" style="color: inherit; text-decoration: none;">
+					<h3>其他方法</h3>
+				</a>
+				<a href="#getlayerstatus-获得图层状态" id="getlayerstatus-获得图层状态" style="color: inherit; text-decoration: none;">
+					<h4>getLayerStatus 获得图层状态</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">new</span> Rect().addTo(sketch.layer).getLayerStatus()</code></pre>
+				<p>获得图层当前在画布中的状态（位置、被旋转角度、透明度、缩放）。</p>
+				<p>更多说明：<a href="#%E5%9B%BE%E5%B1%82%E7%8A%B6%E6%80%81%E7%9A%84%E7%BB%A7%E6%89%BF">图层状态的继承</a></p>
+				<a href="#turnto-转向" id="turnto-转向" style="color: inherit; text-decoration: none;">
+					<h4>turnTo 转向</h4>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> mt = <span class="hljs-keyword">new</span> Player().job(<span class="hljs-string">'战士'</span>).addTo(sketch.layer).xy(<span class="hljs-number">0</span>, <span class="hljs-number">20</span>)
+<span class="hljs-keyword">const</span> boss = <span class="hljs-keyword">new</span> Monster().addTo(sketch.layer).turnTo(mt)</code></pre>
+				<p>将 <code>boss</code> 转向MT。(<code>boss</code>图层的北面)</p>
+				<p>如需背对则可以使用 <code>turnTo(mt, 180)</code>，即面朝MT后再转180度。</p>
+				<p>一次性的，移动后请重新调用。</p>
+				<p>注：这个方法是建立在<code>getLayerStatus</code>基础上的，不要在添加到画布上之前调用 <code>turnTo</code>。</p>
 				<a href="#clone-克隆、复制" id="clone-克隆、复制" style="color: inherit; text-decoration: none;">
 					<h4>clone 克隆、复制</h4>
 				</a>
-				<pre><code class="language-js"><span class="hljs-keyword">const</span> doll = <span class="hljs-keyword">new</span> Monster().add(<span class="hljs-keyword">new</span> Text(<span class="hljs-string">'狩猎人偶'</span>)).addTo(sketch.layer)
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> doll = <span class="hljs-keyword">new</span> Monster()
+    .addTo(sketch.layer)
+    .add(<span class="hljs-keyword">new</span> Text().value(<span class="hljs-string">'狩猎人偶'</span>))
 
 <span class="hljs-keyword">const</span> doll2 = doll.clone().addTo(sketch.layer)</code></pre>
 				<p>复制一个 <code>doll</code>，对 <code>doll2</code> 操作不会影响到 <code>doll</code>.</p>
@@ -200,10 +277,11 @@ boss.emit(<span class="hljs-string">'test'</span>, [<span class="hljs-string">'�
 
 <span class="hljs-comment">// 移除事件监听</span>
 boss.off(<span class="hljs-string">'test'</span>, fn)</code></pre>
-				<a href="#其他" id="其他" style="color: inherit; text-decoration: none;">
-					<h4>其他</h4>
+				<a href="#图形类（继承于-layer）" id="图形类（继承于-layer）" style="color: inherit; text-decoration: none;">
+					<h3>图形类（继承于 Layer）</h3>
 				</a>
 				<p>每种图形类有独有的属性和操作方法，请到 <a href="https://aweikalee.github.io/ffxiv-raid-sketch/">API Document</a> 进行查询。</p>
+				<p>图形类独有的属性都放入了 <code>props</code> 中。<code>props</code> 和 <code>state</code> 一样可以通过 3 种方法设置（见 <a href="#state-%E5%9B%BE%E5%B1%82%E7%8A%B6%E6%80%81">state 图层状态</a>）。</p>
 				<a href="#动画" id="动画" style="color: inherit; text-decoration: none;">
 					<h2>动画</h2>
 				</a>
@@ -225,8 +303,7 @@ Player.setAlias(<span class="hljs-string">'吟游诗人'</span>, <span class="hl
 
 <span class="hljs-keyword">new</span> Player(<span class="hljs-string">'诗人'</span>)</code></pre>
 				<p>为 <code>吟游诗人</code> 设置别名 <code>诗人</code> 之后，设置职业时就可以用 <code>诗人</code> 代替 <code>吟游诗人</code>了。</p>
-				<p><code>Mark</code>, <code>Waymark</code>, <code>Player</code> 都有别名系统，最终都会定向到预设好的官方英文全名。
-				而 <code>Img</code> 的别名系统则就是一个字符串映射。</p>
+				<p><code>Mark</code>, <code>Waymark</code>, <code>Player</code> 都有别名系统，最终都会定向到预设好的官方英文全名。</p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -266,9 +343,6 @@ Player.setAlias(<span class="hljs-string">'吟游诗人'</span>, <span class="hl
 					<li class=" tsd-kind-class">
 						<a href="classes/sketch.html" class="tsd-kind-icon">Sketch</a>
 					</li>
-					<li class=" tsd-kind-class tsd-has-type-parameter">
-						<a href="classes/subscribe.html" class="tsd-kind-icon">Subscribe</a>
-					</li>
 					<li class=" tsd-kind-class">
 						<a href="classes/text.html" class="tsd-kind-icon">Text</a>
 					</li>
@@ -291,7 +365,7 @@ Player.setAlias(<span class="hljs-string">'吟游诗人'</span>, <span class="hl
 						<a href="interfaces/ilayerevent.html" class="tsd-kind-icon">ILayer<wbr>Event</a>
 					</li>
 					<li class=" tsd-kind-interface">
-						<a href="interfaces/ilayerprops.html" class="tsd-kind-icon">ILayer<wbr>Props</a>
+						<a href="interfaces/ilayerstate.html" class="tsd-kind-icon">ILayer<wbr>State</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/ilinecoordinate.html" class="tsd-kind-icon">ILine<wbr>Coordinate</a>
@@ -359,41 +433,14 @@ Player.setAlias(<span class="hljs-string">'吟游诗人'</span>, <span class="hl
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#imarkalias" class="tsd-kind-icon">IMark<wbr>Alias</a>
 					</li>
+					<li class=" tsd-kind-type-alias tsd-has-type-parameter">
+						<a href="globals.html#ipropertydescriptor" class="tsd-kind-icon">IProperty<wbr>Descriptor</a>
+					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#iwaymark" class="tsd-kind-icon">IWaymark</a>
 					</li>
 					<li class=" tsd-kind-type-alias">
 						<a href="globals.html#iwaymarkalias" class="tsd-kind-icon">IWaymark<wbr>Alias</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#job" class="tsd-kind-icon">JOB</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#job_alias" class="tsd-kind-icon">JOB_<wbr>ALIAS</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#job_color" class="tsd-kind-icon">JOB_<wbr>COLOR</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#job_type" class="tsd-kind-icon">JOB_<wbr>TYPE</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#makr_alias" class="tsd-kind-icon">MAKR_<wbr>ALIAS</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#mark" class="tsd-kind-icon">MARK</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#waymark" class="tsd-kind-icon">WAYMARK</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#waymark_alias" class="tsd-kind-icon">WAYMARK_<wbr>ALIAS</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#waymark_color" class="tsd-kind-icon">WAYMARK_<wbr>COLOR</a>
-					</li>
-					<li class=" tsd-kind-object-literal">
-						<a href="globals.html#waymark_color_map" class="tsd-kind-icon">WAYMARK_<wbr>COLOR_<wbr>MAP</a>
 					</li>
 				</ul>
 			</nav>

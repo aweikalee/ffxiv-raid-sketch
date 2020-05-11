@@ -4,6 +4,22 @@
   (global = global || self, factory(global.FRS = {}));
 }(this, (function (exports) { 'use strict';
 
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -135,6 +151,74 @@
     throw new TypeError("Invalid attempt to destructure non-iterable instance");
   }
 
+  /*! *****************************************************************************
+  Copyright (c) Microsoft Corporation. All rights reserved.
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+  this file except in compliance with the License. You may obtain a copy of the
+  License at http://www.apache.org/licenses/LICENSE-2.0
+
+  THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+  WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+  MERCHANTABLITY OR NON-INFRINGEMENT.
+
+  See the Apache Version 2.0 License for specific language governing permissions
+  and limitations under the License.
+  ***************************************************************************** */
+
+  function __rest(s, e) {
+      var t = {};
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+          t[p] = s[p];
+      if (s != null && typeof Object.getOwnPropertySymbols === "function")
+          for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+              if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                  t[p[i]] = s[p[i]];
+          }
+      return t;
+  }
+
+  /**
+   * 向量相对y轴的旋转角
+   *
+   * 注意：此处坐标是图层坐标 不是数学坐标（y轴方向相反）
+   * @ignore
+   * */
+  function rotationAngleY(x, y) {
+    var angle = Math.acos(-y / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
+    return x > 0 ? angle : -angle;
+  }
+  /**
+   * @ignore
+   */
+
+  function rotateVector(x, y, angle) {
+    return [Math.cos(angle) * x - Math.sin(angle) * y, Math.sin(angle) * x + Math.cos(angle) * y];
+  }
+
+  /**
+   * 合并对象, b将会合并到a
+   * @ignore
+   */
+  function merge(a, b) {
+    return Object.assign(a, b);
+  }
+
+  /**
+   * @ignore
+   */
+  var hasOwnProperty = Object.hasOwnProperty.call.bind(Object.hasOwnProperty);
+  /**
+   * @ignore
+   */
+
+  function hasOwn(target, key) {
+    return hasOwnProperty(target, key);
+  }
+
+  /**
+   * @ignore
+   */
   var Subscribe = /*#__PURE__*/function () {
     function Subscribe() {
       _classCallCheck(this, Subscribe);
@@ -193,7 +277,7 @@
         }
 
         this.map.get(type).forEach(function (event) {
-          event.apply(void 0, _toConsumableArray(args || []));
+          event.apply(void 0, _toConsumableArray(args));
         });
       }
     }]);
@@ -202,47 +286,222 @@
   }();
 
   /**
-   * 向量相对y轴的旋转角
-   *
-   * 注意：此处坐标是图层坐标 不是数学坐标（y轴方向相反）
-   * @ignore
-   * */
-  function rotationAngleY(x, y) {
-    var angle = Math.acos(-y / Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)));
-    return x > 0 ? angle : -angle;
-  }
-  /**
-   * 向量旋转后的坐标
-   * @ignore
-   * */
-
-  function rotateVector(x, y, angle) {
-    return [Math.cos(angle) * x - Math.sin(angle) * y, Math.sin(angle) * x + Math.cos(angle) * y];
-  }
-  /**
-   * 合并设置, b将会合并到a
    * @ignore
    */
 
-  function mergeOptions(a, b) {
-    for (var i in b) {
-      if (b[i] !== undefined) {
-        a[i] = b[i];
-      }
-    }
+  function proxy(target, onChange) {
+    var isArray = Array.isArray(target);
+    return new Proxy(target, {
+      set: function set(target, key, value, receiver) {
+        var oldValue = target[key];
+        var hadChange = oldValue !== value;
+        var res = Reflect.set(target, key, value, receiver);
 
-    return a;
+        if (hadChange && hasOwn(target, key)) {
+          onChange(key, oldValue, value, target);
+        }
+
+        return res;
+      },
+      deleteProperty: function deleteProperty(target, key) {
+        var oldValue = target[key];
+        var res = Reflect.deleteProperty(target, key);
+
+        if (!isArray) {
+          onChange(key, oldValue, undefined, target);
+        }
+
+        return res;
+      }
+    });
   }
+
+  /**
+   * @ignore
+   */
+  function createValidator(validators) {
+    return function (target, key, newValue, oldValue) {
+      return new Promise(function (resolve) {
+        var res;
+
+        if (key in validators) {
+          res = validators[key](newValue, oldValue);
+        } else {
+          res = newValue;
+        }
+
+        target[key] = res;
+        return resolve(res);
+      });
+    };
+  }
+  /**
+   * @ignore
+   */
+
+  function isNumber(value) {
+    return typeof value === 'number';
+  }
+  /**
+   * @ignore
+   */
+
+  function isString(value) {
+    return typeof value === 'string';
+  }
+  /**
+   * @ignore
+   */
+
+  function isBoolean(value) {
+    return typeof value === 'boolean';
+  }
+  /**
+   * @ignore
+   */
+
+  function isCanvasGradient(value) {
+    return value instanceof CanvasGradient;
+  }
+  /**
+   * @ignore
+   */
+
+  function isCanvasPattern(value) {
+    return value instanceof CanvasPattern;
+  }
+  /**
+   * @ignore
+   */
+
+  function isCanvasTextAlign(value) {
+    return ['center', 'end', 'left', 'right', 'start'].includes(value);
+  }
+  /**
+   * @ignore
+   */
+
+  function isArray(value, typeCheck) {
+    return Array.isArray(value) && (typeCheck ? value.every(function (v) {
+      return typeCheck(v);
+    }) : true);
+  }
+
   /**
    * 深拷贝
+   *
+   * 暂时只支持 普通object/array
+   * @param target object/array
+   * @ignore
+   */
+  function deepClone(target) {
+    if (_typeof(target) === 'object' && target !== null) {
+      var cloneTarget = Array.isArray(target) ? [] : {};
+
+      for (var key in target) {
+        cloneTarget[key] = deepClone(target[key]);
+      }
+
+      return cloneTarget;
+    } else {
+      return target;
+    }
+  }
+
+  /**
+   * @ignore
+   */
+  function defineImmutable(o, p, target) {
+    return Object.defineProperty(o, p, {
+      get: function get() {
+        return target;
+      },
+      set: function set() {
+        console.log(o);
+        throw new Error("".concat(p, " is immutable"));
+      }
+    });
+  }
+  /**
    * @ignore
    */
 
-  function cloneDeep(target) {
-    // TODO: 更换为遍历形式的深拷贝
-    return JSON.parse(JSON.stringify(target));
+  function defineProperties(o, properties) {
+    return Object.defineProperties(o, properties);
   }
 
+  var validator = createValidator({
+    x: function x(value) {
+      if (!isNumber(value)) {
+        throw new Error('Layer.state.x must be a number');
+      }
+
+      return value;
+    },
+    y: function y(value) {
+      if (!isNumber(value)) {
+        throw new Error('Layer.state.y must be a number');
+      }
+
+      return value;
+    },
+    rotate: function rotate(value) {
+      if (!isNumber(value)) {
+        throw new Error('Layer.state.rotate must be a number');
+      }
+
+      return value;
+    },
+    scaleX: function scaleX(value) {
+      if (!isNumber(value)) {
+        throw new Error('Layer.state.scaleX must be a number');
+      }
+
+      return value;
+    },
+    scaleY: function scaleY(value) {
+      if (!isNumber(value)) {
+        throw new Error('Layer.state.scaleY must be a number');
+      }
+
+      return value;
+    },
+    opacity: function opacity(value) {
+      if (!isNumber(value)) {
+        throw new Error('Layer.state.opacity must be a number');
+      }
+
+      return value;
+    },
+    fill: function fill(value) {
+      if (!(isString(value) || isCanvasGradient(value) || isCanvasPattern(value))) {
+        throw new Error('Layer.state.fill must be a string/CanvasGradient/CanvasPattern');
+      }
+
+      return value;
+    },
+    stroke: function stroke(value) {
+      if (!(isString(value) || isCanvasGradient(value) || isCanvasPattern(value))) {
+        throw new Error('Layer.state.stroke must be a string/CanvasPattern/CanvasPattern');
+      }
+
+      return value;
+    },
+    strokeWidth: function strokeWidth(value) {
+      if (!isNumber(value)) {
+        throw new Error('Layer.state.strokeWidth must be a number');
+      }
+
+      return value;
+    },
+    visible: function visible(value) {
+      if (!isBoolean(value)) {
+        throw new Error("Layer.state.visible must be a boolean");
+      }
+
+      return value;
+    }
+  });
   /**
    * 图层
    *
@@ -251,14 +510,12 @@
 
   var Layer = /*#__PURE__*/function () {
     function Layer() {
-      var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
       _classCallCheck(this, Layer);
 
-      /**
-       * 字段详情：[[ILayerProps]]
-       */
-      this.props = {
+      this.subscribe = new Subscribe();
+      var theState = proxyState(this, {
         x: 0,
         y: 0,
         rotate: 0,
@@ -269,24 +526,44 @@
         stroke: '#000000',
         strokeWidth: 2,
         visible: true
-      };
-      this.subscribe = new Subscribe();
-      this.children = [];
-      mergeOptions(this.props, props);
+      });
+      var parent = proxyParent(this, null);
+      var children = proxyChildren(this, []);
+      defineImmutable(this, 'state', theState);
+      defineProperties(this, {
+        parent: {
+          get: function get() {
+            return parent.value;
+          },
+          set: function set(v) {
+            parent.value = v;
+          }
+        },
+        children: {
+          get: function get() {
+            return children.value;
+          },
+          set: function set(v) {
+            children.value = v;
+          }
+        }
+      });
+      merge(this.state, state);
     }
+    /**
+     * 添加子图层
+     */
+
 
     _createClass(Layer, [{
       key: "add",
-
-      /**
-       * 添加子图层
-       */
       value: function add(layer) {
-        if (!(layer instanceof Layer)) return this;
-        if (layer.parent === this) return this;
+        if (!isLayer(layer)) {
+          throw new Error("add(value), value must be a Layer");
+        }
+
         layer.parent = this;
-        this.emit('add', [layer]);
-        return this.onChange();
+        return this;
       }
       /**
        * 添加到父图层
@@ -295,11 +572,12 @@
     }, {
       key: "addTo",
       value: function addTo(layer) {
-        if (!(layer instanceof Layer)) return this;
-        if (layer.parent === this) return this;
+        if (!isLayer(layer)) {
+          throw new Error("addTo(value), value must be a Layer");
+        }
+
         this.parent = layer;
-        this.emit('addTo', [layer]);
-        return this.onChange();
+        return this;
       }
       /**
        * 移除子图层
@@ -308,10 +586,12 @@
     }, {
       key: "remove",
       value: function remove(layer) {
-        if (!(layer instanceof Layer)) return this;
+        if (!isLayer(layer)) {
+          throw new Error("remove(value), value must be a Layer");
+        }
+
         layer.parent = null;
-        this.emit('remove', [layer]);
-        return this.onChange();
+        return this;
       }
       /**
        * 移除全部子图层
@@ -325,8 +605,7 @@
         this.children.forEach(function (child) {
           return _this.remove(child);
         });
-        this.emit('removeAll');
-        return this.onChange();
+        return this;
       }
       /**
        * 克隆
@@ -337,7 +616,6 @@
       value: function clone() {
         var clone = this._clone();
 
-        clone.props = cloneDeep(this.props);
         this.children.forEach(function (v) {
           clone.add(v.clone());
         });
@@ -351,17 +629,17 @@
     }, {
       key: "render",
       value: function render(ctx, utils) {
-        if (!this.props.visible) return;
-        var _this$props = this.props,
-            x = _this$props.x,
-            y = _this$props.y,
-            rotate = _this$props.rotate,
-            scaleX = _this$props.scaleX,
-            scaleY = _this$props.scaleY,
-            opacity = _this$props.opacity,
-            fill = _this$props.fill,
-            stroke = _this$props.stroke,
-            strokeWidth = _this$props.strokeWidth;
+        if (!this.state.visible) return;
+        var _this$state = this.state,
+            x = _this$state.x,
+            y = _this$state.y,
+            rotate = _this$state.rotate,
+            scaleX = _this$state.scaleX,
+            scaleY = _this$state.scaleY,
+            opacity = _this$state.opacity,
+            fill = _this$state.fill,
+            stroke = _this$state.stroke,
+            strokeWidth = _this$state.strokeWidth;
         var mapping = utils.mapping;
         ctx.save();
         ctx.translate(mapping(x), mapping(y));
@@ -378,9 +656,11 @@
           console.error(err);
         }
 
-        this.emit('render', [ctx, utils]);
+        this.children.forEach(function (child) {
+          return child.render(ctx, utils);
+        });
         ctx.restore();
-        this.emit('rendered');
+        this.emit('rendered', []);
       }
       /**
        * 获得当前图层 在画布中的状态
@@ -391,23 +671,23 @@
     }, {
       key: "getLayerStatus",
       value: function getLayerStatus() {
-        var _this$props2 = this.props,
-            x = _this$props2.x,
-            y = _this$props2.y,
-            rotate = _this$props2.rotate,
-            scaleX = _this$props2.scaleX,
-            scaleY = _this$props2.scaleY,
-            opacity = _this$props2.opacity;
+        var _this$state2 = this.state,
+            x = _this$state2.x,
+            y = _this$state2.y,
+            rotate = _this$state2.rotate,
+            scaleX = _this$state2.scaleX,
+            scaleY = _this$state2.scaleY,
+            opacity = _this$state2.opacity;
         var parent = this.parent;
 
         while (parent) {
-          var _parent$props = parent.props,
-              _x = _parent$props.x,
-              _y = _parent$props.y,
-              _rotate = _parent$props.rotate,
-              _scaleX = _parent$props.scaleX,
-              _scaleY = _parent$props.scaleY,
-              _opacity = _parent$props.opacity;
+          var _parent$state = parent.state,
+              _x = _parent$state.x,
+              _y = _parent$state.y,
+              _rotate = _parent$state.rotate,
+              _scaleX = _parent$state.scaleX,
+              _scaleY = _parent$state.scaleY,
+              _opacity = _parent$state.opacity;
 
           var _rotateVector = rotateVector(x, y, _rotate * Math.PI / 180);
 
@@ -448,11 +728,19 @@
       key: "turnTo",
       value: function turnTo(layer) {
         var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-        if (!(layer instanceof Layer)) return this;
+
+        if (!isLayer(layer)) {
+          throw new Error("turnTo(value, offset), value must be a Layer");
+        }
+
+        if (!isNumber(offset)) {
+          throw new Error("turnTo(value, offset), offset must be a number");
+        }
+
         var p1 = this.getLayerStatus();
         var p2 = layer.getLayerStatus();
         var rotate = rotationAngleY(p2.x - p1.x, p2.y - p1.y) / Math.PI * 180;
-        this.rotate(rotate - p1.rotate + this.props.rotate + offset);
+        this.rotate(rotate - p1.rotate + this.state.rotate + offset);
         return this;
       }
       /**
@@ -462,12 +750,9 @@
     }, {
       key: "xy",
       value: function xy(x, y) {
-        if (typeof x !== 'number' || typeof y !== 'number') return this;
-        if (this.props.x === x && this.props.y === y) return this;
-        this.props.x = x;
-        this.props.y = y;
-        this.emit('xy', [x, y]);
-        return this.onChange();
+        this.state.x = x;
+        this.state.y = y;
+        return this;
       }
       /**
        * 设置透明度
@@ -476,12 +761,8 @@
     }, {
       key: "opacity",
       value: function opacity(value) {
-        if (typeof value !== 'number') return this;
-        var opacity = Math.max(0, Math.min(value, 1));
-        if (this.props.opacity === opacity) return this;
-        this.props.opacity = opacity;
-        this.emit('opacity', [opacity]);
-        return this.onChange();
+        this.state.opacity = value;
+        return this;
       }
       /**
        * 设置旋转角度
@@ -490,11 +771,8 @@
     }, {
       key: "rotate",
       value: function rotate(value) {
-        if (typeof value !== 'number') return this;
-        if (this.props.rotate === value) return this;
-        this.props.rotate = value;
-        this.emit('rotate', [value]);
-        return this.onChange();
+        this.state.rotate = value;
+        return this;
       }
       /**
        * 设置缩放
@@ -503,15 +781,9 @@
     }, {
       key: "scale",
       value: function scale(x, y) {
-        if (typeof x !== 'number') return this;
-
-        var _y = typeof y === 'number' ? y : x;
-
-        if (this.props.scaleX === x && this.props.scaleY === _y) return this;
-        this.props.scaleX = x;
-        this.props.scaleY = _y;
-        this.emit('scale', [x, _y]);
-        return this.onChange();
+        this.state.scaleX = x;
+        this.state.scaleY = y !== undefined ? y : x;
+        return this;
       }
       /**
        * 设置描边颜色
@@ -520,11 +792,8 @@
     }, {
       key: "stroke",
       value: function stroke(value) {
-        if (!value) return this;
-        if (this.props.stroke === value) return this;
-        this.props.stroke = value;
-        this.emit('stroke', [value]);
-        return this.onChange();
+        this.state.stroke = value;
+        return this;
       }
       /**
        * 设置描边宽度
@@ -533,11 +802,8 @@
     }, {
       key: "strokeWidth",
       value: function strokeWidth(value) {
-        if (!value) return this;
-        if (this.props.strokeWidth === value) return this;
-        this.props.strokeWidth = value;
-        this.emit('strokeWidth', [value]);
-        return this.onChange();
+        this.state.strokeWidth = value;
+        return this;
       }
       /**
        * 设置填充颜色
@@ -546,11 +812,8 @@
     }, {
       key: "fill",
       value: function fill(value) {
-        if (!value) return this;
-        if (this.props.fill === value) return this;
-        this.props.fill = value;
-        this.emit('fill', [value]);
-        return this.onChange();
+        this.state.fill = value;
+        return this;
       }
       /**
        * 设置为可见
@@ -559,10 +822,8 @@
     }, {
       key: "show",
       value: function show() {
-        if (this.props.visible) return this;
-        this.props.visible = true;
-        this.emit('visible', [true]);
-        return this.onChange();
+        this.state.visible = true;
+        return this;
       }
       /**
        * 设置为不可见
@@ -571,10 +832,8 @@
     }, {
       key: "hide",
       value: function hide() {
-        if (!this.props.visible) return this;
-        this.props.visible = false;
-        this.emit('visible', [false]);
-        return this.onChange();
+        this.state.visible = false;
+        return this;
       }
       /**
        * 绑定事件监听
@@ -616,64 +875,165 @@
         this.subscribe.emit(type, args);
         return this;
       }
-      /**
-       * 通知变更
-       */
-
-    }, {
-      key: "onChange",
-      value: function onChange() {
-        this.emit('change');
-        return this;
-      }
     }, {
       key: "_clone",
       value: function _clone() {
-        return new Layer();
+        return new Layer(deepClone(this.state));
       }
     }, {
       key: "_render",
       value: function _render(ctx, utils) {}
-    }, {
-      key: "parent",
-      get: function get() {
-        return this._parent;
-      },
-      set: function set(newParent) {
-        var _this2 = this;
-
-        // 发起解绑
-        this.emit('unbindParent');
-        this._parent = newParent;
-        if (newParent === null) return;
-        var render = this.render.bind(this);
-
-        var change = function change() {
-          return newParent.emit('change');
-        }; // 绑定
-
-
-        newParent.children.push(this);
-        newParent.on('render', render);
-        this.on('change', change); // 绑定新的解绑事件
-
-        this.once('unbindParent', function () {
-          var index = newParent.children.indexOf(_this2);
-
-          if (index !== -1) {
-            newParent.children.splice(index, 1);
-          }
-
-          newParent.off('render', render);
-
-          _this2.off('change', change);
-        });
-      }
     }]);
 
     return Layer;
   }();
+  function isLayer(value) {
+    return value instanceof Layer;
+  }
+  /**
+   * @ignore
+   */
 
+  function proxyState(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator(target, key, newValue, oldValue).then(function (value) {
+        that.emit(key, [value]);
+        that.emit('change', []);
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
+  /**
+   * @ignore
+   */
+
+
+  function proxyParent(that, initialValue) {
+    var onParentChange;
+    return proxy({
+      value: initialValue
+    }, function (key, oldValue, newValue, target) {
+      if (key !== 'value') return;
+
+      if (!(isLayer(newValue) || newValue === null)) {
+        target[key] = oldValue;
+        throw new Error("Layer.parent must be a Layer");
+      } // 从旧的父图层中移除
+
+
+      if (oldValue !== null) {
+        var index = oldValue.children.indexOf(that);
+
+        if (index !== -1) {
+          oldValue.children.splice(index, 1);
+        }
+
+        that.off('change', onParentChange);
+      } // 添加到新的父图层
+
+
+      if (newValue !== null) {
+        newValue.children.push(that);
+
+        onParentChange = function onParentChange() {
+          return newValue.emit('change', []);
+        };
+
+        that.on('change', onParentChange);
+      }
+
+      that.emit('parent', [that.parent]);
+      that.emit('change', []);
+    });
+  }
+  /**
+   * @ignore
+   */
+
+
+  function proxyChildren(that, initialValue) {
+    return proxy({
+      value: proxyChildrenArray(that, initialValue)
+    }, function (key, oldValue, newValue, target) {
+      if (key !== 'value') return;
+
+      if (!Array.isArray(newValue) || newValue.some(function (v) {
+        return !isLayer(v);
+      })) {
+        target[key] = oldValue;
+        throw new Error("Layer.children must be a Layer[]");
+      }
+
+      target[key] = proxyChildrenArray(that, newValue);
+      that.emit('children', [that.children]);
+      that.emit('change', []);
+    });
+  }
+  /**
+   * @ignore
+   */
+
+
+  function proxyChildrenArray(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      if (key >= 0) {
+        if (isLayer(newValue)) {
+          if (newValue.parent !== that) {
+            target.splice(Number(key), 1);
+            newValue.parent = that;
+          }
+        } else {
+          if (oldValue) {
+            target[key] = oldValue;
+          } else {
+            target.splice(Number(key), 1);
+          }
+
+          throw new Error("Layer.children's value must be a Layer");
+        }
+      }
+
+      that.emit('children', [that.children]);
+      that.emit('change', []);
+    });
+  }
+
+  /**
+   * @ignore
+   */
+
+  var validator$1 = createValidator({
+    w: function w(value) {
+      if (!isNumber(value)) {
+        throw new Error('Sketch.options.w must be a number');
+      }
+
+      return value;
+    },
+    h: function h(value) {
+      if (!isNumber(value)) {
+        throw new Error('Sketch.options.h must be a number');
+      }
+
+      return value;
+    },
+    unit: function unit(value) {
+      if (!isNumber(value)) {
+        throw new Error('Sketch.options.unit must be a number');
+      }
+
+      return value;
+    },
+    canvas: function canvas(value) {
+      if (!(value instanceof HTMLCanvasElement || value === null)) {
+        throw new Error('Sketch.options.angle must be a number');
+      }
+
+      return value;
+    }
+  });
   /**
    * 画布
    */
@@ -684,13 +1044,37 @@
 
       _classCallCheck(this, Sketch);
 
-      this.options = mergeOptions(Object.assign({}, Sketch.defaultOptions), options);
-      this.canvas = options.canvas || document.createElement('canvas');
-      this.ctx = this.canvas.getContext('2d');
-      this.layer = new Layer();
-      this.layer.on('change', this.render.bind(this));
-      this.size(this.options.w, this.options.h);
-      this.unit(options.unit || this.options.w / 100);
+      /* 抽出canvas重新赋值 是为了触发proxy内的连带设置 */
+      var _a = Sketch.defaultOptions,
+          canvas = _a.canvas,
+          defaultOptions = __rest(_a, ["canvas"]);
+
+      var theOptions = proxyOptions(this, Object.assign({
+        canvas: null
+      }, defaultOptions));
+      var layer = proxyLayer(this, new Layer());
+      defineImmutable(this, 'options', theOptions);
+      defineProperties(this, {
+        layer: {
+          get: function get() {
+            return layer.value;
+          },
+          set: function set(v) {
+            layer.value = v;
+          }
+        },
+        canvas: {
+          get: function get() {
+            return theOptions.canvas;
+          },
+          set: function set(v) {
+            theOptions.canvas = v;
+          }
+        }
+      });
+      merge(this.options, Object.assign({
+        canvas: canvas
+      }, options));
     }
     /**
      * 渲染
@@ -731,12 +1115,9 @@
     }, {
       key: "size",
       value: function size(w, h) {
-        if (typeof w !== 'number') return this;
         this.options.w = w;
-        this.options.h = typeof h === 'number' ? h : w;
-        this.canvas.width = this.options.w;
-        this.canvas.height = this.options.h;
-        return this.render();
+        this.options.h = h === undefined ? w : h;
+        return this;
       }
       /**
        * 设置基数
@@ -746,9 +1127,8 @@
     }, {
       key: "unit",
       value: function unit(value) {
-        if (typeof value !== 'number' || value <= 0) return this;
         this.options.unit = value;
-        return this.render();
+        return this;
       }
     }, {
       key: "_render",
@@ -758,6 +1138,7 @@
             w = _this$options.w,
             h = _this$options.h,
             unit = _this$options.unit;
+        if (!ctx) return;
         var utils = {
           mapping: function mapping(value) {
             return value * unit;
@@ -779,14 +1160,127 @@
   Sketch.defaultOptions = {
     w: 600,
     h: 600,
-    unit: 6
+    unit: 6,
+    canvas: null
   };
+  /**
+   * @ignore
+   */
+
+  function proxyOptions(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator$1(target, key, newValue, oldValue).then(function () {
+        var canvas = target['canvas'];
+
+        switch (key) {
+          case 'canvas':
+            if (canvas) {
+              that.ctx = canvas.getContext('2d');
+              canvas.width = target['w'];
+              canvas.height = target['h'];
+            } else {
+              that.ctx = null;
+            }
+
+            break;
+
+          case 'w':
+            if (canvas) {
+              target['canvas'].width = target['w'];
+            }
+
+            break;
+
+          case 'h':
+            if (canvas) {
+              target['canvas'].height = target['h'];
+            }
+
+            break;
+        }
+
+        that.render();
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
+  /**
+   * @ignore
+   */
+
+
+  function proxyLayer(that, initialValue) {
+    var onChange = that.render.bind(that);
+    initialValue.on('change', onChange);
+    return proxy({
+      value: initialValue
+    }, function (key, oldValue, newValue, target) {
+      if (key !== 'value') return;
+
+      if (!(newValue instanceof Layer)) {
+        target[key] = oldValue;
+        throw new Error("Sketch.layer must be a Layer");
+      }
+
+      if (oldValue) {
+        oldValue.off('change', onChange);
+      }
+
+      newValue.on('change', onChange);
+      that.render();
+    });
+  }
 
   /**
    * @ignore
    */
 
   var LINECAP = ['none', 'point', 'arrow', 'triangle'];
+  /**
+   * @ignore
+   */
+
+  var validator$2 = createValidator({
+    coordinates: function coordinates(value) {
+      if (!isArray(value, function (v) {
+        return isArray(v, isNumber) && v.length >= 2;
+      })) {
+        throw new Error('Line.props.coordinates must be a number[][]');
+      }
+
+      return value;
+    },
+    smooth: function smooth(value) {
+      if (!isBoolean(value)) {
+        throw new Error('Line.props.smooth must be a boolean');
+      }
+
+      return value;
+    },
+    dash: function dash(value) {
+      if (!(value === null || isArray(value, isNumber))) {
+        throw new Error('Line.props.dash must be a number[]/null');
+      }
+
+      return Object.freeze(value);
+    },
+    startCap: function startCap(value) {
+      if (!isLineCap(value)) {
+        throw new Error('Line.props.startCap must be a number[]/null');
+      }
+
+      return value;
+    },
+    endCap: function endCap(value) {
+      if (!isLineCap(value)) {
+        throw new Error('Line.props.endCap must be a number[]/null');
+      }
+
+      return value;
+    }
+  });
   /**
    * 可绘制 折线、二次曲线、贝塞尔曲线（任意组合）
    */
@@ -797,23 +1291,24 @@
     function Line() {
       var _this;
 
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
       _classCallCheck(this, Line);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Line).call(this, {
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Line).call(this, Object.assign({
         fill: 'transparent',
         stroke: '#c79a66'
-      }));
-      /**
-       * 字段详情：[[ILineProps]]
-       */
-
-      _this.lineProps = {
-        coordinates: [],
+      }, state)));
+      var theProps = proxyProps(_assertThisInitialized(_this), {
+        coordinates: proxyCoordinates(_assertThisInitialized(_this), []),
         smooth: false,
         dash: null,
         startCap: 'none',
         endCap: 'none'
-      };
+      });
+      defineImmutable(_assertThisInitialized(_this), 'props', theProps);
+      merge(_this.props, props);
       return _this;
     }
     /**
@@ -836,32 +1331,19 @@
     _createClass(Line, [{
       key: "to",
       value: function to(x, y, cp1x, cp1y, cp2x, cp2y) {
-        if (typeof x !== 'number' || typeof y !== 'number') return this;
-        var coordinate = [];
-        var cp1 = [cp1x, cp1y].filter(function (v) {
-          return typeof v === 'number';
-        });
+        var arr = [x, y, cp1x, cp1y, cp2x, cp2y];
 
-        if (cp1.length === 2) {
-          if (this.lineProps.coordinates.length === 0) {
-            this.lineProps.coordinates.push(cp1);
+        while (arr.length) {
+          var cur = arr.pop();
+
+          if (cur !== undefined) {
+            arr.push(cur);
+            break;
           }
-
-          coordinate.push.apply(coordinate, _toConsumableArray(cp1));
         }
 
-        var cp2 = [cp2x, cp2y].filter(function (v) {
-          return typeof v === 'number';
-        });
-
-        if (cp2.length === 2) {
-          coordinate.push.apply(coordinate, _toConsumableArray(cp2));
-        }
-
-        coordinate.push(x, y);
-        this.lineProps.coordinates.push(coordinate);
-        this.emit('to', [coordinate]);
-        return this.onChange();
+        this.props.coordinates.push(arr);
+        return this;
       }
       /**
        * 清空所有坐标点
@@ -870,11 +1352,8 @@
     }, {
       key: "clear",
       value: function clear() {
-        var arr = this.lineProps.coordinates;
-        if (arr.length === 0) return this;
-        arr.splice(0, arr.length);
-        this.emit('clear');
-        return this.onChange();
+        this.props.coordinates = [];
+        return this;
       }
       /**
        * 设置出发端点样式
@@ -883,11 +1362,8 @@
     }, {
       key: "startCap",
       value: function startCap(value) {
-        if (!LINECAP.includes(value)) return this;
-        if (this.lineProps.startCap === value) return this;
-        this.lineProps.startCap = value;
-        this.emit('startCap', [value]);
-        return this.onChange();
+        this.props.startCap = value;
+        return this;
       }
       /**
        * 设置结束端点样式
@@ -896,11 +1372,8 @@
     }, {
       key: "endCap",
       value: function endCap(value) {
-        if (!LINECAP.includes(value)) return this;
-        if (this.lineProps.endCap === value) return this;
-        this.lineProps.endCap = value;
-        this.emit('endCap', [value]);
-        return this.onChange();
+        this.props.endCap = value;
+        return this;
       }
       /**
        * 光滑折线（曲线点不受影响）
@@ -909,11 +1382,8 @@
     }, {
       key: "smooth",
       value: function smooth(value) {
-        if (typeof value !== 'boolean') return this;
-        if (this.lineProps.smooth === value) return this;
-        this.lineProps.smooth = value;
-        this.emit('smooth', [value]);
-        return this.onChange();
+        this.props.smooth = value;
+        return this;
       }
       /**
        * 设置线段样式
@@ -924,35 +1394,28 @@
     }, {
       key: "dash",
       value: function dash(value) {
-        if (!Array.isArray(value)) return this;
-        if (value.some(function (v) {
-          return typeof v !== 'number';
-        })) return this;
-        this.lineProps.dash = value;
-        this.emit('dash', [value]);
-        return this.onChange();
+        this.props.dash = value;
+        return this;
       }
     }, {
       key: "_clone",
       value: function _clone() {
-        var layer = new Line();
-        layer.lineProps = cloneDeep(this.lineProps);
-        return layer;
+        return new Line(deepClone(this.state), deepClone(this.props));
       }
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
-        var props = this.props,
-            lineProps = this.lineProps;
-        var _this$lineProps = this.lineProps,
-            coord = _this$lineProps.coordinates,
-            startCap = _this$lineProps.startCap,
-            endCap = _this$lineProps.endCap;
+        var state = this.state,
+            props = this.props;
+        var _this$props = this.props,
+            coord = _this$props.coordinates,
+            startCap = _this$props.startCap,
+            endCap = _this$props.endCap;
         /* 绘制线 */
 
         drawLine({
+          state: state,
           props: props,
-          lineProps: lineProps,
           ctx: ctx,
           utils: utils
         });
@@ -980,7 +1443,7 @@
             y: end[1][end[1].length - 1]
           };
           drawCap({
-            props: props,
+            state: state,
             ctx: ctx,
             utils: utils,
             type: startCap,
@@ -988,7 +1451,7 @@
             to: startTo
           });
           drawCap({
-            props: props,
+            state: state,
             ctx: ctx,
             utils: utils,
             type: endCap,
@@ -1002,15 +1465,63 @@
     return Line;
   }(Layer);
 
+  function proxyProps(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator$2(target, key, newValue, oldValue).then(function (value) {
+        if (key === 'coordinates') {
+          target['coordinates'] = proxyCoordinates(that, value);
+        }
+
+        that.emit(key, [value]);
+        that.emit('change', []);
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
+  /**
+   * @ignore
+   */
+
+
+  function proxyCoordinates(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      if (key >= 0) {
+        if (!isArray(newValue, isNumber)) {
+          oldValue ? target[key] = oldValue : target.splice(Number(key), 1);
+          throw new Error("Line.props.coordinates's value must be a number[]");
+        }
+
+        var length = newValue.length;
+
+        if (key == 0 && length !== 2) {
+          throw new Error("Line.props.coordinates[0]'s length must equals 2");
+        } else if (key != 0 && (length % 2 !== 0 || length > 6 || length < 2)) {
+          throw new Error("Line.props.coordinates value's length must equals 2/4/6");
+        }
+
+        target[key] = Object.freeze(newValue);
+      }
+
+      that.emit('coordinates', [that.props.coordinates]);
+      that.emit('change', []);
+    });
+  }
+  /**
+   * @ignore
+   */
+
+
   function drawLine(_ref) {
-    var props = _ref.props,
-        lineProps = _ref.lineProps,
+    var state = _ref.state,
+        props = _ref.props,
         ctx = _ref.ctx,
         utils = _ref.utils;
-    var strokeWidth = props.strokeWidth;
-    var coordinates = lineProps.coordinates,
-        dash = lineProps.dash,
-        smooth = lineProps.smooth;
+    var strokeWidth = state.strokeWidth;
+    var coordinates = props.coordinates,
+        dash = props.dash,
+        smooth = props.smooth;
     var mapping = utils.mapping;
     ctx.save();
     ctx.beginPath();
@@ -1087,14 +1598,14 @@
 
 
   function drawCap(_ref2) {
-    var props = _ref2.props,
+    var state = _ref2.state,
         ctx = _ref2.ctx,
         utils = _ref2.utils,
         type = _ref2.type,
         from = _ref2.from,
         to = _ref2.to;
-    var stroke = props.stroke,
-        strokeWidth = props.strokeWidth;
+    var stroke = state.stroke,
+        strokeWidth = state.strokeWidth;
     var mapping = utils.mapping;
     ctx.save();
     ctx.beginPath();
@@ -1139,7 +1650,42 @@
 
     ctx.restore();
   }
+  /**
+   * @ignore
+   */
 
+
+  function isLineCap(value) {
+    return LINECAP.includes(value);
+  }
+
+  /**
+   * @ignore
+   */
+
+  var validator$3 = createValidator({
+    w: function w(value) {
+      if (!isNumber(value)) {
+        throw new Error('Rect.props.w must be a number');
+      }
+
+      return value;
+    },
+    h: function h(value) {
+      if (!isNumber(value)) {
+        throw new Error('Rect.props.h must be a number');
+      }
+
+      return value;
+    },
+    dash: function dash(value) {
+      if (!(value === null || isArray(value, isNumber))) {
+        throw new Error('Rect.props.dash must be a number[]/null');
+      }
+
+      return Object.freeze(value);
+    }
+  });
   /**
    * 绘制矩形
    */
@@ -1150,21 +1696,22 @@
     function Rect() {
       var _this;
 
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
       _classCallCheck(this, Rect);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, {
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, Object.assign({
         fill: '#c79a667F',
         stroke: '#c79a66'
-      }));
-      /**
-       * 字段详情：[[IPlayerProps]]
-       */
-
-      _this.rectProps = {
+      }, state)));
+      var theProps = proxyProps$1(_assertThisInitialized(_this), {
         w: 30,
         h: 30,
         dash: null
-      };
+      });
+      defineImmutable(_assertThisInitialized(_this), 'props', theProps);
+      merge(_this.props, props);
       return _this;
     }
     /**
@@ -1177,15 +1724,9 @@
     _createClass(Rect, [{
       key: "size",
       value: function size(w, h) {
-        if (typeof w !== 'number') return this;
-
-        var _h = typeof h === 'number' ? h : w;
-
-        if (this.rectProps.w === w && this.rectProps.h === _h) return this;
-        this.rectProps.w = w;
-        this.rectProps.h = _h;
-        this.emit('size', [w, _h]);
-        return this.onChange();
+        this.props.w = w;
+        this.props.h = h === undefined ? w : h;
+        return this;
       }
       /**
        * 设置线段样式
@@ -1194,31 +1735,24 @@
     }, {
       key: "dash",
       value: function dash(value) {
-        if (!Array.isArray(value)) return this;
-        if (value.some(function (v) {
-          return typeof v !== 'number';
-        })) return this;
-        this.rectProps.dash = value;
-        this.emit('dash', [value]);
-        return this.onChange();
+        this.props.dash = value;
+        return this;
       }
     }, {
       key: "_clone",
       value: function _clone() {
-        var layer = new Rect();
-        layer.rectProps = cloneDeep(this.rectProps);
-        return layer;
+        return new Rect(deepClone(this.state), deepClone(this.props));
       }
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
-        var props = this.props,
-            rectProps = this.rectProps;
-        var strokeWidth = props.strokeWidth;
+        var state = this.state,
+            props = this.props;
+        var strokeWidth = state.strokeWidth;
         var mapping = utils.mapping;
-        var w = rectProps.w,
-            h = rectProps.h,
-            dash = rectProps.dash;
+        var w = props.w,
+            h = props.h,
+            dash = props.dash;
 
         if (dash) {
           ctx.setLineDash(dash.map(function (v) {
@@ -1241,6 +1775,52 @@
     return Rect;
   }(Layer);
 
+  function proxyProps$1(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator$3(target, key, newValue, oldValue).then(function (value) {
+        that.emit(key, [value]);
+        that.emit('change', []);
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
+
+  /**
+   * @ignore
+   */
+
+  var validator$4 = createValidator({
+    size: function size(value) {
+      if (!isNumber(value)) {
+        throw new Error('Circle.props.size must be a number');
+      }
+
+      return value;
+    },
+    angle: function angle(value) {
+      if (!isNumber(value)) {
+        throw new Error('Circle.props.angle must be a number');
+      }
+
+      return value;
+    },
+    arc: function arc(value) {
+      if (!isBoolean(value)) {
+        throw new Error('Circle.props.arc must be a boolean');
+      }
+
+      return value;
+    },
+    dash: function dash(value) {
+      if (!(value === null || isArray(value, isNumber))) {
+        throw new Error('Circle.props.dash must be a number[]/null');
+      }
+
+      return Object.freeze(value);
+    }
+  });
   /**
    * 可绘制 圆形、扇形、弧形
    */
@@ -1251,55 +1831,45 @@
     function Circle() {
       var _this;
 
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
       _classCallCheck(this, Circle);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Circle).call(this, {
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Circle).call(this, Object.assign({
         fill: '#c79a667F',
         stroke: '#c79a66'
-      }));
-      /**
-       * 字段详情：[[ICircleProps]]
-       */
-
-      _this.circleProps = {
-        radius: 30,
+      }, state)));
+      var theProps = proxyProps$2(_assertThisInitialized(_this), {
+        size: 30,
         angle: 360,
         arc: false,
         dash: null
-      };
+      });
+      defineImmutable(_assertThisInitialized(_this), 'props', theProps);
+      merge(_this.props, props);
       return _this;
     }
     /**
      * 设置半径
-     * @param value [[ICircleProps]]['radius']
      */
 
 
     _createClass(Circle, [{
       key: "size",
       value: function size(value) {
-        if (typeof value !== 'number') return this;
-        if (this.circleProps.radius === value) return this;
-        this.circleProps.radius = value;
-        this.emit('size', [value]);
-        return this.onChange();
+        this.props.size = value;
+        return this;
       }
       /**
        * 设置张开角度
-       * @param value
        */
 
     }, {
       key: "angle",
       value: function angle(value) {
-        if (typeof value !== 'number') return this;
-
-        var _value = Math.max(0, Math.min(value, 360));
-
-        if (this.circleProps.angle === _value) return this;
-        this.circleProps.angle = _value;
-        this.emit('angle', [_value]);
-        return this.onChange();
+        this.props.angle = value;
+        return this;
       }
       /**
        * 设置弧形
@@ -1309,11 +1879,8 @@
     }, {
       key: "arc",
       value: function arc(value) {
-        if (typeof value !== 'boolean') return this;
-        if (this.circleProps.arc === value) return this;
-        this.circleProps.arc = value;
-        this.emit('arc', [value]);
-        return this.onChange();
+        this.props.arc = value;
+        return this;
       }
       /**
        * 设置线段样式
@@ -1322,30 +1889,23 @@
     }, {
       key: "dash",
       value: function dash(value) {
-        if (!Array.isArray(value)) return this;
-        if (value.some(function (v) {
-          return typeof v !== 'number';
-        })) return this;
-        this.circleProps.dash = value;
-        this.emit('dash', [value]);
-        return this.onChange();
+        this.props.dash = value;
+        return this;
       }
     }, {
       key: "_clone",
       value: function _clone() {
-        var layer = new Circle();
-        layer.circleProps = cloneDeep(this.circleProps);
-        return layer;
+        return new Circle(deepClone(this.state), deepClone(this.props));
       }
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
-        var strokeWidth = this.props.strokeWidth;
-        var _this$circleProps = this.circleProps,
-            radius = _this$circleProps.radius,
-            angle = _this$circleProps.angle,
-            arc = _this$circleProps.arc,
-            dash = _this$circleProps.dash;
+        var strokeWidth = this.state.strokeWidth;
+        var _this$props = this.props,
+            size = _this$props.size,
+            angle = _this$props.angle,
+            arc = _this$props.arc,
+            dash = _this$props.dash;
         var mapping = utils.mapping;
 
         if (dash) {
@@ -1358,7 +1918,7 @@
 
         ctx.rotate(-(Math.PI + _angle) / 2);
         ctx.beginPath();
-        ctx.arc(0, 0, mapping(radius), 0, _angle);
+        ctx.arc(0, 0, mapping(size), 0, _angle);
 
         if (!arc) {
           if (angle !== 360) {
@@ -1376,59 +1936,66 @@
     return Circle;
   }(Layer);
 
-  /**
-   * @ignore
-   */
-  var IMG_ALIAS = {};
+  function proxyProps$2(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator$4(target, key, newValue, oldValue).then(function (value) {
+        that.emit(key, [value]);
+        that.emit('change', []);
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
 
   /**
    * @ignore
    */
-  function setAlias(map, name, alias) {
-    if (!(name in map)) throw new Error('alias target is not found');
-    if (!alias || typeof alias !== 'string') throw new Error('alias is not a string');
-    if (alias in map) throw new Error('alias already exists');
-    map[alias] = map[name];
-  }
-  /**
-   * @ignore
-   */
 
-  function setAliasMapping(map, alias, value) {
-    if (!alias) throw new Error('alias is not a string');
-    if (!value) throw new Error('value is not a string');
-    if (alias in map) console.warn('alias already exists, value will be replaced');
-    map[alias] = value;
-  }
+  var validator$5 = createValidator({
+    src: function src(value) {
+      if (!(value === null || isString(value))) {
+        throw new Error("Img.props.src must be a string/null");
+      }
+
+      return value;
+    },
+    size: function size(value) {
+      if (!(isNumber(value) || value === 'auto')) {
+        throw new Error("Img.props.size must be a number/\"auto\"");
+      }
+
+      return value;
+    }
+  });
 
   var Img = /*#__PURE__*/function (_Layer) {
     _inherits(Img, _Layer);
 
-    function Img(src) {
+    function Img() {
       var _this;
+
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
       _classCallCheck(this, Img);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Img).call(this));
-      /**
-       * 字段详情：[[IImgProps]]
-       */
-
-      _this.imgProps = {
-        src: null,
-        size: 'auto'
-      };
-      _this.raf = null;
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Img).call(this, state));
       _this.image = new Image();
+      _this.raf = null;
 
       _this.image.onload = function () {
-        _this.emit('loaded');
+        _this.emit('loaded', []);
 
-        _this.onChange();
+        _this.emit('change', []);
       };
 
-      _this.src(src || _this.imgProps.src);
-
+      var theProps = proxyProps$3(_assertThisInitialized(_this), {
+        src: null,
+        size: 'auto'
+      });
+      defineImmutable(_assertThisInitialized(_this), 'props', theProps);
+      merge(_this.props, props);
       return _this;
     }
     /**
@@ -1439,14 +2006,7 @@
     _createClass(Img, [{
       key: "src",
       value: function src(value) {
-        if (typeof value !== 'string') return this;
-
-        var _value = IMG_ALIAS[value] || value;
-
-        if (this.imgProps.src === _value) return this;
-        this.imgProps.src = _value;
-        this.image.src = _value;
-        this.emit('src', [_value]);
+        this.props.src = value;
         return this;
       }
       /**
@@ -1460,37 +2020,22 @@
     }, {
       key: "size",
       value: function size(value) {
-        if (typeof value !== 'number') return this;
-        if (this.imgProps.size === value) return this;
-        this.imgProps.size = value;
-        this.emit('size', [value]);
-        return this.onChange();
+        this.props.size = value;
+        return this;
       }
-      /**
-       * 定义图片地址的别名，方便后期使用
-       *
-       * 比如 `Img.setAlias('buff', 'https://example/buff.png')`
-       *
-       * 之后就可以使用 `Img('buff')` 来使用这张图片了
-       * @param alias 别名
-       * @param value 值
-       */
-
     }, {
       key: "_clone",
       value: function _clone() {
-        var layer = new Img(this.imgProps.src);
-        layer.imgProps = cloneDeep(this.imgProps);
-        return layer;
+        return new Img(deepClone(this.state), deepClone(this.props));
       }
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
         var _this2 = this;
 
-        var imgProps = this.imgProps,
+        var props = this.props,
             image = this.image;
-        var size = imgProps.size;
+        var size = props.size;
         var mapping = utils.mapping;
 
         if (this.raf) {
@@ -1511,7 +2056,7 @@
           ctx.arc(0, 0, mapping(r), 0, 1.5 * Math.PI);
           ctx.stroke();
           this.raf = requestAnimationFrame(function () {
-            _this2.emit('change');
+            _this2.emit('change', []);
 
             _this2.raf = null;
           });
@@ -1529,16 +2074,75 @@
 
         ctx.drawImage(this.image, -w / 2, -h / 2, w, h);
       }
-    }], [{
-      key: "setAlias",
-      value: function setAlias(alias, value) {
-        setAliasMapping(IMG_ALIAS, alias, value);
-      }
     }]);
 
     return Img;
   }(Layer);
 
+  function proxyProps$3(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator$5(target, key, newValue, oldValue).then(function (value) {
+        if (key === 'src') {
+          that.image.src = target['src'];
+        }
+
+        that.emit(key, [value]);
+        that.emit('change', []);
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
+
+  /**
+   * @ignore
+   */
+
+  var validator$6 = createValidator({
+    value: function value(_value) {
+      if (!isString(_value)) {
+        throw new Error('Text.props.value must be a string');
+      }
+
+      return _value;
+    },
+    align: function align(value) {
+      if (!isCanvasTextAlign(value)) {
+        throw new Error('Text.props.align must be a CanvasTextAlign');
+      }
+
+      return value;
+    },
+    size: function size(value) {
+      if (!isNumber(value)) {
+        throw new Error('Text.props.size must be a number');
+      }
+
+      return value;
+    },
+    font: function font(value) {
+      if (!isString(value)) {
+        throw new Error('Text.props.font must be a string');
+      }
+
+      return value;
+    },
+    bold: function bold(value) {
+      if (!isBoolean(value)) {
+        throw new Error('Text.props.bold must be a boolean');
+      }
+
+      return value;
+    },
+    italic: function italic(value) {
+      if (!isBoolean(value)) {
+        throw new Error('Text.props.italic must be a boolean');
+      }
+
+      return value;
+    }
+  });
   /**
    * 绘制文本
    */
@@ -1546,29 +2150,27 @@
   var Text = /*#__PURE__*/function (_Layer) {
     _inherits(Text, _Layer);
 
-    function Text(value) {
+    function Text() {
       var _this;
+
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
       _classCallCheck(this, Text);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, {
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, Object.assign({
         fill: '#ffffff'
-      }));
-      /**
-       * 字段详情：[[ITextProps]]
-       */
-
-      _this.textProps = {
+      }, state)));
+      var theProps = proxyProps$4(_assertThisInitialized(_this), {
         value: '',
         align: 'center',
         size: 2.5,
         font: '',
         bold: false,
         italic: false
-      };
-
-      _this.value(value);
-
+      });
+      defineImmutable(_assertThisInitialized(_this), 'props', theProps);
+      merge(_this.props, props);
       return _this;
     }
     /**
@@ -1579,14 +2181,8 @@
     _createClass(Text, [{
       key: "value",
       value: function value(_value2) {
-        if (typeof _value2 !== 'string' && typeof _value2 !== 'number') return this;
-
-        var _value = "".concat(_value2);
-
-        if (this.textProps.value === _value) return this;
-        this.textProps.value = _value;
-        this.emit('value', [_value]);
-        return this.onChange();
+        this.props.value = _value2;
+        return this;
       }
       /**
        * 设置字体大小
@@ -1595,11 +2191,8 @@
     }, {
       key: "size",
       value: function size(value) {
-        if (typeof value !== 'number') return this;
-        if (this.textProps.size === value) return this;
-        this.textProps.size = value;
-        this.emit('size', [value]);
-        return this.onChange();
+        this.props.size = value;
+        return this;
       }
       /**
        * 设置左右对齐方式
@@ -1608,11 +2201,8 @@
     }, {
       key: "align",
       value: function align(value) {
-        if (!['start', 'end', 'left', 'center', 'right'].includes(value)) return this;
-        if (this.textProps.align === value) return this;
-        this.textProps.align = value;
-        this.emit('align', [value]);
-        return this.onChange();
+        this.props.align = value;
+        return this;
       }
       /**
        * 设置字体
@@ -1623,11 +2213,8 @@
     }, {
       key: "font",
       value: function font(value) {
-        if (typeof value !== 'string') return this;
-        if (this.textProps.font === value) return this;
-        this.textProps.font = value;
-        this.emit('font', [value]);
-        return this.onChange();
+        this.props.font = value;
+        return this;
       }
       /**
        * 设置加粗
@@ -1636,11 +2223,8 @@
     }, {
       key: "bold",
       value: function bold(value) {
-        if (typeof value !== 'boolean') return this;
-        if (this.textProps.bold === value) return this;
-        this.textProps.bold = value;
-        this.emit('bold', [value]);
-        return this.onChange();
+        this.props.bold = value;
+        return this;
       }
       /**
        * 设置斜体
@@ -1649,29 +2233,24 @@
     }, {
       key: "italic",
       value: function italic(value) {
-        if (typeof value !== 'boolean') return this;
-        if (this.textProps.italic === value) return this;
-        this.textProps.italic = value;
-        this.emit('italic', [value]);
-        return this.onChange();
+        this.props.italic = value;
+        return this;
       }
     }, {
       key: "_clone",
       value: function _clone() {
-        var layer = new Text();
-        layer.textProps = cloneDeep(this.textProps);
-        return layer;
+        return new Text(deepClone(this.state), deepClone(this.props));
       }
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
-        var _this$textProps = this.textProps,
-            value = _this$textProps.value,
-            font = _this$textProps.font,
-            size = _this$textProps.size,
-            align = _this$textProps.align,
-            bold = _this$textProps.bold,
-            italic = _this$textProps.italic;
+        var _this$props = this.props,
+            value = _this$props.value,
+            font = _this$props.font,
+            size = _this$props.size,
+            align = _this$props.align,
+            bold = _this$props.bold,
+            italic = _this$props.italic;
         var mapping = utils.mapping;
         var fontStyle = italic ? 'italic' : 'normal';
         var fontWeight = bold ? 700 : 400;
@@ -1688,6 +2267,18 @@
 
     return Text;
   }(Layer);
+
+  function proxyProps$4(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator$6(target, key, newValue, oldValue).then(function (value) {
+        that.emit(key, [value]);
+        that.emit('change', []);
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
 
   const img = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAHlBMVEWOZBCPZRCUZgtHcEyqeRmaaQrYvYnDnE7///7y59JRnYlMAAAACHRSTlMXS3wA06346/WJDqsAAAGFSURBVCjPVZPBbsIwDIad5gVCR7VrmYq4huUJqMY0jqAVXmAb3RVpWh4AteHeA7ztbMdt2X+o2i+J/cd2wbFAJF/xORHBCG36/sJaz/QIi5uoHKHaB9GnGWDqmy9W3c56aIu6q3a7al5tGj5PUB3CD2ZWkwm+GIHJptlyApvVXR4hvp5z8o/B33iZYEFJIUWPaKOMUO0vpbbpHldscSVTgNfxeEYdrm2OkTyZAlrtcowbEGJOPIUQ45we7GOgnW654PhkaKVtdvQE7ZRMIazbLWabR5j5hiHlcTYRWLc5x6TYTiB7Agfs3T0zjO6hv2XcGe8JfT2Ub01fEeDKnYxbzne4suDaUekKWrbKaDokBSFvQz25H7HIl9LQKKhYJCly+HhivYa+R2g4tHEYJA5I1+MsBG4R+3wLg04yDBQSdTn+orYyNtg3UrOmTEamzk6vBLsZGAO6H8XMD9H0MLTJhk6vBAjEZoVwzt0/aLPv2y0O5ghdUvVzfQfpN7jfGCdZg71n7g+VL8U1zaTYeQAAAABJRU5ErkJggg==";
 
@@ -1745,6 +2336,10 @@
 
   const img$r = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAJFBMVEVxs/9xs/9ys/9MpulmtOdnr/zh8fi83/Gb0Oxbq/OFxOr9//+JfW/0AAAAC3RSTlMBFzCpxUz+9el63FJSSeUAAAGaSURBVCjPlZKxToNQFIZ7fYLCG0DC0BkKtCvYimzUDrhCGpM7lsQoI0ZtupU2lrnRGFnJhcDLee4tLaCJif9yyB/Ofz4Op9f7W/3fFgf66SFeFIWfLi+5iSN0E5A4e7mzxK7JSWpVZRuh2z3DwVV12elH4j43jLXn9DvddjYptXLTns+7YRQSkwyFNuQNuSbgr1rzkaSWamlnduY0/fwgXabePtfzndAGMrEV4wNuoCiQnsty6qUNFJJonOarAHUO5ecfURityZiYwSkU8a6iACQ+hJE8rKGQ9BZphVbYnp3pft0PQDDB9rVCb6AAyIDW1ZaY8PDOoJBEgRQySmDYsoaCDfmTTCt3iU2hCrZptqHI9mV5WoyJwjaF+Ft4slJCCM5jSHgAKLohrUi0BShIaJJDTbqhJJZBo0QHrA2Yg/AQPn7V+qzMBYReDLARVmcRIwQT3rTGr2c9xZiaUurLTCxWnubwS2Ed1T1VoLOCfTqdd59ZWqaykg/px3NSbFJZW1ZGjnC8zHlL9ZVycK9Ux3K6XIS4lnr/0TfSp76y1fG64gAAAABJRU5ErkJggg==";
 
+  /**
+   * @ignore
+   */
+
   var MARK = {
     attack1: img,
     attack2: img$1,
@@ -1776,6 +2371,9 @@
     triangle: img$r
   };
 
+  /**
+   * @ignore
+   */
   var MAKR_ALIAS = {
     attack1: 'attack1',
     attack2: 'attack2',
@@ -1836,32 +2434,63 @@
   };
 
   /**
+   * @ignore
+   */
+  function setAlias(map, name, alias) {
+    if (!(name in map)) throw new Error('alias target is not found');
+    if (!alias || typeof alias !== 'string') throw new Error('alias is not a string');
+    if (alias in map) throw new Error('alias already exists');
+    map[alias] = map[name];
+  }
+
+  /**
+   * @ignore
+   */
+
+  var validator$7 = createValidator({
+    type: function type(value) {
+      if (!isMarkAlias(value)) {
+        throw new Error('Mark.props.type is invalid');
+      }
+
+      return MAKR_ALIAS[value];
+    },
+    size: function size(value) {
+      if (!isNumber(value)) {
+        throw new Error('Mark.props.size must be a number');
+      }
+
+      return value;
+    }
+  });
+  /**
    * 绘制 `目标标记`
    */
 
   var Mark = /*#__PURE__*/function (_Layer) {
     _inherits(Mark, _Layer);
 
-    function Mark(type) {
+    function Mark() {
       var _this;
+
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
       _classCallCheck(this, Mark);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Mark).call(this));
-      /**
-       * 字段详情：[[IMarkProps]]
-       */
-
-      _this.markProps = {
-        type: null,
-        size: 7
-      };
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Mark).call(this, state));
       _this.img = new Img();
 
-      _this.img.on('loaded', _this.onChange.bind(_assertThisInitialized(_this)));
+      _this.img.on('loaded', function () {
+        return _this.emit('change', []);
+      });
 
-      _this.type(type || _this.markProps.type);
-
+      var theProps = proxyProps$5(_assertThisInitialized(_this), {
+        type: 'attack1',
+        size: 7
+      });
+      defineImmutable(_assertThisInitialized(_this), 'props', theProps);
+      merge(_this.props, props);
       return _this;
     }
     /**
@@ -1872,12 +2501,8 @@
     _createClass(Mark, [{
       key: "type",
       value: function type(value) {
-        if (!(value in MAKR_ALIAS)) return this;
-        var _value = MAKR_ALIAS[value];
-        if (this.markProps.type === _value) return this;
-        this.markProps.type = _value;
-        this.emit('type', [_value]);
-        return this.onChange();
+        this.props.type = value;
+        return this;
       }
       /**
        * 设置尺寸
@@ -1886,11 +2511,8 @@
     }, {
       key: "size",
       value: function size(value) {
-        if (typeof value !== 'number') return this;
-        if (this.markProps.size === value) return this;
-        this.markProps.size = value;
-        this.emit('size', [value]);
-        return this.onChange();
+        this.props.size = value;
+        return this;
       }
       /**
        * 为目标标记设别名
@@ -1907,18 +2529,16 @@
     }, {
       key: "_clone",
       value: function _clone() {
-        var layer = new Mark();
-        layer.markProps = cloneDeep(this.markProps);
-        return layer;
+        return new Mark(deepClone(this.state), deepClone(this.props));
       }
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
         var img = this.img;
-        var _this$markProps = this.markProps,
-            type = _this$markProps.type,
-            size = _this$markProps.size;
-        img.src(MARK[type]);
+        var _this$props = this.props,
+            type = _this$props.type,
+            size = _this$props.size;
+        img.src(MARK[type] || null);
         img.size(size);
         img.render(ctx, utils);
       }
@@ -1931,6 +2551,26 @@
 
     return Mark;
   }(Layer);
+
+  function proxyProps$5(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator$7(target, key, newValue, oldValue).then(function (value) {
+        that.emit(key, [value]);
+        that.emit('change', []);
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
+  /**
+   * @ignore
+   */
+
+
+  function isMarkAlias(value) {
+    return value in MAKR_ALIAS;
+  }
 
   const img$s = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAAHlBMVEVHcEz/ACr/ACr9AC33ADTxATvtC0D0ZH37vL///v1j7saHAAAACXRSTlMACRUmQGWWxulh22TmAAAC5ElEQVRYw+1YwY3bMBAUOyDZAckOJHUgqgPLV8HZTgGHwAXEgBrIWd3ezpKSHT+4VJA8AoS4zwE7nB3uktpx0/xfv7dUo/OqjVdNgihacrxGsFH0R0yAiwQUh3hjgFEV+SujTFqEoH+ljB7xgEjxJBjJGGttQrCOsgLs72h55yheQuCAKN46770FQi4G5+PTAsIoMSHL+7dd23okJVQCGWHzDst7HK0Uj4RC18U4dK2nsyqLpowc7x9jHIcOOZnyIREDx4/TdD1wTuXuUFAQOP5yj0PKqczgKL6P0/G8fB4GnFO5ECkjxM8JIDBQGSi+H6fLsmQGV2TQJgHeKH65HYakuqjZ+hDi2wzAKQOKzc2aIxPcCcDdoQTNBJiukPAuMxCCAcfLCpAZuMzTeQWESoZzJUMqQ2b4uQLKrWRDeAYE9EaxcPsZGHBaAZ2sIYR+F8NLSp2sAdeZm3WXhlyHWKUB9+20V8OJ+vtWqyFkwA4NPQM+K+qQTqmP4waoYQivDLosGnUYnzQID1liGE/P3aoqGI61ddgYOKUo34dcuBGvABWuEzU0fON6BtTch/XVGI/fwBDxLrmKV4MYrpX3IbfGCqjS8MQQ5Trkbn2k1P5NDdWvt38GyPfhF4auqg7tK4OWL9B4nDcGSYNLDHPlF0jvZ+BRY2PAV1T/YQ0PhjsBWgIIo4PFDeJjXQBoncCAO9rSZxSAH5EZhIeMRSSGj8iFLs+tyvK8xN06RZ4Syxp0HrCu0DxwRloYsHBMPQFuE07VVYxwFv09398nluCk2RtzK314548pJgJp9k4U8fvhAAJI0JI/IQoejLkIUt2axEDt1G/xggZM90Cg7zzbGtEybX7DIV5LRo4tjUn2hP2J6LIMc5D/scmWSRZINdnBJVsmOkU4Q7WFk8Os8KLJmeV8ZC9KVlIpve5f5aizj67235rdHHyxVqIRZbvN/lY3qy+uoYFSneG7fkrYszQn9Y/8SvIFsfVRvmQOaRgAAAAASUVORK5CYII=";
 
@@ -1946,6 +2586,10 @@
 
   const img$y = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgBAMAAAAQtmoLAAAAG1BMVEVzQpZ1RJd/T52JWaKSY6iba67+xv/Zj+D//P+KtydjAAAACHRSTlMCGjxsk7f+3p2mXvkAAAQ4SURBVFjDpVjdedsgFBUbgDYAdQKjugMIOwtYyQBN3Lw3TjuBorF7/0CqA0L9yksewvW559xf1DT/f9S/XNZKqUap/b+tGt2QidptgXe13ueY1uiRgj/aqH1U6L4BAwLZg4C/rY1RBv3SVTXBIwPX4aBjO/2JR+1QCq7ATWutIaeqvJGAMa1zrhWMyv0GCBtHBy1I3rpHbdf5g3MEUblPHrXOf/sOFgihTY03GLjOn6fBJ6cqoiJAeJ2fh4MjqSoswKXW9dd5vgaEIKkwe8ulgJSPMxyEcMaabRLkUveKBh8I4Vioookmzl/IYLqAUNZVgscIZzIYB5Q2altKVlK1J4grQrBSaqv+UdYTWbwEtGhFWl1wCf4NcXhkFkOUthwKsLAOLN4XCEsk8hAUaUyNnpya3gjCCkQeBYUH2qffAuEdFpMu5RRWA5aD759emcUhpZQqZivo1PnT40ooTttcMKhALUIEZnFZS1vIVtMCQifSvpC0XODZLOSe4dxBINgpaiJZ2loQUNkleotTKovALvnwNN8niCq0MYcuAcT7nHhznmecEgQPZwgjsfhBvJGFzhQr6ercEQB8EBYUb5fPQUxvEKk7Podh6AMnyEwpZfPtgBtZd5yeQwCLJymlQepblQqih0wNwIIThJXKh04QArgeeh8hON42g0AcsEapMQFvhphu2HNyDURxPXjsG9BeAWJcscjKpFEl/4B+DAMYLCwgFJleIC6xgV8gwEGPPmXjJgY3MugFYkIIk0ewKwSgLRBXn5NpjfAcPPskEP6QS1jsfNFgkBRkiGnIIpiEgJXDCL8igi0jnLgOiDTXERgUOdiOIn1hWbm0Ibd8NnBSP2jwFtZxwBS3n3ND6ocNKDVOY4q0yyQfV6i4BAXR32VfJr2pKzFpSqVx1Z2AQ7ZpMAKoFIDBdekDuSHPqrqeDVKu3gig/cyBykE4TGMIsdHEXlaKW9eLgTC+BC7QTAOXbs8GpzVjXm0+tRlp9uzSOK4Bsgixj/UPbHAPoJp8GMhgHsf3ZVrznGtUnoMgPN3vA/k2hoFmBGqsH5fhEEdWZlLLOOmRrSTREEdWbiomBA7w/YLSFAdWMpDxY8WjkkoycglgSAA5BnFgRQMeoXEbLaxLoGo0mG6bEzR11rjLwHCL+zEFOeNSQy8B33NOfKRJVXxHyKp+uiaF4l5ZWH5oRez687wkEU3P4i6teR17XAFgYWpTeKHJEvqwSjprN7d15OB8YtxtrlaJw3FpFABArUJtPYCcf5T1MD6cNpZ1+B+odJYZyM8HU9ntQaWvr39v0ZsvFGqU5/ljiAptPoG0ksi9/+Skq3gkbYYWvvTuUzuerrDxkT9WFklde7pal96uuoYQi65N7+nadZ7UxnLVaF39jIBOp/e6rj+/I434zK1+E+APJvHU7/NTTmv5eqB3WJDXKn1rKZw/3GDp2IYUxjUAAAAASUVORK5CYII=";
 
+  /**
+   * @ignore
+   */
+
   var WAYMARK = {
     1: img$s,
     2: img$t,
@@ -1956,12 +2600,20 @@
     C: img$x,
     D: img$y
   };
+  /**
+   * @ignore
+   */
+
   var WAYMARK_COLOR_MAP = {
     red: '#ff444e',
     yellow: '#fcff44',
     blue: '#448cff',
     purple: '#9b44ff'
   };
+  /**
+   * @ignore
+   */
+
   var WAYMARK_COLOR = {
     1: WAYMARK_COLOR_MAP.red,
     2: WAYMARK_COLOR_MAP.yellow,
@@ -1973,6 +2625,9 @@
     D: WAYMARK_COLOR_MAP.purple
   };
 
+  /**
+   * @ignore
+   */
   var WAYMARK_ALIAS = {
     1: 1,
     2: 2,
@@ -1989,34 +2644,55 @@
   };
 
   /**
+   * @ignore
+   */
+
+  var validator$8 = createValidator({
+    type: function type(value) {
+      if (!isWaymarkAlias(value)) {
+        throw new Error('Waymark.props.type is invalid');
+      }
+
+      return WAYMARK_ALIAS[value];
+    },
+    size: function size(value) {
+      if (!isNumber(value)) {
+        throw new Error('Waymark.props.size must be a number');
+      }
+
+      return value;
+    }
+  });
+  /**
    * 绘制 `场景标记`
    */
 
   var Waymark = /*#__PURE__*/function (_Layer) {
     _inherits(Waymark, _Layer);
 
-    function Waymark(type) {
+    function Waymark() {
       var _this;
+
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
       _classCallCheck(this, Waymark);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Waymark).call(this));
-      /**
-       * 字段详情：[[IWaymarkProps]]
-       */
-
-      _this.waymarkProps = {
-        type: null,
-        size: 5
-      };
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Waymark).call(this, state));
       _this.img = new Img();
       _this.circle = new Circle();
       _this.rect = new Rect();
 
-      _this.img.on('loaded', _this.onChange.bind(_assertThisInitialized(_this)));
+      _this.img.on('loaded', function () {
+        return _this.emit('change', []);
+      });
 
-      _this.type(type);
-
+      var theProps = proxyProps$6(_assertThisInitialized(_this), {
+        type: 'A',
+        size: 5
+      });
+      defineImmutable(_assertThisInitialized(_this), 'props', theProps);
+      merge(_this.props, props);
       return _this;
     }
     /**
@@ -2027,12 +2703,8 @@
     _createClass(Waymark, [{
       key: "type",
       value: function type(value) {
-        if (!(value in WAYMARK_ALIAS)) return this;
-        var _value = WAYMARK_ALIAS[value];
-        if (this.waymarkProps.type === _value) return this;
-        this.waymarkProps.type = _value;
-        this.emit('type', [_value]);
-        return this.onChange();
+        this.props.type = value;
+        return this;
       }
       /**
        * 设置尺寸
@@ -2041,11 +2713,8 @@
     }, {
       key: "size",
       value: function size(value) {
-        if (typeof value !== 'number') return this;
-        if (this.waymarkProps.size === value) return this;
-        this.waymarkProps.size = value;
-        this.emit('size', [value]);
-        return this.onChange();
+        this.props.size = value;
+        return this;
       }
       /**
        * 为场地标记设别名
@@ -2061,9 +2730,7 @@
     }, {
       key: "_clone",
       value: function _clone() {
-        var layer = new Waymark();
-        layer.waymarkProps = cloneDeep(this.waymarkProps);
-        return layer;
+        return new Waymark(deepClone(this.state), deepClone(this.props));
       }
     }, {
       key: "_render",
@@ -2071,10 +2738,10 @@
         var img = this.img,
             circle = this.circle,
             rect = this.rect;
-        var strokeWidth = this.props.strokeWidth;
-        var _this$waymarkProps = this.waymarkProps,
-            type = _this$waymarkProps.type,
-            size = _this$waymarkProps.size;
+        var strokeWidth = this.state.strokeWidth;
+        var _this$props = this.props,
+            type = _this$props.type,
+            size = _this$props.size;
         var unmapping = utils.unmapping;
         var isCircle = ['A', 'B', 'C', 'D'].includes(type);
 
@@ -2105,6 +2772,26 @@
 
     return Waymark;
   }(Layer);
+
+  function proxyProps$6(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator$8(target, key, newValue, oldValue).then(function (value) {
+        that.emit(key, [value]);
+        that.emit('change', []);
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
+  /**
+   * @ignore
+   */
+
+
+  function isWaymarkAlias(value) {
+    return value in WAYMARK_ALIAS;
+  }
 
   const img$z = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAG1BMVEXEggbGhQ7IhxTKiR3Njyr//v326tboy5varGFhRJiyAAAABXRSTlMcUYbC9LJu8A4AAAEOSURBVCjPnZE5koMwEEXRDfSFL4A6mRRBDaQuKOMLsORjjHMW54Ph3NOSGB/AJEivHnT37yD45BGAPwDSvSnyBFCxE7JXbAkQXkeriK9mZUdA5f2vA6e+M2CftubsQLjVqwZ0XnexA+CT0ZqY+zJgt9A6tV+6skql/S1JLk0ReSAU8YWhiaT0nbJ+Y6aPTgMo9mcWjhGkUlT2Q8ngbVC5NAyi/2l1urf94/0PoZKsvl3qMYk8wGmq6te1nqrzAcJleRbpcxhiXwY6a4uE0nn0dQVov9tZ7oM5QN5Wo9bZNPtpBW0rcUJk8s44kD24RyBStPtMsx8omynw7YAMjQ1dcuwUH/sBXwNhFyU/2fQfpJQ8vmcqRRQAAAAASUVORK5CYII=";
 
@@ -2160,6 +2847,10 @@
 
   const img$Z = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAHlBMVEXDgQLIhhTGhQ7FgwnMjifKiR3//fj37NTpzqLarGGk8EoaAAAABnRSTlMMfU4x98iIBn7FAAABJUlEQVQoz6WRQW6DMBBFLfkERvEBbC4wYk4QaaCwpApS2aMx2UeE7ilR99D0uB2jREoqddW/sf30x/bMV+o/0ogID0eN3qe47TYp9M4kKWxGjEvm2tUkqDDz0Yro7dzvk1RlzhgjzDs784cRcMhrQYItcZcnyhX9kgsxtiHmLgLmcWlMfaguPETwwgOHT6JvWfgkoA10ZQ4D8zsNq4AdE5Usmoh4L8DOU07l+TxRXvZ1ojJTHImuQQroq4v/MC2PQywJF14F6PhDDkslUCpQabEM4yIXchCDtJk5S9Q0pbxSS28KxCJqil4a8CAjA/TSiJ1PtfGo77Mzu5Bv87pP070d5QKAG1HoivVWsAkwq149AjxE4HwK8CsjeIoNQD/HqPVfCf8ALMVU7ngots8AAAAASUVORK5CYII=";
 
+  /**
+   * @ignore
+   */
+
   var JOB = {
     gladiator: img$z,
     marauder: img$A,
@@ -2189,11 +2880,19 @@
     redmage: img$Y,
     bluemage: img$Z
   };
+  /**
+   * @ignore
+   */
+
   var JOB_COLOR = {
     tank: '#4494f0',
     healer: '#64aa4f',
     dps: '#c25859'
   };
+  /**
+   * @ignore
+   */
+
   var JOB_TYPE = {
     gladiator: 'tank',
     marauder: 'tank',
@@ -2224,6 +2923,9 @@
     bluemage: 'dps'
   };
 
+  /**
+   * @ignore
+   */
   var JOB_ALIAS = {
     gladiator: 'gladiator',
     marauder: 'marauder',
@@ -2282,33 +2984,54 @@
   };
 
   /**
+   * @ignore
+   */
+
+  var validator$9 = createValidator({
+    job: function job(value) {
+      if (!isJobAlias(value)) {
+        throw new Error('Player.props.job is invalid');
+      }
+
+      return JOB_ALIAS[value];
+    },
+    size: function size(value) {
+      if (!isNumber(value)) {
+        throw new Error('Player.props.size must be a number');
+      }
+
+      return value;
+    }
+  });
+  /**
    * 绘制 职业图标
    */
 
   var Player = /*#__PURE__*/function (_Layer) {
     _inherits(Player, _Layer);
 
-    function Player(job) {
+    function Player() {
       var _this;
+
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
       _classCallCheck(this, Player);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Player).call(this));
-      /**
-       * 字段详情：[[IPlayerProps]]
-       */
-
-      _this.playerProps = {
-        job: null,
-        size: 5
-      };
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Player).call(this, state));
       _this.img = new Img();
       _this.circle = new Circle();
 
-      _this.img.on('loaded', _this.onChange.bind(_assertThisInitialized(_this)));
+      _this.img.on('loaded', function () {
+        return _this.emit('change', []);
+      });
 
-      _this.job(job || _this.playerProps.job);
-
+      var theProps = proxyProps$7(_assertThisInitialized(_this), {
+        job: 'archer',
+        size: 5
+      });
+      defineImmutable(_assertThisInitialized(_this), 'props', theProps);
+      merge(_this.props, props);
       return _this;
     }
     /**
@@ -2319,12 +3042,8 @@
     _createClass(Player, [{
       key: "job",
       value: function job(value) {
-        if (!(value in JOB_ALIAS)) return this;
-        var _value = JOB_ALIAS[value];
-        if (this.playerProps.job === _value) return this;
-        this.playerProps.job = _value;
-        this.emit('job', [_value]);
-        return this.onChange();
+        this.props.job = value;
+        return this;
       }
       /**
        * 设置尺寸
@@ -2333,11 +3052,8 @@
     }, {
       key: "size",
       value: function size(value) {
-        if (typeof value !== 'number') return this;
-        if (this.playerProps.size === value) return this;
-        this.playerProps.size = value;
-        this.emit('size', [value]);
-        return this.onChange();
+        this.props.size = value;
+        return this;
       }
       /**
        * 为职业名称设别名
@@ -2353,20 +3069,18 @@
     }, {
       key: "_clone",
       value: function _clone() {
-        var layer = new Player();
-        layer.playerProps = cloneDeep(this.playerProps);
-        return layer;
+        return new Player(deepClone(this.state), deepClone(this.props));
       }
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
-        if (!this.playerProps.job) return;
+        if (!this.props.job) return;
         var img = this.img,
             circle = this.circle;
-        var strokeWidth = this.props.strokeWidth;
-        var _this$playerProps = this.playerProps,
-            job = _this$playerProps.job,
-            size = _this$playerProps.size;
+        var strokeWidth = this.state.strokeWidth;
+        var _this$props = this.props,
+            job = _this$props.job,
+            size = _this$props.size;
         var unmapping = utils.unmapping;
         var jobType = JOB_TYPE[job];
         var jobColor = JOB_COLOR[jobType];
@@ -2375,7 +3089,7 @@
         circle.strokeWidth(strokeWidth);
         circle.size(size / 2);
         circle.render(ctx, utils);
-        img.src(JOB[job]);
+        img.src(JOB[job] || null);
         img.size(size - unmapping(strokeWidth * 2));
         img.render(ctx, utils);
       }
@@ -2389,6 +3103,39 @@
     return Player;
   }(Layer);
 
+  function proxyProps$7(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator$9(target, key, newValue, oldValue).then(function (value) {
+        that.emit(key, [value]);
+        that.emit('change', []);
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
+  /**
+   * @ignore
+   */
+
+
+  function isJobAlias(value) {
+    return value in JOB_ALIAS;
+  }
+
+  /**
+   * @ignore
+   */
+
+  var validator$a = createValidator({
+    size: function size(value) {
+      if (!isNumber(value)) {
+        throw new Error('Monster.props.size must be a number');
+      }
+
+      return value;
+    }
+  });
   /**
    * 绘制目标圈
    *
@@ -2401,19 +3148,20 @@
     function Monster() {
       var _this;
 
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
       _classCallCheck(this, Monster);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Monster).call(this, {
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Monster).call(this, Object.assign({
         fill: '#ffcdbf60',
         stroke: '#ffcdbf'
-      }));
-      /**
-       * 字段详情：[[IMonsterProps]]
-       */
-
-      _this.monsterProps = {
+      }, state)));
+      var theProps = proxyProps$8(_assertThisInitialized(_this), {
         size: 15
-      };
+      });
+      defineImmutable(_assertThisInitialized(_this), 'props', theProps);
+      merge(_this.props, props);
       return _this;
     }
     /**
@@ -2424,24 +3172,19 @@
     _createClass(Monster, [{
       key: "size",
       value: function size(value) {
-        if (typeof value !== 'number') return this;
-        if (this.monsterProps.size === value) return this;
-        this.monsterProps.size = value;
-        this.emit('size', [value]);
-        return this.onChange();
+        this.props.size = value;
+        return this;
       }
     }, {
       key: "_clone",
       value: function _clone() {
-        var layer = new Monster();
-        layer.monsterProps = cloneDeep(this.monsterProps);
-        return layer;
+        return new Monster(deepClone(this.state), deepClone(this.props));
       }
     }, {
       key: "_render",
       value: function _render(ctx, utils) {
-        var strokeWidth = this.props.strokeWidth;
-        var size = this.monsterProps.size;
+        var strokeWidth = this.state.strokeWidth;
+        var size = this.props.size;
         var mapping = utils.mapping;
         ctx.rotate(Math.PI * 0.75);
         var radius = mapping(size / 2);
@@ -2485,6 +3228,18 @@
 
     return Monster;
   }(Layer);
+
+  function proxyProps$8(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      validator$a(target, key, newValue, oldValue).then(function (value) {
+        that.emit(key, [value]);
+        that.emit('change', []);
+      }, function (err) {
+        target[key] = oldValue;
+        throw err;
+      });
+    });
+  }
 
   exports.Circle = Circle;
   exports.Img = Img;

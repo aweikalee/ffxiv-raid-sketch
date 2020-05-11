@@ -96,16 +96,13 @@
 								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="waymark.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-inherited">
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="waymark.html#children" class="tsd-kind-icon">children</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section tsd-is-inherited">
-							<h3>Accessors</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><a href="waymark.html#parent" class="tsd-kind-icon">parent</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="waymark.html#parent" class="tsd-kind-icon">parent</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="waymark.html#props" class="tsd-kind-icon">props</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="waymark.html#state" class="tsd-kind-icon">state</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -137,13 +134,6 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="waymark.html#setalias" class="tsd-kind-icon">set<wbr>Alias</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section ">
-							<h3>Object literals</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-object-literal tsd-parent-kind-class tsd-is-inherited"><a href="waymark.html#props" class="tsd-kind-icon">props</a></li>
-								<li class="tsd-kind-object-literal tsd-parent-kind-class"><a href="waymark.html#waymarkprops" class="tsd-kind-icon">waymark<wbr>Props</a></li>
-							</ul>
-						</section>
 					</div>
 				</section>
 			</section>
@@ -153,20 +143,23 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Waymark<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">IWaymarkProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"type"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="waymark.html" class="tsd-signature-type">Waymark</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Waymark<span class="tsd-signature-symbol">(</span>state<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ilayerstate.html" class="tsd-signature-type">ILayerState</a><span class="tsd-signature-symbol">&gt;</span>, props<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/iwaymarkprops.html" class="tsd-signature-type">IWaymarkProps</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="waymark.html" class="tsd-signature-type">Waymark</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Overrides <a href="layer.html">Layer</a>.<a href="layer.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Waymark.ts#L41">Waymark.ts:41</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Waymark.ts#L56">Waymark.ts:56</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> type: <span class="tsd-signature-type">IWaymarkProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"type"</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> state: <span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ilayerstate.html" class="tsd-signature-type">ILayerState</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = {}</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> props: <span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/iwaymarkprops.html" class="tsd-signature-type">IWaymarkProps</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = {}</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="waymark.html" class="tsd-signature-type">Waymark</a></h4>
@@ -174,55 +167,50 @@
 					</ul>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="children" class="tsd-anchor"></a>
 					<h3>children</h3>
-					<div class="tsd-signature tsd-kind-icon">children<span class="tsd-signature-symbol">:</span> <a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
+					<div class="tsd-signature tsd-kind-icon">children<span class="tsd-signature-symbol">:</span> <a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#children">children</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L109">Layer.ts:109</a></li>
+							<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L190">Layer.ts:190</a></li>
 						</ul>
 					</aside>
 				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
-				<h2>Accessors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="parent" class="tsd-anchor"></a>
 					<h3>parent</h3>
-					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> parent<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> parent<span class="tsd-signature-symbol">(</span>newParent<span class="tsd-signature-symbol">: </span><a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#parent">parent</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L111">Layer.ts:111</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#parent">parent</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L115">Layer.ts:115</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>newParent: <a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
+					<div class="tsd-signature tsd-kind-icon">parent<span class="tsd-signature-symbol">:</span> <a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#parent">parent</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L189">Layer.ts:189</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="props" class="tsd-anchor"></a>
+					<h3>props</h3>
+					<div class="tsd-signature tsd-kind-icon">props<span class="tsd-signature-symbol">:</span> <a href="../interfaces/iwaymarkprops.html" class="tsd-signature-type">IWaymarkProps</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Waymark.ts#L53">Waymark.ts:53</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="state" class="tsd-anchor"></a>
+					<h3>state</h3>
+					<div class="tsd-signature tsd-kind-icon">state<span class="tsd-signature-symbol">:</span> <a href="../interfaces/ilayerstate.html" class="tsd-signature-type">ILayerState</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#state">state</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L188">Layer.ts:188</a></li>
+						</ul>
+					</aside>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
@@ -231,14 +219,14 @@
 					<a name="add" class="tsd-anchor"></a>
 					<h3>add</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">add<span class="tsd-signature-symbol">(</span>layer<span class="tsd-signature-symbol">: </span><a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">add<span class="tsd-signature-symbol">(</span>layer<span class="tsd-signature-symbol">: </span><a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#add">add</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L152">Layer.ts:152</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L235">Layer.ts:235</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -252,7 +240,7 @@
 									<h5>layer: <a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -260,14 +248,14 @@
 					<a name="addto" class="tsd-anchor"></a>
 					<h3>add<wbr>To</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">add<wbr>To<span class="tsd-signature-symbol">(</span>layer<span class="tsd-signature-symbol">: </span><a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">add<wbr>To<span class="tsd-signature-symbol">(</span>layer<span class="tsd-signature-symbol">: </span><a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#addto">addTo</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L163">Layer.ts:163</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L246">Layer.ts:246</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -278,7 +266,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>layer: <a href="layer.html" class="tsd-signature-type">Layer</a></h5>
+									<h5>layer: <a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -296,7 +284,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#clone">clone</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L193">Layer.ts:193</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L276">Layer.ts:276</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -312,14 +300,14 @@
 					<a name="emit" class="tsd-anchor"></a>
 					<h3>emit</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">emit&lt;F&gt;<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">keyof </span><a href="../interfaces/iwaymarkevent.html" class="tsd-signature-type">IWaymarkEvent</a>, args<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Parameters</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">F</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">emit&lt;T, K&gt;<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">K</span>, args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Parameters</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">K</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#emit">emit</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L447">Layer.ts:447</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L498">Layer.ts:498</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -330,16 +318,19 @@
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
-									<h4>F<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></h4>
+									<h4>T<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></h4>
+								</li>
+								<li>
+									<h4>K<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IKey</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
 								</li>
 							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>type: <span class="tsd-signature-symbol">keyof </span><a href="../interfaces/iwaymarkevent.html" class="tsd-signature-type">IWaymarkEvent</a></h5>
+									<h5>type: <span class="tsd-signature-type">K</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> args: <span class="tsd-signature-type">Parameters</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">F</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<h5>args: <span class="tsd-signature-type">Parameters</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">K</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -350,14 +341,14 @@
 					<a name="fill" class="tsd-anchor"></a>
 					<h3>fill</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">fill<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"fill"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">fill<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"fill"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#fill">fill</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L391">Layer.ts:391</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L450">Layer.ts:450</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -368,7 +359,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>value: <span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"fill"</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5>value: <span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"fill"</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -386,7 +377,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#getlayerstatus">getLayerStatus</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L251">Layer.ts:251</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L333">Layer.ts:333</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -430,7 +421,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#hide">hide</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L413">Layer.ts:413</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L466">Layer.ts:466</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -446,14 +437,14 @@
 					<a name="off" class="tsd-anchor"></a>
 					<h3>off</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">off&lt;F&gt;<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">keyof </span><a href="../interfaces/iwaymarkevent.html" class="tsd-signature-type">IWaymarkEvent</a>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">F</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">off&lt;T, K&gt;<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">K</span>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">K</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#off">off</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L439">Layer.ts:439</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L490">Layer.ts:490</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -464,16 +455,19 @@
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
-									<h4>F<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></h4>
+									<h4>T<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></h4>
+								</li>
+								<li>
+									<h4>K<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IKey</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
 								</li>
 							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>type: <span class="tsd-signature-symbol">keyof </span><a href="../interfaces/iwaymarkevent.html" class="tsd-signature-type">IWaymarkEvent</a></h5>
+									<h5>type: <span class="tsd-signature-type">K</span></h5>
 								</li>
 								<li>
-									<h5>event: <span class="tsd-signature-type">F</span></h5>
+									<h5>event: <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">K</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -484,14 +478,14 @@
 					<a name="on" class="tsd-anchor"></a>
 					<h3>on</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">on&lt;F&gt;<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">keyof </span><a href="../interfaces/iwaymarkevent.html" class="tsd-signature-type">IWaymarkEvent</a>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">F</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">on&lt;T, K&gt;<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">K</span>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">K</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#on">on</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L423">Layer.ts:423</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L474">Layer.ts:474</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -502,16 +496,19 @@
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
-									<h4>F<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></h4>
+									<h4>T<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></h4>
+								</li>
+								<li>
+									<h4>K<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IKey</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
 								</li>
 							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>type: <span class="tsd-signature-symbol">keyof </span><a href="../interfaces/iwaymarkevent.html" class="tsd-signature-type">IWaymarkEvent</a></h5>
+									<h5>type: <span class="tsd-signature-type">K</span></h5>
 								</li>
 								<li>
-									<h5>event: <span class="tsd-signature-type">F</span></h5>
+									<h5>event: <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">K</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -522,14 +519,14 @@
 					<a name="once" class="tsd-anchor"></a>
 					<h3>once</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">once&lt;F&gt;<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">keyof </span><a href="../interfaces/iwaymarkevent.html" class="tsd-signature-type">IWaymarkEvent</a>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">F</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">once&lt;T, K&gt;<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">K</span>, event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">K</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#once">once</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L431">Layer.ts:431</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L482">Layer.ts:482</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -540,16 +537,19 @@
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
 							<ul class="tsd-type-parameters">
 								<li>
-									<h4>F<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></h4>
+									<h4>T<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></h4>
+								</li>
+								<li>
+									<h4>K<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IKey</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
 								</li>
 							</ul>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>type: <span class="tsd-signature-symbol">keyof </span><a href="../interfaces/iwaymarkevent.html" class="tsd-signature-type">IWaymarkEvent</a></h5>
+									<h5>type: <span class="tsd-signature-type">K</span></h5>
 								</li>
 								<li>
-									<h5>event: <span class="tsd-signature-type">F</span></h5>
+									<h5>event: <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">K</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -560,14 +560,14 @@
 					<a name="opacity" class="tsd-anchor"></a>
 					<h3>opacity</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">opacity<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"opacity"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">opacity<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"opacity"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#opacity">opacity</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L327">Layer.ts:327</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L409">Layer.ts:409</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -578,7 +578,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>value: <span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"opacity"</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5>value: <span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"opacity"</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -589,14 +589,14 @@
 					<a name="remove" class="tsd-anchor"></a>
 					<h3>remove</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">remove<span class="tsd-signature-symbol">(</span>layer<span class="tsd-signature-symbol">: </span><a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">remove<span class="tsd-signature-symbol">(</span>layer<span class="tsd-signature-symbol">: </span><a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#remove">remove</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L174">Layer.ts:174</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L257">Layer.ts:257</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -607,7 +607,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>layer: <a href="layer.html" class="tsd-signature-type">Layer</a></h5>
+									<h5>layer: <a href="layer.html" class="tsd-signature-type">Layer</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -625,7 +625,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#removeall">removeAll</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L184">Layer.ts:184</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L268">Layer.ts:268</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -648,7 +648,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#render">render</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L206">Layer.ts:206</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L288">Layer.ts:288</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -673,14 +673,14 @@
 					<a name="rotate" class="tsd-anchor"></a>
 					<h3>rotate</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">rotate<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"rotate"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">rotate<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"rotate"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#rotate">rotate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L341">Layer.ts:341</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L417">Layer.ts:417</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -691,7 +691,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>value: <span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"rotate"</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5>value: <span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"rotate"</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -702,14 +702,14 @@
 					<a name="scale" class="tsd-anchor"></a>
 					<h3>scale</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">scale<span class="tsd-signature-symbol">(</span>x<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"scaleX"</span><span class="tsd-signature-symbol">]</span>, y<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"scaleY"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">scale<span class="tsd-signature-symbol">(</span>x<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"scaleX"</span><span class="tsd-signature-symbol">]</span>, y<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"scaleY"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#scale">scale</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L353">Layer.ts:353</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L425">Layer.ts:425</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -720,10 +720,10 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>x: <span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"scaleX"</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5>x: <span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"scaleX"</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> y: <span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"scaleY"</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> y: <span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"scaleY"</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -741,7 +741,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#show">show</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L403">Layer.ts:403</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L458">Layer.ts:458</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -763,7 +763,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Waymark.ts#L67">Waymark.ts:67</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Waymark.ts#L87">Waymark.ts:87</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -785,14 +785,14 @@
 					<a name="stroke" class="tsd-anchor"></a>
 					<h3>stroke</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">stroke<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"stroke"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">stroke<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"stroke"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#stroke">stroke</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L367">Layer.ts:367</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L434">Layer.ts:434</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -803,7 +803,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>value: <span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"stroke"</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5>value: <span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"stroke"</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -814,14 +814,14 @@
 					<a name="strokewidth" class="tsd-anchor"></a>
 					<h3>stroke<wbr>Width</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">stroke<wbr>Width<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"strokeWidth"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">stroke<wbr>Width<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"strokeWidth"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#strokewidth">strokeWidth</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L379">Layer.ts:379</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L442">Layer.ts:442</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -832,7 +832,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>value: <span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"strokeWidth"</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5>value: <span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"strokeWidth"</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -850,7 +850,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#turnto">turnTo</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L299">Layer.ts:299</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L381">Layer.ts:381</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -887,7 +887,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Waymark.ts#L54">Waymark.ts:54</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Waymark.ts#L79">Waymark.ts:79</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -909,14 +909,14 @@
 					<a name="xy" class="tsd-anchor"></a>
 					<h3>xy</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">xy<span class="tsd-signature-symbol">(</span>x<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"x"</span><span class="tsd-signature-symbol">]</span>, y<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"y"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
+						<li class="tsd-signature tsd-kind-icon">xy<span class="tsd-signature-symbol">(</span>x<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"x"</span><span class="tsd-signature-symbol">]</span>, y<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"y"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">this</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#xy">xy</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L313">Layer.ts:313</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Layer.ts#L400">Layer.ts:400</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -927,10 +927,10 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>x: <span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"x"</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5>x: <span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"x"</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 								<li>
-									<h5>y: <span class="tsd-signature-type">ILayerProps</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"y"</span><span class="tsd-signature-symbol">]</span></h5>
+									<h5>y: <span class="tsd-signature-type">ILayerState</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"y"</span><span class="tsd-signature-symbol">]</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">this</span></h4>
@@ -947,7 +947,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Waymark.ts#L86">Waymark.ts:86</a></li>
+									<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/a6ecc55/src/Waymark.ts#L102">Waymark.ts:102</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -977,160 +977,6 @@
 					</ul>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Object literals</h2>
-				<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-class tsd-is-inherited">
-					<a name="props" class="tsd-anchor"></a>
-					<h3>props</h3>
-					<div class="tsd-signature tsd-kind-icon">props<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="layer.html">Layer</a>.<a href="layer.html#props">props</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L94">Layer.ts:94</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>字段详情：<a href="../interfaces/ilayerprops.html">ILayerProps</a></p>
-						</div>
-					</div>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="props.fill-1" class="tsd-anchor"></a>
-						<h3>fill</h3>
-						<div class="tsd-signature tsd-kind-icon">fill<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;#000000&quot;</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L101">Layer.ts:101</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="props.opacity-1" class="tsd-anchor"></a>
-						<h3>opacity</h3>
-						<div class="tsd-signature tsd-kind-icon">opacity<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L100">Layer.ts:100</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="props.rotate-1" class="tsd-anchor"></a>
-						<h3>rotate</h3>
-						<div class="tsd-signature tsd-kind-icon">rotate<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L97">Layer.ts:97</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="props.scalex" class="tsd-anchor"></a>
-						<h3>scaleX</h3>
-						<div class="tsd-signature tsd-kind-icon">scaleX<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L98">Layer.ts:98</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="props.scaley" class="tsd-anchor"></a>
-						<h3>scaleY</h3>
-						<div class="tsd-signature tsd-kind-icon">scaleY<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L99">Layer.ts:99</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="props.stroke-1" class="tsd-anchor"></a>
-						<h3>stroke</h3>
-						<div class="tsd-signature tsd-kind-icon">stroke<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;#000000&quot;</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L102">Layer.ts:102</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="props.strokewidth-1" class="tsd-anchor"></a>
-						<h3>stroke<wbr>Width</h3>
-						<div class="tsd-signature tsd-kind-icon">stroke<wbr>Width<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 2</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L103">Layer.ts:103</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="props.visible" class="tsd-anchor"></a>
-						<h3>visible</h3>
-						<div class="tsd-signature tsd-kind-icon">visible<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> = true</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L104">Layer.ts:104</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="props.x" class="tsd-anchor"></a>
-						<h3>x</h3>
-						<div class="tsd-signature tsd-kind-icon">x<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L95">Layer.ts:95</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="props.y" class="tsd-anchor"></a>
-						<h3>y</h3>
-						<div class="tsd-signature tsd-kind-icon">y<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Layer.ts#L96">Layer.ts:96</a></li>
-							</ul>
-						</aside>
-					</section>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-class">
-					<a name="waymarkprops" class="tsd-anchor"></a>
-					<h3>waymark<wbr>Props</h3>
-					<div class="tsd-signature tsd-kind-icon">waymark<wbr>Props<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Waymark.ts#L35">Waymark.ts:35</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>字段详情：<a href="../interfaces/iwaymarkprops.html">IWaymarkProps</a></p>
-						</div>
-					</div>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="waymarkprops.size-1" class="tsd-anchor"></a>
-						<h3>size</h3>
-						<div class="tsd-signature tsd-kind-icon">size<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 5</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Waymark.ts#L37">Waymark.ts:37</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="waymarkprops.type-1" class="tsd-anchor"></a>
-						<h3>type</h3>
-						<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/aweikalee/ffxiv-raid-sketch/blob/cd86972/src/Waymark.ts#L36">Waymark.ts:36</a></li>
-							</ul>
-						</aside>
-					</section>
-				</section>
-			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
@@ -1153,8 +999,14 @@
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 								<a href="waymark.html#children" class="tsd-kind-icon">children</a>
 							</li>
-							<li class=" tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 								<a href="waymark.html#parent" class="tsd-kind-icon">parent</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="waymark.html#props" class="tsd-kind-icon">props</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="waymark.html#state" class="tsd-kind-icon">state</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="waymark.html#add" class="tsd-kind-icon">add</a>
@@ -1227,12 +1079,6 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="waymark.html#setalias" class="tsd-kind-icon">set<wbr>Alias</a>
-							</li>
-							<li class=" tsd-kind-object-literal tsd-parent-kind-class tsd-is-inherited">
-								<a href="waymark.html#props" class="tsd-kind-icon">props</a>
-							</li>
-							<li class=" tsd-kind-object-literal tsd-parent-kind-class">
-								<a href="waymark.html#waymarkprops" class="tsd-kind-icon">waymark<wbr>Props</a>
 							</li>
 						</ul>
 					</li>
