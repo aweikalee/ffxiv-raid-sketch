@@ -34,5 +34,9 @@
     "dist",
     "es",
     "README.md"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aweikalee/ffxiv-raid-sketch.git"
+  }
 }
