@@ -1,65 +1,26 @@
-import Layer, { ILayerEvent, ILayerState } from './Layer'
+import { ILayerState } from './Layer'
+import Simple, { ISimpleProps } from './Simple'
 import { ISketchUtils } from './Sketch'
-import { proxy, deepClone, merge, defineImmutable } from './utils/index'
-import * as valid from './utils/vaildate'
-
-export interface IMonsterProps {
-    /**
-     * 显示尺寸
-     */
-    size: number
-}
-
-export interface IMonsterEvent extends ILayerEvent {
-    size: (size: IMonsterProps['size']) => void
-}
-
-/**
- * @ignore
- */
-const validator = valid.createValidator<IMonsterProps>({
-    size(value) {
-        if (!valid.isNumber(value)) {
-            throw new Error('size must be a number')
-        }
-
-        return value
-    },
-})
+import { deepClone } from './utils/index'
 
 /**
  * 绘制目标圈
  *
  * 即选中怪时可以分辨面向和侧背的圈
  */
-export default class Monster extends Layer<IMonsterEvent> {
-    props: IMonsterProps
-
+export default class Monster extends Simple {
     constructor(
         state: Partial<ILayerState> = {},
-        props: Partial<IMonsterProps> = {}
+        props: Partial<ISimpleProps> = {}
     ) {
-        super({
-            fill: '#ffcdbf60',
-            stroke: '#ffcdbf',
-            ...state,
-        })
-
-        const theProps = proxyProps(this, {
-            size: 15,
-        })
-
-        defineImmutable(this, 'props', theProps)
-
-        merge(this.props, props)
-    }
-
-    /**
-     * 设置尺寸
-     */
-    size(value: number) {
-        this.props.size = value
-        return this
+        super(
+            {
+                fill: '#ffcdbf60',
+                stroke: '#ffcdbf',
+                ...state,
+            },
+            { size: 15, ...props }
+        )
     }
 
     protected _clone() {
@@ -110,25 +71,4 @@ export default class Monster extends Layer<IMonsterEvent> {
         ctx.stroke()
         ctx.fill()
     }
-}
-
-/**
- * @ignore
- */
-function proxyProps(that: Monster, initialValue: IMonsterProps) {
-    return proxy<IMonsterProps>(
-        initialValue,
-        (key, oldValue, newValue, target) => {
-            validator(target, key, newValue, oldValue).then(
-                (value) => {
-                    that.emit(key, [value] as any)
-                    that.emit('change', [])
-                },
-                (err) => {
-                    target[key] = oldValue
-                    throw err
-                }
-            )
-        }
-    )
 }
