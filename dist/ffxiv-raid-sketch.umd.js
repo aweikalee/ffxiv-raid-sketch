@@ -295,10 +295,25 @@
       set: function set(target, key, value, receiver) {
         var oldValue = target[key];
         var hadChange = oldValue !== value;
+        var hasOwnBeforeChange = hasOwn(target, key);
         var res = Reflect.set(target, key, value, receiver);
 
         if (hadChange && hasOwn(target, key)) {
-          onChange(key, oldValue, value, target);
+          try {
+            onChange(key, oldValue, value, target);
+          } catch (err) {
+            if (hasOwnBeforeChange) {
+              target[key] = oldValue;
+            } else {
+              if (isArray) {
+                target.splice(key, 1);
+              } else {
+                delete target[key];
+              }
+            }
+
+            throw err;
+          }
         }
 
         return res;
@@ -308,7 +323,12 @@
         var res = Reflect.deleteProperty(target, key);
 
         if (!isArray) {
-          onChange(key, oldValue, undefined, target);
+          try {
+            onChange(key, oldValue, undefined, target);
+          } catch (err) {
+            target[key] = oldValue;
+            throw err;
+          }
         }
 
         return res;
@@ -320,19 +340,12 @@
    * @ignore
    */
   function createValidator(validators) {
-    return function (target, key, newValue, oldValue) {
-      return new Promise(function (resolve) {
-        var res;
-
-        if (key in validators) {
-          res = validators[key](newValue, oldValue);
-        } else {
-          res = newValue;
-        }
-
-        target[key] = res;
-        return resolve(res);
-      });
+    return function (key, newValue, oldValue) {
+      if (key in validators) {
+        return validators[key](newValue, oldValue);
+      } else {
+        return true;
+      }
     };
   }
   /**
@@ -433,73 +446,73 @@
   var validator = createValidator({
     x: function x(value) {
       if (!isNumber(value)) {
-        throw new Error('Layer.state.x must be a number');
+        throw new Error('x must be a number');
       }
 
-      return value;
+      return true;
     },
     y: function y(value) {
       if (!isNumber(value)) {
-        throw new Error('Layer.state.y must be a number');
+        throw new Error('y must be a number');
       }
 
-      return value;
+      return true;
     },
     rotate: function rotate(value) {
       if (!isNumber(value)) {
-        throw new Error('Layer.state.rotate must be a number');
+        throw new Error('rotate must be a number');
       }
 
-      return value;
+      return true;
     },
     scaleX: function scaleX(value) {
       if (!isNumber(value)) {
-        throw new Error('Layer.state.scaleX must be a number');
+        throw new Error('scaleX must be a number');
       }
 
-      return value;
+      return true;
     },
     scaleY: function scaleY(value) {
       if (!isNumber(value)) {
-        throw new Error('Layer.state.scaleY must be a number');
+        throw new Error('scaleY must be a number');
       }
 
-      return value;
+      return true;
     },
     opacity: function opacity(value) {
       if (!isNumber(value)) {
-        throw new Error('Layer.state.opacity must be a number');
+        throw new Error('opacity must be a number');
       }
 
-      return value;
+      return true;
     },
     fill: function fill(value) {
       if (!(isString(value) || isCanvasGradient(value) || isCanvasPattern(value))) {
-        throw new Error('Layer.state.fill must be a string/CanvasGradient/CanvasPattern');
+        throw new Error('fill must be a string/CanvasGradient/CanvasPattern');
       }
 
-      return value;
+      return true;
     },
     stroke: function stroke(value) {
       if (!(isString(value) || isCanvasGradient(value) || isCanvasPattern(value))) {
-        throw new Error('Layer.state.stroke must be a string/CanvasPattern/CanvasPattern');
+        throw new Error('stroke must be a string/CanvasPattern/CanvasPattern');
       }
 
-      return value;
+      return true;
     },
     strokeWidth: function strokeWidth(value) {
       if (!isNumber(value)) {
-        throw new Error('Layer.state.strokeWidth must be a number');
+        throw new Error('strokeWidth must be a number');
       }
 
-      return value;
+      return true;
     },
     visible: function visible(value) {
       if (!isBoolean(value)) {
-        throw new Error("Layer.state.visible must be a boolean");
+        throw new Error("visible must be a boolean");
       }
 
-      return value;
+      return true;
     }
   });
   /**
@@ -642,10 +655,23 @@
             strokeWidth = _this$state.strokeWidth;
         var mapping = utils.mapping;
         ctx.save();
-        ctx.translate(mapping(x), mapping(y));
-        ctx.scale(scaleX, scaleY);
-        ctx.rotate(rotate * Math.PI / 180);
-        ctx.globalAlpha *= opacity;
+
+        if (x !== 0 || y !== 0) {
+          ctx.translate(mapping(x), mapping(y));
+        }
+
+        if (scaleX !== 1 || scaleY !== 1) {
+          ctx.scale(scaleX, scaleY);
+        }
+
+        if (rotate !== 0) {
+          ctx.rotate(rotate * Math.PI / 180);
+        }
+
+        if (opacity !== 1) {
+          ctx.globalAlpha *= opacity;
+        }
+
         ctx.fillStyle = fill;
         ctx.strokeStyle = stroke;
         ctx.lineWidth = strokeWidth;
@@ -895,14 +921,10 @@
    */
 
   function proxyState(that, initialValue) {
-    return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator(target, key, newValue, oldValue).then(function (value) {
-        that.emit(key, [value]);
-        that.emit('change', []);
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
+    return proxy(initialValue, function (key, oldValue, newValue) {
+      if (!validator(key, newValue, oldValue)) return;
+      that.emit(key, [newValue]);
+      that.emit('change', []);
     });
   }
   /**
@@ -911,15 +933,14 @@
 
 
   function proxyParent(that, initialValue) {
-    var onParentChange;
+    var onChildrenChange;
     return proxy({
       value: initialValue
-    }, function (key, oldValue, newValue, target) {
+    }, function (key, oldValue, newValue) {
       if (key !== 'value') return;
 
       if (!(isLayer(newValue) || newValue === null)) {
-        target[key] = oldValue;
-        throw new Error("Layer.parent must be a Layer");
+        throw new Error("parent must be a Layer");
       } // 从旧的父图层中移除
 
 
@@ -930,18 +951,18 @@
           oldValue.children.splice(index, 1);
         }
 
-        that.off('change', onParentChange);
+        that.off('change', onChildrenChange);
       } // 添加到新的父图层
 
 
       if (newValue !== null) {
         newValue.children.push(that);
 
-        onParentChange = function onParentChange() {
+        onChildrenChange = function onChildrenChange() {
           return newValue.emit('change', []);
         };
 
-        that.on('change', onParentChange);
+        that.on('change', onChildrenChange);
       }
 
       that.emit('parent', [that.parent]);
@@ -962,8 +983,7 @@
       if (!Array.isArray(newValue) || newValue.some(function (v) {
         return !isLayer(v);
       })) {
-        target[key] = oldValue;
-        throw new Error("Layer.children must be a Layer[]");
+        throw new Error("children must be a Layer[]");
       }
 
       target[key] = proxyChildrenArray(that, newValue);
@@ -985,13 +1005,7 @@
             newValue.parent = that;
           }
         } else {
-          if (oldValue) {
-            target[key] = oldValue;
-          } else {
-            target.splice(Number(key), 1);
-          }
-
-          throw new Error("Layer.children's value must be a Layer");
+          throw new Error("children's value must be a Layer");
         }
       }
 
@@ -1007,31 +1021,31 @@
   var validator$1 = createValidator({
     w: function w(value) {
       if (!isNumber(value)) {
-        throw new Error('Sketch.options.w must be a number');
+        throw new Error('w must be a number');
       }
 
-      return value;
+      return true;
     },
     h: function h(value) {
       if (!isNumber(value)) {
-        throw new Error('Sketch.options.h must be a number');
+        throw new Error('h must be a number');
       }
 
-      return value;
+      return true;
     },
     unit: function unit(value) {
       if (!isNumber(value)) {
-        throw new Error('Sketch.options.unit must be a number');
+        throw new Error('unit must be a number');
       }
 
-      return value;
+      return true;
     },
     canvas: function canvas(value) {
       if (!(value instanceof HTMLCanvasElement || value === null)) {
-        throw new Error('Sketch.options.angle must be a number');
+        throw new Error('angle must be a number');
       }
 
-      return value;
+      return true;
     }
   });
   /**
@@ -1170,41 +1184,37 @@
 
   function proxyOptions(that, initialValue) {
     return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator$1(target, key, newValue, oldValue).then(function () {
-        var canvas = target['canvas'];
+      if (!validator$1(key, newValue, oldValue)) return;
+      var canvas = target['canvas'];
 
-        switch (key) {
-          case 'canvas':
-            if (canvas) {
-              that.ctx = canvas.getContext('2d');
-              canvas.width = target['w'];
-              canvas.height = target['h'];
-            } else {
-              that.ctx = null;
-            }
+      switch (key) {
+        case 'canvas':
+          if (canvas) {
+            that.ctx = canvas.getContext('2d');
+            canvas.width = target['w'];
+            canvas.height = target['h'];
+          } else {
+            that.ctx = null;
+          }
 
-            break;
+          break;
 
-          case 'w':
-            if (canvas) {
-              target['canvas'].width = target['w'];
-            }
+        case 'w':
+          if (canvas) {
+            target['canvas'].width = target['w'];
+          }
 
-            break;
+          break;
 
-          case 'h':
-            if (canvas) {
-              target['canvas'].height = target['h'];
-            }
+        case 'h':
+          if (canvas) {
+            target['canvas'].height = target['h'];
+          }
 
-            break;
-        }
+          break;
+      }
 
-        that.render();
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
+      that.render();
     });
   }
   /**
@@ -1221,8 +1231,7 @@
       if (key !== 'value') return;
 
       if (!(newValue instanceof Layer)) {
-        target[key] = oldValue;
-        throw new Error("Sketch.layer must be a Layer");
+        throw new Error("layer must be a Layer");
       }
 
       if (oldValue) {
@@ -1248,38 +1257,38 @@
       if (!isArray(value, function (v) {
         return isArray(v, isNumber) && v.length >= 2;
       })) {
-        throw new Error('Line.props.coordinates must be a number[][]');
+        throw new Error('coordinates must be a number[][]');
       }
 
-      return value;
+      return true;
     },
     smooth: function smooth(value) {
       if (!isBoolean(value)) {
-        throw new Error('Line.props.smooth must be a boolean');
+        throw new Error('smooth must be a boolean');
       }
 
-      return value;
+      return true;
     },
     dash: function dash(value) {
       if (!(value === null || isArray(value, isNumber))) {
-        throw new Error('Line.props.dash must be a number[]/null');
+        throw new Error('dash must be a number[]/null');
       }
 
-      return Object.freeze(value);
+      return true;
     },
     startCap: function startCap(value) {
       if (!isLineCap(value)) {
-        throw new Error('Line.props.startCap must be a number[]/null');
+        throw new Error('startCap must be a number[]/null');
       }
 
-      return value;
+      return true;
     },
     endCap: function endCap(value) {
       if (!isLineCap(value)) {
-        throw new Error('Line.props.endCap must be a number[]/null');
+        throw new Error('endCap must be a number[]/null');
       }
 
-      return value;
+      return true;
     }
   });
   /**
@@ -1468,17 +1477,16 @@
 
   function proxyProps(that, initialValue) {
     return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator$2(target, key, newValue, oldValue).then(function (value) {
-        if (key === 'coordinates') {
-          target['coordinates'] = proxyCoordinates(that, value);
-        }
+      if (!validator$2(key, newValue, oldValue)) return;
 
-        that.emit(key, [value]);
-        that.emit('change', []);
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
+      if (key === 'coordinates') {
+        target['coordinates'] = proxyCoordinates(that, newValue);
+      } else if (key === 'dash') {
+        Object.freeze(newValue);
+      }
+
+      that.emit(key, [newValue]);
+      that.emit('change', []);
     });
   }
   /**
@@ -1487,22 +1495,21 @@
 
 
   function proxyCoordinates(that, initialValue) {
-    return proxy(initialValue, function (key, oldValue, newValue, target) {
+    return proxy(initialValue, function (key, oldValue, newValue) {
       if (key >= 0) {
         if (!isArray(newValue, isNumber)) {
-          oldValue ? target[key] = oldValue : target.splice(Number(key), 1);
-          throw new Error("Line.props.coordinates's value must be a number[]");
+          throw new Error("coordinates's value must be a number[]");
         }
 
         var length = newValue.length;
 
         if (key == 0 && length !== 2) {
-          throw new Error("Line.props.coordinates[0]'s length must equals 2");
+          throw new Error("coordinates[0]'s length must equals 2");
         } else if (key != 0 && (length % 2 !== 0 || length > 6 || length < 2)) {
-          throw new Error("Line.props.coordinates value's length must equals 2/4/6");
+          throw new Error("coordinates value's length must equals 2/4/6");
         }
 
-        target[key] = Object.freeze(newValue);
+        Object.freeze(newValue);
       }
 
       that.emit('coordinates', [that.props.coordinates]);
@@ -1667,24 +1674,24 @@
   var validator$3 = createValidator({
     w: function w(value) {
       if (!isNumber(value)) {
-        throw new Error('Rect.props.w must be a number');
+        throw new Error('w must be a number');
       }
 
-      return value;
+      return true;
     },
     h: function h(value) {
       if (!isNumber(value)) {
-        throw new Error('Rect.props.h must be a number');
+        throw new Error('h must be a number');
       }
 
-      return value;
+      return true;
     },
     dash: function dash(value) {
       if (!(value === null || isArray(value, isNumber))) {
-        throw new Error('Rect.props.dash must be a number[]/null');
+        throw new Error('dash must be a number[]/null');
       }
 
-      return Object.freeze(value);
+      return true;
     }
   });
   /**
@@ -1777,14 +1784,15 @@
   }(Layer);
 
   function proxyProps$1(that, initialValue) {
-    return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator$3(target, key, newValue, oldValue).then(function (value) {
-        that.emit(key, [value]);
-        that.emit('change', []);
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
+    return proxy(initialValue, function (key, oldValue, newValue) {
+      if (!validator$3(key, newValue, oldValue)) return;
+
+      if (key === 'dash') {
+        Object.freeze(newValue);
+      }
+
+      that.emit(key, [newValue]);
+      that.emit('change', []);
     });
   }
 
@@ -1795,31 +1803,31 @@
   var validator$4 = createValidator({
     size: function size(value) {
       if (!isNumber(value)) {
-        throw new Error('Circle.props.size must be a number');
+        throw new Error('size must be a number');
       }
 
-      return value;
+      return true;
     },
     angle: function angle(value) {
       if (!isNumber(value)) {
-        throw new Error('Circle.props.angle must be a number');
+        throw new Error('angle must be a number');
       }
 
-      return value;
+      return true;
     },
     arc: function arc(value) {
       if (!isBoolean(value)) {
-        throw new Error('Circle.props.arc must be a boolean');
+        throw new Error('arc must be a boolean');
       }
 
-      return value;
+      return true;
     },
     dash: function dash(value) {
       if (!(value === null || isArray(value, isNumber))) {
-        throw new Error('Circle.props.dash must be a number[]/null');
+        throw new Error('dash must be a number[]/null');
       }
 
-      return Object.freeze(value);
+      return true;
     }
   });
   /**
@@ -1938,14 +1946,15 @@
   }(Layer);
 
   function proxyProps$2(that, initialValue) {
-    return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator$4(target, key, newValue, oldValue).then(function (value) {
-        that.emit(key, [value]);
-        that.emit('change', []);
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
+    return proxy(initialValue, function (key, oldValue, newValue) {
+      if (!validator$4(key, newValue, oldValue)) return;
+
+      if (key === 'dash') {
+        Object.freeze(newValue);
+      }
+
+      that.emit(key, [newValue]);
+      that.emit('change', []);
     });
   }
 
@@ -1956,17 +1965,17 @@
   var validator$5 = createValidator({
     src: function src(value) {
       if (!(value === null || isString(value))) {
-        throw new Error("Img.props.src must be a string/null");
+        throw new Error("src must be a string/null");
       }
 
-      return value;
+      return true;
     },
     size: function size(value) {
       if (!(isNumber(value) || value === 'auto')) {
-        throw new Error("Img.props.size must be a number/\"auto\"");
+        throw new Error("size must be a number/\"auto\"");
       }
 
-      return value;
+      return true;
     }
   });
 
@@ -2082,17 +2091,14 @@
 
   function proxyProps$3(that, initialValue) {
     return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator$5(target, key, newValue, oldValue).then(function (value) {
-        if (key === 'src') {
-          that.image.src = target['src'];
-        }
+      if (!validator$5(key, newValue, oldValue)) return;
 
-        that.emit(key, [value]);
-        that.emit('change', []);
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
+      if (key === 'src') {
+        that.image.src = target['src'];
+      }
+
+      that.emit(key, [newValue]);
+      that.emit('change', []);
     });
   }
 
@@ -2103,45 +2109,45 @@
   var validator$6 = createValidator({
     value: function value(_value) {
       if (!isString(_value)) {
-        throw new Error('Text.props.value must be a string');
+        throw new Error('value must be a string');
       }
 
-      return _value;
+      return true;
     },
     align: function align(value) {
       if (!isCanvasTextAlign(value)) {
-        throw new Error('Text.props.align must be a CanvasTextAlign');
+        throw new Error('align must be a CanvasTextAlign');
       }
 
-      return value;
+      return true;
     },
     size: function size(value) {
       if (!isNumber(value)) {
-        throw new Error('Text.props.size must be a number');
+        throw new Error('size must be a number');
       }
 
-      return value;
+      return true;
     },
     font: function font(value) {
       if (!isString(value)) {
-        throw new Error('Text.props.font must be a string');
+        throw new Error('font must be a string');
       }
 
-      return value;
+      return true;
     },
     bold: function bold(value) {
       if (!isBoolean(value)) {
-        throw new Error('Text.props.bold must be a boolean');
+        throw new Error('bold must be a boolean');
       }
 
-      return value;
+      return true;
     },
     italic: function italic(value) {
       if (!isBoolean(value)) {
-        throw new Error('Text.props.italic must be a boolean');
+        throw new Error('italic must be a boolean');
       }
 
-      return value;
+      return true;
     }
   });
   /**
@@ -2270,14 +2276,10 @@
   }(Layer);
 
   function proxyProps$4(that, initialValue) {
-    return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator$6(target, key, newValue, oldValue).then(function (value) {
-        that.emit(key, [value]);
-        that.emit('change', []);
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
+    return proxy(initialValue, function (key, oldValue, newValue) {
+      if (!validator$6(key, newValue, oldValue)) return;
+      that.emit(key, [newValue]);
+      that.emit('change', []);
     });
   }
 
@@ -2451,17 +2453,17 @@
   var validator$7 = createValidator({
     type: function type(value) {
       if (!isMarkAlias(value)) {
-        throw new Error('Mark.props.type is invalid');
+        throw new Error('type is invalid');
       }
 
-      return MAKR_ALIAS[value];
+      return true;
     },
     size: function size(value) {
       if (!isNumber(value)) {
-        throw new Error('Mark.props.size must be a number');
+        throw new Error('size must be a number');
       }
 
-      return value;
+      return true;
     }
   });
   /**
@@ -2555,13 +2557,14 @@
 
   function proxyProps$5(that, initialValue) {
     return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator$7(target, key, newValue, oldValue).then(function (value) {
-        that.emit(key, [value]);
-        that.emit('change', []);
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
+      if (!validator$7(key, newValue, oldValue)) return;
+
+      if (key === 'type') {
+        target[key] = newValue = MAKR_ALIAS[newValue];
+      }
+
+      that.emit(key, [newValue]);
+      that.emit('change', []);
     });
   }
   /**
@@ -2651,17 +2654,17 @@
   var validator$8 = createValidator({
     type: function type(value) {
       if (!isWaymarkAlias(value)) {
-        throw new Error('Waymark.props.type is invalid');
+        throw new Error('type is invalid');
       }
 
-      return WAYMARK_ALIAS[value];
+      return true;
     },
     size: function size(value) {
       if (!isNumber(value)) {
-        throw new Error('Waymark.props.size must be a number');
+        throw new Error('size must be a number');
       }
 
-      return value;
+      return true;
     }
   });
   /**
@@ -2776,13 +2779,14 @@
 
   function proxyProps$6(that, initialValue) {
     return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator$8(target, key, newValue, oldValue).then(function (value) {
-        that.emit(key, [value]);
-        that.emit('change', []);
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
+      if (!validator$8(key, newValue, oldValue)) return;
+
+      if (key === 'type') {
+        target[key] = newValue = WAYMARK_ALIAS[newValue];
+      }
+
+      that.emit(key, [newValue]);
+      that.emit('change', []);
     });
   }
   /**
@@ -2991,17 +2995,17 @@
   var validator$9 = createValidator({
     job: function job(value) {
       if (!isJobAlias(value)) {
-        throw new Error('Player.props.job is invalid');
+        throw new Error('job is invalid');
       }
 
-      return JOB_ALIAS[value];
+      return true;
     },
     size: function size(value) {
       if (!isNumber(value)) {
-        throw new Error('Player.props.size must be a number');
+        throw new Error('size must be a number');
       }
 
-      return value;
+      return true;
     }
   });
   /**
@@ -3106,13 +3110,14 @@
 
   function proxyProps$7(that, initialValue) {
     return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator$9(target, key, newValue, oldValue).then(function (value) {
-        that.emit(key, [value]);
-        that.emit('change', []);
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
+      if (!validator$9(key, newValue, oldValue)) return;
+
+      if (key === 'job') {
+        target[key] = newValue = JOB_ALIAS[newValue];
+      }
+
+      that.emit(key, [newValue]);
+      that.emit('change', []);
     });
   }
   /**
@@ -3131,35 +3136,33 @@
   var validator$a = createValidator({
     size: function size(value) {
       if (!isNumber(value)) {
-        throw new Error('Monster.props.size must be a number');
+        throw new Error('size must be a number');
       }
 
-      return value;
+      return true;
     }
   });
   /**
-   * 绘制目标圈
+   * 基础图形类
    *
-   * 即选中怪时可以分辨面向和侧背的圈
+   * 比如 [Monster] 可能只需要一个 `props.size`。
+   * 则可直接继承这个类，重写 _render 即可
    */
 
-  var Monster = /*#__PURE__*/function (_Layer) {
-    _inherits(Monster, _Layer);
+  var Simple = /*#__PURE__*/function (_Layer) {
+    _inherits(Simple, _Layer);
 
-    function Monster() {
+    function Simple() {
       var _this;
 
       var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-      _classCallCheck(this, Monster);
+      _classCallCheck(this, Simple);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Monster).call(this, Object.assign({
-        fill: '#ffcdbf60',
-        stroke: '#ffcdbf'
-      }, state)));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Simple).call(this, state));
       var theProps = proxyProps$8(_assertThisInitialized(_this), {
-        size: 15
+        size: 10
       });
       defineImmutable(_assertThisInitialized(_this), 'props', theProps);
       merge(_this.props, props);
@@ -3170,13 +3173,54 @@
      */
 
 
-    _createClass(Monster, [{
+    _createClass(Simple, [{
       key: "size",
       value: function size(value) {
         this.props.size = value;
         return this;
       }
     }, {
+      key: "_clone",
+      value: function _clone() {
+        return new Simple(deepClone(this.state), deepClone(this.props));
+      }
+    }]);
+
+    return Simple;
+  }(Layer);
+
+  function proxyProps$8(that, initialValue) {
+    return proxy(initialValue, function (key, oldValue, newValue, target) {
+      if (!validator$a(key, newValue, oldValue)) return;
+      that.emit(key, [newValue]);
+      that.emit('change', []);
+    });
+  }
+
+  /**
+   * 绘制目标圈
+   *
+   * 即选中怪时可以分辨面向和侧背的圈
+   */
+
+  var Monster = /*#__PURE__*/function (_Simple) {
+    _inherits(Monster, _Simple);
+
+    function Monster() {
+      var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+      _classCallCheck(this, Monster);
+
+      return _possibleConstructorReturn(this, _getPrototypeOf(Monster).call(this, Object.assign({
+        fill: '#ffcdbf60',
+        stroke: '#ffcdbf'
+      }, state), Object.assign({
+        size: 15
+      }, props)));
+    }
+
+    _createClass(Monster, [{
       key: "_clone",
       value: function _clone() {
         return new Monster(deepClone(this.state), deepClone(this.props));
@@ -3228,19 +3272,7 @@
     }]);
 
     return Monster;
-  }(Layer);
-
-  function proxyProps$8(that, initialValue) {
-    return proxy(initialValue, function (key, oldValue, newValue, target) {
-      validator$a(target, key, newValue, oldValue).then(function (value) {
-        that.emit(key, [value]);
-        that.emit('change', []);
-      }, function (err) {
-        target[key] = oldValue;
-        throw err;
-      });
-    });
-  }
+  }(Simple);
 
   exports.Circle = Circle;
   exports.Img = Img;
