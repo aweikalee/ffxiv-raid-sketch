@@ -66,7 +66,7 @@ const validator = valid.createValidator<ICircleProps>({
             throw new Error('dash must be a number[]/null')
         }
 
-        return Object.freeze(value)
+        return value
     },
 })
 
@@ -170,6 +170,9 @@ function proxyProps(that: Circle, initialValue: ICircleProps) {
         (key, oldValue, newValue, target) => {
             validator(target, key, newValue, oldValue).then(
                 (value) => {
+                    if (key === 'dash') {
+                        Object.freeze(newValue)
+                    }
                     that.emit(key, [value] as any)
                     that.emit('change', [])
                 },

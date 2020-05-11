@@ -83,7 +83,7 @@ const validator = valid.createValidator<ILineProps>({
             throw new Error('dash must be a number[]/null')
         }
 
-        return Object.freeze(value)
+        return value
     },
     startCap(value) {
         if (!isLineCap(value)) {
@@ -281,6 +281,8 @@ function proxyProps(that: Line, initialValue: ILineProps) {
                             that,
                             value as ILineProps['coordinates']
                         )
+                    } else if (key === 'dash') {
+                        Object.freeze(newValue)
                     }
 
                     that.emit(key, [value] as any)
@@ -307,16 +309,12 @@ function proxyCoordinates(that: Line, initialValue: ILineProps['coordinates']) {
                     oldValue
                         ? (target[key] = oldValue)
                         : target.splice(Number(key), 1)
-                    throw new Error(
-                        `coordinates's value must be a number[]`
-                    )
+                    throw new Error(`coordinates's value must be a number[]`)
                 }
 
                 const length = newValue.length
                 if (key == 0 && length !== 2) {
-                    throw new Error(
-                        `coordinates[0]'s length must equals 2`
-                    )
+                    throw new Error(`coordinates[0]'s length must equals 2`)
                 } else if (
                     key != 0 &&
                     (length % 2 !== 0 || length > 6 || length < 2)
