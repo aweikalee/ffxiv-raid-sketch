@@ -44,6 +44,9 @@ export interface ITextEvent extends ILayerEvent {
     italic: (italic: ITextProps['italic']) => void
 }
 
+/**
+ * @ignore
+ */
 const validator = valid.createValidator<ITextProps>({
     value(value) {
         if (!valid.isString(value)) {

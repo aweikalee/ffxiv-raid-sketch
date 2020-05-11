@@ -510,6 +510,9 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
     protected _render(ctx: CanvasRenderingContext2D, utils: ISketchUtils) {}
 }
 
+/**
+ * @ignore
+ */
 export function isLayer(value: unknown): value is Layer<any> {
     return value instanceof Layer
 }

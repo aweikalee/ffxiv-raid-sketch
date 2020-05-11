@@ -26,6 +26,9 @@ export interface IRectEvent extends ILayerEvent {
     dash: (dash: IRectProps['dash']) => void
 }
 
+/**
+ * @ignore
+ */
 const validator = valid.createValidator<IRectProps>({
     w(value) {
         if (!valid.isNumber(value)) {

@@ -7,6 +7,9 @@ export type IPropertyDescriptor<T> = {
     set?(v: T): void
 }
 
+/**
+ * @ignore
+ */
 export function defineImmutable<T, K extends keyof T>(
     o: T,
     p: K,
@@ -23,6 +26,9 @@ export function defineImmutable<T, K extends keyof T>(
     })
 }
 
+/**
+ * @ignore
+ */
 export function defineProperties<T>(
     o: T,
     properties: {

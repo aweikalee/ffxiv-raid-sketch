@@ -1,7 +1,13 @@
+/**
+ * @ignore
+ */
 export type IKey<T> = {
     [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
 }[keyof T]
 
+/**
+ * @ignore
+ */
 export class Subscribe<T extends {}> {
     map = new Map<IKey<T>, T[IKey<T>][]>()
     constructor() {}

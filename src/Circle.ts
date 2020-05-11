@@ -36,6 +36,9 @@ export interface ICircleEvent extends ILayerEvent {
     dash: (dash: ICircleProps['dash']) => void
 }
 
+/**
+ * @ignore
+ */
 const validator = valid.createValidator<ICircleProps>({
     size(value) {
         if (!valid.isNumber(value)) {

@@ -57,6 +57,9 @@ export type IJob =
     | 'redmage'
     | 'bluemage'
 
+/**
+ * @ignore
+ */
 export const JOB: {
     [key in IJob]: string
 } = {
@@ -88,15 +91,21 @@ export const JOB: {
     blackmage,
     summoner,
     redmage,
-    bluemage
+    bluemage,
 }
 
+/**
+ * @ignore
+ */
 export const JOB_COLOR = {
     tank: '#4494f0',
     healer: '#64aa4f',
-    dps: '#c25859'
+    dps: '#c25859',
 }
 
+/**
+ * @ignore
+ */
 export const JOB_TYPE: {
     [key in IJob]: keyof typeof JOB_COLOR
 } = {
@@ -128,5 +137,5 @@ export const JOB_TYPE: {
     blackmage: 'dps',
     summoner: 'dps',
     redmage: 'dps',
-    bluemage: 'dps'
+    bluemage: 'dps',
 }

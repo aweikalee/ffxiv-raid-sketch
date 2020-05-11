@@ -30,6 +30,9 @@ export type IJobAlias =
     | '赤魔法师'
     | '青魔法师'
 
+/**
+ * @ignore
+ */
 export const JOB_ALIAS: {
     [key in IJobAlias]: keyof typeof JOB
 } = {
@@ -91,5 +94,5 @@ export const JOB_ALIAS: {
     黑魔法师: 'blackmage',
     召唤师: 'summoner',
     赤魔法师: 'redmage',
-    青魔法师: 'bluemage'
+    青魔法师: 'bluemage',
 }

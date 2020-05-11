@@ -17,6 +17,9 @@ export type IWaymark =
     | 'C'
     | 'D'
 
+/**
+ * @ignore
+ */
 export const WAYMARK: {
     [key in IWaymark]: string
 } = {
@@ -27,16 +30,22 @@ export const WAYMARK: {
     A,
     B,
     C,
-    D
+    D,
 }
 
+/**
+ * @ignore
+ */
 export const WAYMARK_COLOR_MAP = {
     red: '#ff444e',
     yellow: '#fcff44',
     blue: '#448cff',
-    purple: '#9b44ff'
+    purple: '#9b44ff',
 }
 
+/**
+ * @ignore
+ */
 export const WAYMARK_COLOR: {
     [key in IWaymark]: string
 } = {
@@ -47,5 +56,5 @@ export const WAYMARK_COLOR: {
     A: WAYMARK_COLOR_MAP.red,
     B: WAYMARK_COLOR_MAP.yellow,
     C: WAYMARK_COLOR_MAP.blue,
-    D: WAYMARK_COLOR_MAP.purple
+    D: WAYMARK_COLOR_MAP.purple,
 }

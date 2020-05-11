@@ -31,6 +31,9 @@ export type IMarkAlias =
     | '十字'
     | '三角'
 
+/**
+ * @ignore
+ */
 export const MAKR_ALIAS: {
     [key in IMarkAlias]: IMark
 } = {
@@ -96,5 +99,5 @@ export const MAKR_ALIAS: {
     方块: 'square',
     圆圈: 'circle',
     十字: 'cross',
-    三角: 'triangle'
+    三角: 'triangle',
 }

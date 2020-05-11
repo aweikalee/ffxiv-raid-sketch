@@ -26,6 +26,9 @@ export interface IWaymarkEvent extends ILayerEvent {
     size: (size: IWaymarkProps['size']) => void
 }
 
+/**
+ * @ignore
+ */
 const validator = valid.createValidator<IWaymarkProps>({
     type(value) {
         if (!isWaymarkAlias(value)) {

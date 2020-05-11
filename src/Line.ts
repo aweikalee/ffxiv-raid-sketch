@@ -56,6 +56,9 @@ export interface ILineEvent extends ILayerEvent {
  */
 const LINECAP: ILineCap[] = ['none', 'point', 'arrow', 'triangle']
 
+/**
+ * @ignore
+ */
 const validator = valid.createValidator<ILineProps>({
     coordinates(value) {
         if (

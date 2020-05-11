@@ -11,6 +11,9 @@ export type IWaymarkAlias =
     | 'c'
     | 'd'
 
+/**
+ * @ignore
+ */
 export const WAYMARK_ALIAS: {
     [key in IWaymarkAlias]: IWaymark
 } = {
@@ -25,5 +28,5 @@ export const WAYMARK_ALIAS: {
     a: 'A',
     b: 'B',
     c: 'C',
-    d: 'D'
+    d: 'D',
 }

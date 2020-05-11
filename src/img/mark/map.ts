@@ -60,6 +60,9 @@ export type IMark =
     | 'cross'
     | 'triangle'
 
+/**
+ * @ignore
+ */
 export const MARK: {
     [key in IMark]: string
 } = {
@@ -93,5 +96,5 @@ export const MARK: {
     square,
     circle,
     cross,
-    triangle
+    triangle,
 }

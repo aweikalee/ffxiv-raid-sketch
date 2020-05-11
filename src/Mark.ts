@@ -28,6 +28,9 @@ export interface IMarkEvent extends ILayerEvent {
     size: (size: IMarkProps['size']) => void
 }
 
+/**
+ * @ignore
+ */
 const validator = valid.createValidator<IMarkProps>({
     type(value) {
         if (!isMarkAlias(value)) {

@@ -3,6 +3,7 @@
  *
  * 暂时只支持 普通object/array
  * @param target object/array
+ * @ignore
  */
 export function deepClone<T>(target: T): T {
     if (typeof target === 'object' && target !== null) {

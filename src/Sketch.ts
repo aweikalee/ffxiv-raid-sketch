@@ -35,6 +35,9 @@ export interface ISketchUtils {
     unmapping: (value: number) => number
 }
 
+/**
+ * @ignore
+ */
 const validator = valid.createValidator<ISketchOptions>({
     w(value) {
         if (!valid.isNumber(value)) {

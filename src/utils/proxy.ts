@@ -1,5 +1,8 @@
 import { hasOwn } from './object'
 
+/**
+ * @ignore
+ */
 export type IProxyChange<T> = <K extends keyof T>(
     key: K,
     oldValue: T[K],
@@ -7,6 +10,9 @@ export type IProxyChange<T> = <K extends keyof T>(
     target: T
 ) => void
 
+/**
+ * @ignore
+ */
 export function proxy<T extends object>(
     target: T,
     onChange: IProxyChange<T>

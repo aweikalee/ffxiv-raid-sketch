@@ -23,6 +23,9 @@ export interface IImgEvent extends ILayerEvent {
     size: (size: IImgProps['size']) => void
 }
 
+/**
+ * @ignore
+ */
 const validator = valid.createValidator<IImgProps>({
     src(value) {
         if (!(value === null || valid.isString(value))) {

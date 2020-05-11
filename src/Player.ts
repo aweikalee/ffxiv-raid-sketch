@@ -31,6 +31,9 @@ export interface IPlayerEvent extends ILayerEvent {
     size: (size: IPlayerProps['size']) => void
 }
 
+/**
+ * @ignore
+ */
 const validator = valid.createValidator<IPlayerProps>({
     job(value) {
         if (!isJobAlias(value)) {
