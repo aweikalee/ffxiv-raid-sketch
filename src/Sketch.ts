@@ -44,28 +44,28 @@ const validator = valid.createValidator<ISketchOptions>({
             throw new Error('w must be a number')
         }
 
-        return value
+        return true
     },
     h(value) {
         if (!valid.isNumber(value)) {
             throw new Error('h must be a number')
         }
 
-        return value
+        return true
     },
     unit(value) {
         if (!valid.isNumber(value)) {
             throw new Error('unit must be a number')
         }
 
-        return value
+        return true
     },
     canvas(value) {
         if (!(value instanceof HTMLCanvasElement || value === null)) {
             throw new Error('angle must be a number')
         }
 
-        return value
+        return true
     },
 })
 
@@ -194,38 +194,32 @@ function proxyOptions(that: Sketch, initialValue: ISketchOptions) {
     return proxy<ISketchOptions>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            validator(target, key, newValue, oldValue).then(
-                () => {
-                    const canvas = target['canvas']
-                    switch (key) {
-                        case 'canvas':
-                            if (canvas) {
-                                that.ctx = canvas.getContext('2d')
-                                canvas.width = target['w']
-                                canvas.height = target['h']
-                            } else {
-                                that.ctx = null
-                            }
-                            break
-                        case 'w':
-                            if (canvas) {
-                                target['canvas'].width = target['w']
-                            }
-                            break
-                        case 'h':
-                            if (canvas) {
-                                target['canvas'].height = target['h']
-                            }
-                            break
-                    }
+            if (!validator(key, newValue, oldValue)) return
 
-                    that.render()
-                },
-                (err) => {
-                    target[key] = oldValue
-                    throw err
-                }
-            )
+            const canvas = target['canvas']
+            switch (key) {
+                case 'canvas':
+                    if (canvas) {
+                        that.ctx = canvas.getContext('2d')
+                        canvas.width = target['w']
+                        canvas.height = target['h']
+                    } else {
+                        that.ctx = null
+                    }
+                    break
+                case 'w':
+                    if (canvas) {
+                        target['canvas'].width = target['w']
+                    }
+                    break
+                case 'h':
+                    if (canvas) {
+                        target['canvas'].height = target['h']
+                    }
+                    break
+            }
+
+            that.render()
         }
     )
 }
@@ -241,7 +235,6 @@ function proxyLayer(that: Sketch, initialValue: Layer<any>) {
         (key, oldValue, newValue, target) => {
             if (key !== 'value') return
             if (!(newValue instanceof Layer)) {
-                target[key] = oldValue
                 throw new Error(`layer must be a Layer`)
             }
 

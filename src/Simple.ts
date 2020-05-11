@@ -22,7 +22,7 @@ const validator = valid.createValidator<ISimpleProps>({
             throw new Error('size must be a number')
         }
 
-        return value
+        return true
     },
 })
 
@@ -70,16 +70,10 @@ function proxyProps(that: Simple, initialValue: ISimpleProps) {
     return proxy<ISimpleProps>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            validator(target, key, newValue, oldValue).then(
-                (value) => {
-                    that.emit(key, [value] as any)
-                    that.emit('change', [])
-                },
-                (err) => {
-                    target[key] = oldValue
-                    throw err
-                }
-            )
+            if (!validator(key, newValue, oldValue)) return
+
+            that.emit(key, [newValue] as any)
+            that.emit('change', [])
         }
     )
 }

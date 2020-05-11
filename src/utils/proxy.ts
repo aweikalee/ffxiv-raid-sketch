@@ -23,9 +23,23 @@ export function proxy<T extends object>(
         set(target, key, value, receiver) {
             const oldValue = target[key]
             const hadChange = oldValue !== value
+            const hasOwnBeforeChange = hasOwn(target, key)
             const res = Reflect.set(target, key, value, receiver)
             if (hadChange && hasOwn(target, key)) {
-                onChange(key as keyof T, oldValue, value, target)
+                try {
+                    onChange(key as keyof T, oldValue, value, target)
+                } catch (err) {
+                    if (hasOwnBeforeChange) {
+                        target[key] = oldValue
+                    } else {
+                        if (isArray) {
+                            ;(target as any[]).splice(key as number, 1)
+                        } else {
+                            delete target[key]
+                        }
+                    }
+                    throw err
+                }
             }
             return res
         },
@@ -33,7 +47,12 @@ export function proxy<T extends object>(
             const oldValue = target[key]
             const res = Reflect.deleteProperty(target, key)
             if (!isArray) {
-                onChange(key as keyof T, oldValue, undefined, target)
+                try {
+                    onChange(key as keyof T, oldValue, undefined, target)
+                } catch (err) {
+                    target[key] = oldValue
+                    throw err
+                }
             }
             return res
         },

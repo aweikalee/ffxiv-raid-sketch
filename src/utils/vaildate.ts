@@ -2,18 +2,17 @@
  * @ignore
  */
 export type IValidtorRule<T> = {
-    [key in keyof T]: (newValue: unknown, oldValue: unknown) => T[key]
+    [K in keyof T]: (newValue: unknown, oldValue: unknown) => boolean
 }
 
 /**
  * @ignore
  */
 export type IValidtor<T, K extends keyof T> = (
-    target: T,
     key: K,
     newValue: unknown,
     oldValue: unknown
-) => Promise<T[K]>
+) => newValue is T[K]
 
 /**
  * @ignore
@@ -21,17 +20,12 @@ export type IValidtor<T, K extends keyof T> = (
 export function createValidator<T, K extends keyof T = keyof T>(
     validators: IValidtorRule<T>
 ): IValidtor<T, K> {
-    return (target, key, newValue, oldValue) => {
-        return new Promise((resolve) => {
-            let res: T[K]
-            if (key in validators) {
-                res = validators[key](newValue, oldValue)
-            } else {
-                res = newValue as T[K]
-            }
-            target[key] = res
-            return resolve(res)
-        })
+    return (key, newValue, oldValue): newValue is T[K] => {
+        if (key in validators) {
+            return validators[key](newValue, oldValue)
+        } else {
+            return true
+        }
     }
 }
 

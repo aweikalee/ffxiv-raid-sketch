@@ -32,14 +32,14 @@ const validator = valid.createValidator<IImgProps>({
             throw new Error(`src must be a string/null`)
         }
 
-        return value
+        return true
     },
     size(value) {
         if (!(valid.isNumber(value) || value === 'auto')) {
             throw new Error(`size must be a number/"auto"`)
         }
 
-        return value
+        return true
     },
 })
 
@@ -142,18 +142,13 @@ export default class Img extends Layer<IImgEvent> {
  */
 function proxyProps(that: Img, initialValue: IImgProps) {
     return proxy<IImgProps>(initialValue, (key, oldValue, newValue, target) => {
-        validator(target, key, newValue, oldValue).then(
-            (value) => {
-                if (key === 'src') {
-                    that.image.src = target['src']
-                }
-                that.emit(key, [value] as any)
-                that.emit('change', [])
-            },
-            (err) => {
-                target[key] = oldValue
-                throw err
-            }
-        )
+        if (!validator(key, newValue, oldValue)) return
+
+        if (key === 'src') {
+            that.image.src = target['src']
+        }
+
+        that.emit(key, [newValue] as any)
+        that.emit('change', [])
     })
 }

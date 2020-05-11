@@ -53,42 +53,42 @@ const validator = valid.createValidator<ITextProps>({
             throw new Error('value must be a string')
         }
 
-        return value
+        return true
     },
     align(value) {
         if (!valid.isCanvasTextAlign(value)) {
             throw new Error('align must be a CanvasTextAlign')
         }
 
-        return value
+        return true
     },
     size(value) {
         if (!valid.isNumber(value)) {
             throw new Error('size must be a number')
         }
 
-        return value
+        return true
     },
     font(value) {
         if (!valid.isString(value)) {
             throw new Error('font must be a string')
         }
 
-        return value
+        return true
     },
     bold(value) {
         if (!valid.isBoolean(value)) {
             throw new Error('bold must be a boolean')
         }
 
-        return value
+        return true
     },
     italic(value) {
         if (!valid.isBoolean(value)) {
             throw new Error('italic must be a boolean')
         }
 
-        return value
+        return true
     },
 })
 
@@ -199,19 +199,10 @@ export default class Text extends Layer<ITextEvent> {
  * @ignore
  */
 function proxyProps(that: Text, initialValue: ITextProps) {
-    return proxy<ITextProps>(
-        initialValue,
-        (key, oldValue, newValue, target) => {
-            validator(target, key, newValue, oldValue).then(
-                (value) => {
-                    that.emit(key, [value] as any)
-                    that.emit('change', [])
-                },
-                (err) => {
-                    target[key] = oldValue
-                    throw err
-                }
-            )
-        }
-    )
+    return proxy<ITextProps>(initialValue, (key, oldValue, newValue) => {
+        if (!validator(key, newValue, oldValue)) return
+
+        that.emit(key, [newValue] as any)
+        that.emit('change', [])
+    })
 }

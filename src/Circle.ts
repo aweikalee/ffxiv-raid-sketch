@@ -45,28 +45,28 @@ const validator = valid.createValidator<ICircleProps>({
             throw new Error('size must be a number')
         }
 
-        return value
+        return true
     },
     angle(value) {
         if (!valid.isNumber(value)) {
             throw new Error('angle must be a number')
         }
 
-        return value
+        return true
     },
     arc(value) {
         if (!valid.isBoolean(value)) {
             throw new Error('arc must be a boolean')
         }
 
-        return value
+        return true
     },
     dash(value) {
         if (!(value === null || valid.isArray<number>(value, valid.isNumber))) {
             throw new Error('dash must be a number[]/null')
         }
 
-        return value
+        return true
     },
 })
 
@@ -165,22 +165,14 @@ export default class Circle extends Layer<ICircleEvent> {
  * @ignore
  */
 function proxyProps(that: Circle, initialValue: ICircleProps) {
-    return proxy<ICircleProps>(
-        initialValue,
-        (key, oldValue, newValue, target) => {
-            validator(target, key, newValue, oldValue).then(
-                (value) => {
-                    if (key === 'dash') {
-                        Object.freeze(newValue)
-                    }
-                    that.emit(key, [value] as any)
-                    that.emit('change', [])
-                },
-                (err) => {
-                    target[key] = oldValue
-                    throw err
-                }
-            )
+    return proxy<ICircleProps>(initialValue, (key, oldValue, newValue) => {
+        if (!validator(key, newValue, oldValue)) return
+
+        if (key === 'dash') {
+            Object.freeze(newValue)
         }
-    )
+
+        that.emit(key, [newValue] as any)
+        that.emit('change', [])
+    })
 }

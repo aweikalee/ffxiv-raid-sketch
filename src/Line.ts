@@ -69,35 +69,35 @@ const validator = valid.createValidator<ILineProps>({
             throw new Error('coordinates must be a number[][]')
         }
 
-        return value
+        return true
     },
     smooth(value) {
         if (!valid.isBoolean(value)) {
             throw new Error('smooth must be a boolean')
         }
 
-        return value
+        return true
     },
     dash(value) {
         if (!(value === null || valid.isArray<number>(value, valid.isNumber))) {
             throw new Error('dash must be a number[]/null')
         }
 
-        return value
+        return true
     },
     startCap(value) {
         if (!isLineCap(value)) {
             throw new Error('startCap must be a number[]/null')
         }
 
-        return value
+        return true
     },
     endCap(value) {
         if (!isLineCap(value)) {
             throw new Error('endCap must be a number[]/null')
         }
 
-        return value
+        return true
     },
 })
 
@@ -274,25 +274,18 @@ function proxyProps(that: Line, initialValue: ILineProps) {
     return proxy<ILineProps>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            validator(target, key, newValue, oldValue).then(
-                (value) => {
-                    if (key === 'coordinates') {
-                        target['coordinates'] = proxyCoordinates(
-                            that,
-                            value as ILineProps['coordinates']
-                        )
-                    } else if (key === 'dash') {
-                        Object.freeze(newValue)
-                    }
+            if (!validator(key, newValue, oldValue)) return
+            if (key === 'coordinates') {
+                target['coordinates'] = proxyCoordinates(
+                    that,
+                    newValue as ILineProps['coordinates']
+                )
+            } else if (key === 'dash') {
+                Object.freeze(newValue)
+            }
 
-                    that.emit(key, [value] as any)
-                    that.emit('change', [])
-                },
-                (err) => {
-                    target[key] = oldValue
-                    throw err
-                }
-            )
+            that.emit(key, [newValue] as any)
+            that.emit('change', [])
         }
     )
 }
@@ -303,12 +296,9 @@ function proxyProps(that: Line, initialValue: ILineProps) {
 function proxyCoordinates(that: Line, initialValue: ILineProps['coordinates']) {
     return proxy<ILineProps['coordinates']>(
         initialValue,
-        (key, oldValue, newValue, target) => {
+        (key, oldValue, newValue) => {
             if (key >= 0) {
                 if (!valid.isArray<number>(newValue, valid.isNumber)) {
-                    oldValue
-                        ? (target[key] = oldValue)
-                        : target.splice(Number(key), 1)
                     throw new Error(`coordinates's value must be a number[]`)
                 }
 
@@ -324,7 +314,7 @@ function proxyCoordinates(that: Line, initialValue: ILineProps['coordinates']) {
                     )
                 }
 
-                target[key as number] = Object.freeze(newValue)
+                Object.freeze(newValue)
             }
             that.emit('coordinates', [that.props.coordinates])
             that.emit('change', [])

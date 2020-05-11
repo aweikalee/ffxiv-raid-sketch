@@ -35,21 +35,21 @@ const validator = valid.createValidator<IRectProps>({
             throw new Error('w must be a number')
         }
 
-        return value
+        return true
     },
     h(value) {
         if (!valid.isNumber(value)) {
             throw new Error('h must be a number')
         }
 
-        return value
+        return true
     },
     dash(value) {
         if (!(value === null || valid.isArray<number>(value, valid.isNumber))) {
             throw new Error('dash must be a number[]/null')
         }
 
-        return value
+        return true
     },
 })
 
@@ -130,20 +130,15 @@ export default class Rect extends Layer<IRectEvent> {
 function proxyProps(that: Rect, initialValue: IRectProps) {
     return proxy<IRectProps>(
         initialValue,
-        (key, oldValue, newValue, target) => {
-            validator(target, key, newValue, oldValue).then(
-                (value) => {
-                    if (key === 'dash') {
-                        Object.freeze(newValue)
-                    }
-                    that.emit(key, [value] as any)
-                    that.emit('change', [])
-                },
-                (err) => {
-                    target[key] = oldValue
-                    throw err
-                }
-            )
+        (key, oldValue, newValue) => {
+            if (!validator(key, newValue, oldValue)) return
+
+            if (key === 'dash') {
+                Object.freeze(newValue)
+            }
+
+            that.emit(key, [newValue] as any)
+            that.emit('change', [])
         }
     )
 }

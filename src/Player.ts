@@ -40,14 +40,14 @@ const validator = valid.createValidator<IPlayerProps>({
             throw new Error('job is invalid')
         }
 
-        return value
+        return true
     },
     size(value) {
         if (!valid.isNumber(value)) {
             throw new Error('size must be a number')
         }
 
-        return value
+        return true
     },
 })
 
@@ -140,19 +140,14 @@ function proxyProps(that: Player, initialValue: IPlayerProps) {
     return proxy<IPlayerProps>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            validator(target, key, newValue, oldValue).then(
-                (value) => {
-                    if (key === 'job') {
-                        target[key] = value = JOB_ALIAS[value]
-                    }
-                    that.emit(key, [value] as any)
-                    that.emit('change', [])
-                },
-                (err) => {
-                    target[key] = oldValue
-                    throw err
-                }
-            )
+            if (!validator(key, newValue, oldValue)) return
+
+            if (key === 'job') {
+                target[key] = newValue = JOB_ALIAS[newValue]
+            }
+
+            that.emit(key, [newValue] as any)
+            that.emit('change', [])
         }
     )
 }

@@ -97,41 +97,42 @@ const validator = valid.createValidator<ILayerState>({
             throw new Error('x must be a number')
         }
 
-        return value
+        return true
     },
     y(value) {
         if (!valid.isNumber(value)) {
             throw new Error('y must be a number')
         }
-        return value
+
+        return true
     },
     rotate(value) {
         if (!valid.isNumber(value)) {
             throw new Error('rotate must be a number')
         }
 
-        return value
+        return true
     },
     scaleX(value) {
         if (!valid.isNumber(value)) {
             throw new Error('scaleX must be a number')
         }
 
-        return value
+        return true
     },
     scaleY(value) {
         if (!valid.isNumber(value)) {
             throw new Error('scaleY must be a number')
         }
 
-        return value
+        return true
     },
     opacity(value) {
         if (!valid.isNumber(value)) {
             throw new Error('opacity must be a number')
         }
 
-        return value
+        return true
     },
     fill(value) {
         if (
@@ -146,7 +147,7 @@ const validator = valid.createValidator<ILayerState>({
             )
         }
 
-        return value
+        return true
     },
     stroke(value) {
         if (
@@ -161,21 +162,21 @@ const validator = valid.createValidator<ILayerState>({
             )
         }
 
-        return value
+        return true
     },
     strokeWidth(value) {
         if (!valid.isNumber(value)) {
             throw new Error('strokeWidth must be a number')
         }
 
-        return value
+        return true
     },
     visible(value) {
         if (!valid.isBoolean(value)) {
             throw new Error(`visible must be a boolean`)
         }
 
-        return value
+        return true
     },
 })
 
@@ -532,21 +533,12 @@ export function isLayer(value: unknown): value is Layer<any> {
  * @ignore
  */
 function proxyState(that: Layer<any>, initialValue: ILayerState) {
-    return proxy<ILayerState>(
-        initialValue,
-        (key, oldValue, newValue, target) => {
-            validator(target, key, newValue, oldValue).then(
-                (value) => {
-                    that.emit<ILayerEvent>(key, [value as any])
-                    that.emit<ILayerEvent>('change', [])
-                },
-                (err) => {
-                    target[key] = oldValue
-                    throw err
-                }
-            )
-        }
-    )
+    return proxy<ILayerState>(initialValue, (key, oldValue, newValue) => {
+        if (!validator(key, newValue, oldValue)) return
+
+        that.emit<ILayerEvent>(key, [newValue] as any)
+        that.emit<ILayerEvent>('change', [])
+    })
 }
 
 /**
@@ -556,11 +548,10 @@ function proxyParent(that: Layer<any>, initialValue: Layer['parent']) {
     let onChildrenChange: ILayerEvent['change']
     return proxy<{ value: Layer['parent'] }>(
         { value: initialValue },
-        (key, oldValue, newValue, target) => {
+        (key, oldValue, newValue) => {
             if (key !== 'value') return
 
             if (!(isLayer(newValue) || newValue === null)) {
-                target[key] = oldValue
                 throw new Error(`parent must be a Layer`)
             }
 
@@ -596,7 +587,6 @@ function proxyChildren(that: Layer<any>, initialValue: Layer['children']) {
             if (key !== 'value') return
 
             if (!Array.isArray(newValue) || newValue.some((v) => !isLayer(v))) {
-                target[key] = oldValue
                 throw new Error(`children must be a Layer[]`)
             }
 
@@ -622,11 +612,6 @@ function proxyChildrenArray(that: Layer<any>, initialValue: Layer['children']) {
                         newValue.parent = that
                     }
                 } else {
-                    if (oldValue) {
-                        target[key] = oldValue
-                    } else {
-                        target.splice(Number(key), 1)
-                    }
                     throw new Error(`children's value must be a Layer`)
                 }
             }
