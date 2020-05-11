@@ -601,13 +601,20 @@ function proxyChildrenArray(that: Layer<any>, initialValue: Layer['children']) {
     return proxy<Layer['children']>(
         initialValue,
         (key, oldValue, newValue, target) => {
-            if (key >= 0 && !isLayer(newValue)) {
-                if (oldValue) {
-                    target[key] = oldValue
+            if (key >= 0) {
+                if (isLayer(newValue)) {
+                    if (newValue.parent !== that) {
+                        target.splice(Number(key), 1)
+                        newValue.parent = that
+                    }
                 } else {
-                    target.splice(Number(key), 1)
+                    if (oldValue) {
+                        target[key] = oldValue
+                    } else {
+                        target.splice(Number(key), 1)
+                    }
+                    throw new Error(`Layer.children's value must be a Layer`)
                 }
-                throw new Error(`Layer.children's value must be a Layer`)
             }
 
             that.emit<ILayerEvent>('children', [that.children])
