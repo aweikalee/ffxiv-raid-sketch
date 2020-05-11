@@ -2,16 +2,22 @@ import { JOB, IJob } from '../img/job/map'
 
 export type IJobAlias =
     | IJob
+    | '防护'
     | '剑术师'
     | '斧术师'
     | '骑士'
     | '战士'
     | '暗黑骑士'
     | '绝枪战士'
+    | '治疗'
     | '幻术师'
     | '白魔法师'
     | '学者'
     | '占星术士'
+    | '进攻'
+    | '近战'
+    | '远程物理'
+    | '远程魔法'
     | '格斗家'
     | '枪术师'
     | '双剑师'
@@ -29,6 +35,9 @@ export type IJobAlias =
     | '召唤师'
     | '赤魔法师'
     | '青魔法师'
+    | '防护青魔'
+    | '治疗青魔'
+    | '自由人'
 
 /**
  * @ignore
@@ -36,6 +45,7 @@ export type IJobAlias =
 export const JOB_ALIAS: {
     [key in IJobAlias]: keyof typeof JOB
 } = {
+    tank: 'tank',
     gladiator: 'gladiator',
     marauder: 'marauder',
     paladin: 'paladin',
@@ -43,11 +53,16 @@ export const JOB_ALIAS: {
     darkknight: 'darkknight',
     gunbreaker: 'gunbreaker',
 
+    healer: 'healer',
     conjurer: 'conjurer',
     whitemage: 'whitemage',
     scholar: 'scholar',
     astrologian: 'astrologian',
 
+    dps: 'dps',
+    melee: 'melee',
+    physicalranged: 'physicalranged',
+    magicalranged: 'magicalranged',
     pugilist: 'pugilist',
     lancer: 'lancer',
     rogue: 'rogue',
@@ -65,7 +80,12 @@ export const JOB_ALIAS: {
     summoner: 'summoner',
     redmage: 'redmage',
     bluemage: 'bluemage',
+    bluemagetank: 'bluemagetank',
+    bluemagehealer: 'bluemagehealer',
 
+    libero: 'libero',
+
+    防护: 'tank',
     剑术师: 'gladiator',
     斧术师: 'marauder',
     骑士: 'paladin',
@@ -73,11 +93,16 @@ export const JOB_ALIAS: {
     暗黑骑士: 'darkknight',
     绝枪战士: 'gunbreaker',
 
+    治疗: 'healer',
     幻术师: 'conjurer',
     白魔法师: 'whitemage',
     学者: 'scholar',
     占星术士: 'astrologian',
 
+    进攻: 'dps',
+    近战: 'melee',
+    远程物理: 'physicalranged',
+    远程魔法: 'magicalranged',
     格斗家: 'pugilist',
     枪术师: 'lancer',
     双剑师: 'rogue',
@@ -95,4 +120,8 @@ export const JOB_ALIAS: {
     召唤师: 'summoner',
     赤魔法师: 'redmage',
     青魔法师: 'bluemage',
+    防护青魔: 'bluemagetank',
+    治疗青魔: 'bluemagehealer',
+
+    自由人: 'libero',
 }
