@@ -303,10 +303,21 @@ export default class Layer<E extends ILayerEvent = ILayerEvent> {
 
         ctx.save()
 
-        ctx.translate(mapping(x), mapping(y))
-        ctx.scale(scaleX, scaleY)
-        ctx.rotate((rotate * Math.PI) / 180)
-        ctx.globalAlpha *= opacity
+        if (x !== 0 || y !== 0) {
+            ctx.translate(mapping(x), mapping(y))
+        }
+
+        if (scaleX !== 1 || scaleY !== 1) {
+            ctx.scale(scaleX, scaleY)
+        }
+
+        if (rotate !== 0) {
+            ctx.rotate((rotate * Math.PI) / 180)
+        }
+
+        if (opacity !== 1) {
+            ctx.globalAlpha *= opacity
+        }
 
         ctx.fillStyle = fill
         ctx.strokeStyle = stroke
